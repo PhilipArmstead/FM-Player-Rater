@@ -3,21 +3,16 @@
 
 #include <gtk/gtk.h>
 
-static void print_hello(void) {
-	g_print("Hello World\n");
-}
+
+G_MODULE_EXPORT void print_hello(void);
 
 static void activate(GtkApplication *app) {
-	const GtkWidget *window = gtk_application_window_new(app);
-	gtk_window_set_title(GTK_WINDOW(window), "Hello!");
-	gtk_window_set_default_size(GTK_WINDOW(window), 200, 200);
+	// TODO: do something about this path
+	GtkBuilder *builder = gtk_builder_new_from_file("../../src/layouts/hello-world.ui");
 
-	GtkWidget *button = gtk_button_new_with_label("Hello World");
-	gtk_widget_set_halign(button, GTK_ALIGN_CENTER);
-	gtk_widget_set_valign(button, GTK_ALIGN_CENTER);
-	g_signal_connect(button, "clicked", G_CALLBACK(print_hello), NULL);
-	gtk_window_set_child(GTK_WINDOW(window), button);
-
+	GtkWidget *window = GTK_WIDGET(gtk_builder_get_object (builder, "window"));
+	gtk_window_set_application(GTK_WINDOW(window), GTK_APPLICATION(app));
+	g_object_unref(builder);
 	gtk_window_present(GTK_WINDOW(window));
 }
 
@@ -28,4 +23,8 @@ int main(const int argc, char **argv) {
 	g_object_unref(app);
 
 	return status;
+}
+
+G_MODULE_EXPORT void print_hello(void) {
+	g_print("Hello World\n");
 }
