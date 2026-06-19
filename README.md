@@ -17,7 +17,7 @@ Coming soon.
 
 ### Common Requirements (All Platforms)
 
-- **C Compiler**: GCC 9+ or Clang 10+ (C99 standard)
+- **C Compiler**: GCC 9+, Clang 10+, or MSVC with C99 support
 - **Build System**: CMake 3.20+
 - **Package Manager**: pkg-config (for GTK4 detection)
 - **GUI Framework**: GTK4 development libraries
@@ -120,6 +120,7 @@ sudo port install \
 ```bash
 pacman -S \
   mingw-w64-x86_64-toolchain \
+  mingw-w64-x86_64-cmake \
   mingw-w64-x86_64-pkg-config \
   mingw-w64-x86_64-gtk4
 ```
@@ -127,6 +128,7 @@ pacman -S \
 **Packages**:
 
 - `mingw-w64-x86_64-toolchain` - GCC compiler and build tools
+- `mingw-w64-x86_64-cmake` - CMake build system
 - `mingw-w64-x86_64-pkg-config` - Package configuration helper
 - `mingw-w64-x86_64-gtk4` - GTK4 libraries and headers for Windows 64-bit
 
@@ -141,30 +143,37 @@ pacman -S \
 ### On Any Platform (after dependencies are installed)
 
 ```bash
-# Create a build directory and configure (Release is default)
-mkdir -p build; cd build
-cmake -DCMAKE_BUILD_TYPE=Release ..
+# Configure (Release is the default for single-config generators)
+cmake -S . -B build
 
 # Build
-cmake --build .
+cmake --build build
 
-# Build a specific configuration (Debug)
-cmake -DCMAKE_BUILD_TYPE=Debug ..
-cmake --build .
+# Build Debug on single-config generators (Unix Makefiles, Ninja)
+cmake -S . -B build-debug -DCMAKE_BUILD_TYPE=Debug
+cmake --build build-debug
+
+# Build Debug on multi-config generators (Visual Studio, Xcode)
+cmake --build build --config Debug
 
 # Build with multiple cores
-cmake --build . -- -j$(nproc)
+cmake --build build --parallel
 
 # Clean build artifacts
-cmake --build . --target clean
+cmake --build build --target clean
 
-# Run the application (from build dir), or build a "run" target if provided
-./$(pwd)/build/Release/FM-Player-Rater   # or adjust path to your configuration
-# or from the build tree:
-cmake --build . --target run
+# Run directly
+./build/FM-Player-Rater   # single-config generators
+# or
+./build/Debug/FM-Player-Rater   # multi-config generators, Debug
+
+# Or use the custom run target
+cmake --build build --target run
+# (multi-config)
+cmake --build build --config Debug --target run
 
 # Show build info (via CMake custom target)
-cmake --build . --target info
+cmake --build build --target info
 ```
 
 ## Runtime Requirements
@@ -183,9 +192,7 @@ Most modern distributions include X11. For headless systems or when needed:
 
 ## Notes
 
-- This project prefers **Clang** by default where available, but GCC works equally well — set the `CC` environment
-  variable or `CMAKE_C_COMPILER` to override.
-- The build setup supports 64-bit builds across all platforms
+- CMake selects the compiler from your environment/toolchain. Override with `CC` or `-DCMAKE_C_COMPILER=...` when needed.
 - Platform-specific flags are set automatically during build:
 	- Linux: `-DARCH_LINUX`
 	- macOS: `-DARCH_MACOS`

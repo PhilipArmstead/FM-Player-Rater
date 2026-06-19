@@ -8,7 +8,7 @@ G_MODULE_EXPORT void print_hello(void);
 
 static void activate(GtkApplication *app) {
 	// TODO: do something about this path
-	GtkBuilder *builder = gtk_builder_new_from_file("../../src/layouts/hello-world.ui");
+	GtkBuilder *builder = gtk_builder_new_from_file("../src/layouts/hello-world.ui");
 
 	GtkWidget *window = GTK_WIDGET(gtk_builder_get_object (builder, "window"));
 	gtk_window_set_application(GTK_WINDOW(window), GTK_APPLICATION(app));
