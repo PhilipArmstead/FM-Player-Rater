@@ -4,15 +4,18 @@
 #include <gtk/gtk.h>
 
 #include "core/logger.h"
+#include "platform/platform.h"
 
 
-G_MODULE_EXPORT void print_hello(void);
+static ProcessContext processContext = {0};
+
+G_MODULE_EXPORT void callback(void);
 
 static void activate(GtkApplication *app) {
 	// TODO: do something about this path
 	GtkBuilder *builder = gtk_builder_new_from_file("../layouts/hello-world.ui");
 
-	GtkWidget *window = GTK_WIDGET(gtk_builder_get_object (builder, "window"));
+	GtkWidget *window = GTK_WIDGET(gtk_builder_get_object(builder, "window"));
 	gtk_window_set_application(GTK_WINDOW(window), GTK_APPLICATION(app));
 	g_object_unref(builder);
 	gtk_window_present(GTK_WINDOW(window));
@@ -31,9 +34,16 @@ int main(const int argc, char **argv) {
 	return status;
 }
 
-G_MODULE_EXPORT void print_hello(void) {
-	LOG_INFO("Hello World!", "");
-	LOG_WARN("Hello World :\\", "");
-	LOG_ERROR("Hello World :(", "");
-	LOG_FATAL("Hello World :'(", "");
+G_MODULE_EXPORT void callback(void) {
+	platform_openProcess(&processContext);
+	if (processContext.handle == NULL) {
+		LOG_ERROR("Failed to open process");
+		return;
+	}
+
+	LOG_INFO(
+		"Process opened with PID: %u (base module address of %p)",
+		processContext.pid,
+		(void*)processContext.moduleBaseAddress
+	);
 }

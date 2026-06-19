@@ -13,9 +13,9 @@
 				<child>
 					<object class="GtkGrid">
 						<child>
-							<object class="GtkButton" id="prints_hello">
+							<object class="GtkButton">
 								<property name="label">Description</property>
-								<signal name="clicked" handler="print_hello"/>
+								<signal name="clicked" handler="callback"/>
 							</object>
 						</child>
 						<child>

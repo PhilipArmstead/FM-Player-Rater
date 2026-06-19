@@ -9,3 +9,6 @@
 // Logger
 void platform_consoleWrite(const char *message, LogLevel colour);
 void platform_consoleWriteError(const char *message, LogLevel colour);
+
+// Process
+void platform_openProcess(ProcessContext *context);

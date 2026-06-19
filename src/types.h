@@ -18,3 +18,10 @@ typedef enum LogLevel {
 	LogLevelInfo,
 	LogLevelCount
 } LogLevel;
+
+// Process
+typedef struct {
+	void *handle; // Platform-specific process handle
+	uintptr_t moduleBaseAddress;
+	uint32_t pid;
+} ProcessContext;
