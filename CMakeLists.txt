@@ -15,6 +15,16 @@ pkg_check_modules(GTK4 REQUIRED IMPORTED_TARGET gtk4)
 
 add_executable(fm_player_rater
 	src/main.c
+	src/core/logger.c
+	src/platform/linux.c
+	src/platform/macos.c
+	src/platform/windows.c
+)
+
+# Allow including headers using absolute paths relative to the project `src/` directory,
+# e.g. #include "platform/platform.h"
+target_include_directories(fm_player_rater PRIVATE
+	${PROJECT_SOURCE_DIR}/src
 )
 
 # Keep binary name with hyphens, but use a CMake-safe target name.
