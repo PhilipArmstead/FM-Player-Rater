@@ -3,13 +3,15 @@
 
 #include <gtk/gtk.h>
 
+#include "app/player.h"
 #include "core/logger.h"
 #include "platform/platform.h"
 
 
 static ProcessContext processContext = {0};
 
-G_MODULE_EXPORT void callback(void);
+G_MODULE_EXPORT void callbackConnect(void);
+G_MODULE_EXPORT void callbackShowCurrentPlayer(void);
 
 static void activate(GtkApplication *app) {
 	// TODO: do something about this path
@@ -34,7 +36,7 @@ int main(const int argc, char **argv) {
 	return status;
 }
 
-G_MODULE_EXPORT void callback(void) {
+G_MODULE_EXPORT void callbackConnect(void) {
 	platform_openProcess(&processContext);
 	if (processContext.handle == NULL) {
 		LOG_ERROR("Failed to open process");
@@ -46,4 +48,14 @@ G_MODULE_EXPORT void callback(void) {
 		processContext.pid,
 		(void*)processContext.moduleBaseAddress
 	);
+}
+
+G_MODULE_EXPORT void callbackShowCurrentPlayer(void) {
+	if (processContext.handle == NULL) {
+		LOG_ERROR("Process handle is NULL, cannot read current player");
+		return;
+	}
+
+	const uint32_t uniqueId = getPersonUniqueId(&processContext);
+	LOG_INFO("Current Player Unique ID: %u", uniqueId);
 }

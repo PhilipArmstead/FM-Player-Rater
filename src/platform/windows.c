@@ -37,8 +37,32 @@ void platform_consoleWriteError(const char *message, const LogLevel colour) {
 }
 
 
-// Process
+// Memory
 #include <stdint.h>
+
+
+void readFromMemory(void *handle, const uintptr_t address, const size_t length, uint8_t *bytes) {
+	if (!ReadProcessMemory(handle, (LPCVOID)address, bytes, length, NULL)) {
+		platform_consoleWriteError("Failed to read memory", LogLevelError);
+	}
+}
+
+uint8_t readByte(void *handle, const uintptr_t address) {
+	uint8_t byte;
+	if (!ReadProcessMemory(handle, (LPCVOID)address, &byte, 1, NULL)) {
+		platform_consoleWriteError("Failed to read byte", LogLevelError);
+	}
+	return byte;
+}
+
+void writeToMemory(void *handle, const uintptr_t address, const size_t length, const uint8_t *bytes) {
+	if (!WriteProcessMemory(handle, (LPVOID)address, bytes, length, NULL)) {
+		platform_consoleWriteError("Failed to write to memory", LogLevelError);
+	}
+}
+
+
+// Process
 #include <stdlib.h>
 #include <tlhelp32.h>
 
@@ -50,7 +74,7 @@ void platform_openProcess(ProcessContext *context) {
 
 	HANDLE hSnapshot = CreateToolhelp32Snapshot(TH32CS_SNAPPROCESS, 0);
 	if (hSnapshot == INVALID_HANDLE_VALUE) {
-		LOG_ERROR("Failed to create process snapshot: %s", strerror(errno));
+		LOG_ERROR("Failed to create process snapshot: %s", GetLastError());
 		return;
 	}
 
@@ -86,7 +110,7 @@ void platform_openProcess(ProcessContext *context) {
 	// Get the base address of the module
 	HANDLE snap = CreateToolhelp32Snapshot(TH32CS_SNAPMODULE | TH32CS_SNAPMODULE32, pid);
 	if (snap == INVALID_HANDLE_VALUE) {
-		LOG_ERROR("Failed to create module snapshot: %s", strerror(errno));
+		LOG_ERROR("Failed to create module snapshot: %s", GetLastError());
 		CloseHandle(h);
 		return;
 	};

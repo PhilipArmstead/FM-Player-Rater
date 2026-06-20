@@ -14,18 +14,14 @@
 					<object class="GtkGrid">
 						<child>
 							<object class="GtkButton">
-								<property name="label">Description</property>
-								<signal name="clicked" handler="callback"/>
+								<property name="label">Connect</property>
+								<signal name="clicked" handler="callbackConnect"/>
 							</object>
 						</child>
 						<child>
-							<object class="GtkEntry" id="description_entry">
-								<layout>
-									<property name="column">1</property>
-									<property name="row">0</property>
-									<property name="row-span">1</property>
-									<property name="column-span">1</property>
-								</layout>
+							<object class="GtkButton">
+								<property name="label">Show current player</property>
+								<signal name="clicked" handler="callbackShowCurrentPlayer"/>
 							</object>
 						</child>
 					</object>
