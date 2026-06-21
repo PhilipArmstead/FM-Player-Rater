@@ -43,12 +43,13 @@ void platform_consoleWriteError(const char *message, const LogLevel colour) {
 
 void readFromMemory(void *handle, const uintptr_t address, const size_t length, uint8_t *bytes) {
 	if (!ReadProcessMemory(handle, (LPCVOID)address, bytes, length, NULL)) {
+		memset(bytes, 0, length);
 		platform_consoleWriteError("Failed to read memory\n", LogLevelError);
 	}
 }
 
 uint8_t readByte(void *handle, const uintptr_t address) {
-	uint8_t byte;
+	uint8_t byte = 0;
 	if (!ReadProcessMemory(handle, (LPCVOID)address, &byte, 1, NULL)) {
 		platform_consoleWriteError("Failed to read byte\n", LogLevelError);
 	}

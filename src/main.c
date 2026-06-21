@@ -3,7 +3,7 @@
 
 #include <gtk/gtk.h>
 
-#include "app/date-time.h"
+#include "app/game-status.h"
 #include "app/player.h"
 #include "core/logger.h"
 #include "platform/platform.h"
@@ -13,7 +13,7 @@ static ProcessContext processContext = {0};
 
 G_MODULE_EXPORT void callbackConnect(void);
 G_MODULE_EXPORT void callbackShowCurrentPlayer(void);
-static gboolean updateDateTime(gpointer userData);
+static gboolean updateGameDetails(gpointer userData);
 
 static void activate(GtkApplication *app) {
 	// TODO: do something about this path
@@ -24,7 +24,7 @@ static void activate(GtkApplication *app) {
 	g_object_unref(builder);
 
 	// Periodic callbacks
-	g_timeout_add(3000, updateDateTime, NULL);
+	g_timeout_add(3000, updateGameDetails, NULL);
 
 	gtk_window_present(GTK_WINDOW(window));
 }
@@ -66,7 +66,7 @@ G_MODULE_EXPORT void callbackShowCurrentPlayer(void) {
 	LOG_INFO("Current Player Unique ID: %u", uniqueId);
 }
 
-static gboolean updateDateTime(gpointer userData) {
+static gboolean updateGameDetails(gpointer userData) {
 	if (processContext.handle != NULL) {
 		DayMonthYear dayMonthYear = getDayMonthYear(&processContext);
 		LOG_INFO(
@@ -75,6 +75,11 @@ static gboolean updateDateTime(gpointer userData) {
 			dayMonthYear.day,
 			dayMonthYear.year
 		);
+
+		#define GAME_STATUS_STRING_BUFFER_SIZE 32
+		char versionBuffer[GAME_STATUS_STRING_BUFFER_SIZE] = {0};
+		getGameVersion(&processContext, versionBuffer, GAME_STATUS_STRING_BUFFER_SIZE);
+		LOG_INFO("Game Version: %s", versionBuffer);
 	}
 
 	// Keep repeating

@@ -8,3 +8,4 @@
 
 DayMonthYear getDayMonthYear(const ProcessContext *context);
 Date getDate(const ProcessContext *context);
+void getGameVersion(const ProcessContext *context, char *versionBuffer, uint8_t bufferSize);

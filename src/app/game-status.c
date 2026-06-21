@@ -1,7 +1,7 @@
 // SPDX-FileCopyrightText: © 2026 Phil Armstead <philarmstead@mailbox.org>
 // SPDX-License-Identifier: GPL-3.0-or-later
 
-#include "date-time.h"
+#include "game-status.h"
 #include "app/constants.h"
 #include "app/maths.h"
 #include "app/types.h"
@@ -40,7 +40,7 @@
 // Assumes valid ProcessContext
 Date getDate(const ProcessContext *context) {
 	uint8_t bytes[4];
-	readFromMemory(context->handle, context->moduleBaseAddress + POINTER_TO_CURRENT_DATETIME, 4, bytes);
+	readFromMemory(context->handle, context->moduleBaseAddress + CURRENT_DATETIME_PTR_BASE, 4, bytes);
 
 	const uint8_t yearBytes[2] = {bytes[2], bytes[3]};
 	const uint16_t year = (uint16_t)hexBytesToInt(yearBytes, 2);
@@ -93,4 +93,19 @@ DayMonthYear getDayMonthYear(const ProcessContext *context) {
 	}
 
 	return dayMonthYear;
+}
+
+// Assumes valid ProcessContext
+void getGameVersion(const ProcessContext *context, char *versionBuffer, const uint8_t bufferSize) {
+	uint8_t bytes[4];
+	void *handle = context->handle;
+	readFromMemory(handle, context->moduleBaseAddress + GAME_VERSION_PTR_BASE, 4, bytes);
+	readFromMemory(handle, hexBytesToInt(bytes, 4) + GAME_VERSION_PTR_OFFSET_1, 4, bytes);
+	readFromMemory(
+		handle,
+		hexBytesToInt(bytes, 4) + GAME_VERSION_PTR_OFFSET_2,
+		bufferSize - 1,
+		(uint8_t*)versionBuffer
+	);
+	versionBuffer[bufferSize - 1] = '\0';
 }
