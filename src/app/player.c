@@ -7,6 +7,7 @@
 #include "platform/platform.h"
 
 
+// Assumes valid ProcessContext
 uint32_t getPersonUniqueId(const ProcessContext *processContext) {
 	uint8_t bytes[4];
 	void *handle = processContext->handle;

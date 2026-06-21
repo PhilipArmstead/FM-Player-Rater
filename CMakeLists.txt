@@ -15,6 +15,7 @@ pkg_check_modules(GTK4 REQUIRED IMPORTED_TARGET gtk4)
 
 add_executable(fm_player_rater
 	src/main.c
+	src/app/date-time.c
 	src/app/player.c
 	src/core/logger.c
 	src/platform/linux.c

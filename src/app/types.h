@@ -85,3 +85,16 @@ typedef struct {
 	bool canDevelopQuickly;
 	bool isHotProspect;
 } Player;
+
+typedef struct {
+	uint16_t days;
+	uint16_t year;
+} Date;
+
+#define MONTH_NAME_LENGTH 12
+
+typedef struct {
+	char month[MONTH_NAME_LENGTH];
+	uint16_t year;
+	uint16_t day;
+} DayMonthYear;

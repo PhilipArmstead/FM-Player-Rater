@@ -3,6 +3,7 @@
 
 #include <gtk/gtk.h>
 
+#include "app/date-time.h"
 #include "app/player.h"
 #include "core/logger.h"
 #include "platform/platform.h"
@@ -12,6 +13,7 @@ static ProcessContext processContext = {0};
 
 G_MODULE_EXPORT void callbackConnect(void);
 G_MODULE_EXPORT void callbackShowCurrentPlayer(void);
+static gboolean updateDateTime(gpointer userData);
 
 static void activate(GtkApplication *app) {
 	// TODO: do something about this path
@@ -20,6 +22,10 @@ static void activate(GtkApplication *app) {
 	GtkWidget *window = GTK_WIDGET(gtk_builder_get_object(builder, "window"));
 	gtk_window_set_application(GTK_WINDOW(window), GTK_APPLICATION(app));
 	g_object_unref(builder);
+
+	// Periodic callbacks
+	g_timeout_add(3000, updateDateTime, NULL);
+
 	gtk_window_present(GTK_WINDOW(window));
 }
 
@@ -58,4 +64,19 @@ G_MODULE_EXPORT void callbackShowCurrentPlayer(void) {
 
 	const uint32_t uniqueId = getPersonUniqueId(&processContext);
 	LOG_INFO("Current Player Unique ID: %u", uniqueId);
+}
+
+static gboolean updateDateTime(gpointer userData) {
+	if (processContext.handle != NULL) {
+		DayMonthYear dayMonthYear = getDayMonthYear(&processContext);
+		LOG_INFO(
+			"Current Date: %s %d, %d",
+			dayMonthYear.month,
+			dayMonthYear.day,
+			dayMonthYear.year
+		);
+	}
+
+	// Keep repeating
+	return G_SOURCE_CONTINUE;
 }
