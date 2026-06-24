@@ -13,7 +13,7 @@
 				<child>
 					<object class="GtkGrid">
 						<child>
-							<object class="GtkButton">
+							<object class="GtkButton" id="connectButton">
 								<property name="label">Connect</property>
 								<signal name="clicked" handler="callbackConnect"/>
 							</object>

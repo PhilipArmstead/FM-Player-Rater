@@ -62,6 +62,7 @@ typedef struct {
 	uint8_t attributes[ATTRIBUTE_COUNT];
 	Rating ratings[POSITION_GROUPED_COUNT];
 	Club club;
+	char commonName[64];
 	char forename[32];
 	char surname[32];
 	Nationality nationality;

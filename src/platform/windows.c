@@ -69,6 +69,7 @@ void writeToMemory(void *handle, const uintptr_t address, const size_t length, c
 
 #include "core/logger.h"
 
+
 void platform_openProcess(ProcessContext *context) {
 	context->handle = NULL;
 	context->pid = 0;

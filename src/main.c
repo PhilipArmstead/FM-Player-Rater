@@ -10,6 +10,7 @@
 
 
 static ProcessContext processContext = {0};
+static GtkBuilder *builder;
 
 G_MODULE_EXPORT void callbackConnect(void);
 G_MODULE_EXPORT void callbackShowCurrentPlayer(void);
@@ -17,11 +18,11 @@ static gboolean updateGameDetails(gpointer userData);
 
 static void activate(GtkApplication *app) {
 	// TODO: do something about this path
-	GtkBuilder *builder = gtk_builder_new_from_file("../layouts/hello-world.ui");
+	builder = gtk_builder_new_from_file("../layouts/hello-world.ui");
 
 	GtkWidget *window = GTK_WIDGET(gtk_builder_get_object(builder, "window"));
 	gtk_window_set_application(GTK_WINDOW(window), GTK_APPLICATION(app));
-	g_object_unref(builder);
+	// g_object_unref(builder);
 
 	// Periodic callbacks
 	g_timeout_add(3000, updateGameDetails, NULL);
@@ -43,6 +44,13 @@ int main(const int argc, char **argv) {
 }
 
 G_MODULE_EXPORT void callbackConnect(void) {
+	GtkButton *button = GTK_BUTTON(GTK_WIDGET(gtk_builder_get_object(builder, "connectButton")));
+	if (processContext.handle != NULL) {
+		gtk_button_set_label(button, "Connect");
+		processContext.handle = NULL;
+		return;
+	}
+
 	platform_openProcess(&processContext);
 	if (processContext.handle == NULL) {
 		LOG_ERROR("Failed to open process");
@@ -54,6 +62,8 @@ G_MODULE_EXPORT void callbackConnect(void) {
 		processContext.pid,
 		(void*)processContext.moduleBaseAddress
 	);
+
+	gtk_button_set_label(button, "Disconnect");
 }
 
 G_MODULE_EXPORT void callbackShowCurrentPlayer(void) {
@@ -62,8 +72,17 @@ G_MODULE_EXPORT void callbackShowCurrentPlayer(void) {
 		return;
 	}
 
-	const uint32_t uniqueId = getPersonUniqueId(&processContext);
+	const uint32_t uniqueId = getCurrentPersonUniqueId(&processContext);
 	LOG_INFO("Current Player Unique ID: %u", uniqueId);
+
+	const Player player = getPlayerById(&processContext, uniqueId);
+	LOG_INFO(
+		"Current Player: %s (Age: %d, Ability: %d, Potential: %d)",
+		player.commonName,
+		player.age,
+		player.ca,
+		player.pa
+	);
 }
 
 static gboolean updateGameDetails(gpointer userData) {
