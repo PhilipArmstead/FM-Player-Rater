@@ -99,3 +99,10 @@ typedef struct {
 	uint16_t year;
 	uint16_t day;
 } DayMonthYear;
+
+#define GAME_STATUS_STRING_BUFFER_SIZE 32
+
+typedef struct {
+	char gameVersion[GAME_STATUS_STRING_BUFFER_SIZE];
+	DayMonthYear currentDate;
+} GameContext;

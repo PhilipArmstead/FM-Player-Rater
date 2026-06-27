@@ -10,6 +10,7 @@
 
 
 static ProcessContext processContext = {0};
+static GameContext gameContext = {0};
 static GtkBuilder *builder;
 
 G_MODULE_EXPORT void callbackConnect(void);
@@ -88,19 +89,31 @@ G_MODULE_EXPORT void callbackShowCurrentPlayer(void) {
 static gboolean updateGameDetails(gpointer userData) {
 	if (processContext.handle != NULL) {
 		DayMonthYear dayMonthYear = getDayMonthYear(&processContext);
-		LOG_INFO(
-			"Current Date: %s %d, %d",
-			dayMonthYear.month,
-			dayMonthYear.day,
-			dayMonthYear.year
-		);
+		if (
+			dayMonthYear.day != gameContext.currentDate.day ||
+			strncmp(dayMonthYear.month, gameContext.currentDate.month, MONTH_NAME_LENGTH) != 0 ||
+			dayMonthYear.year != gameContext.currentDate.year
+		) {
+			gameContext.currentDate = dayMonthYear;
+			LOG_INFO(
+				"Current Date: %s %d, %d",
+				dayMonthYear.month,
+				dayMonthYear.day,
+				dayMonthYear.year
+			);
+		}
 
-		#define GAME_STATUS_STRING_BUFFER_SIZE 32
 		char versionBuffer[GAME_STATUS_STRING_BUFFER_SIZE] = {0};
 		getGameVersion(&processContext, versionBuffer, GAME_STATUS_STRING_BUFFER_SIZE);
-		LOG_INFO("Game Version: %s", versionBuffer);
+		if (strncmp(versionBuffer, gameContext.gameVersion, GAME_STATUS_STRING_BUFFER_SIZE) != 0) {
+			strncpy(gameContext.gameVersion, versionBuffer, GAME_STATUS_STRING_BUFFER_SIZE);
+			LOG_INFO("Game Version: %s", versionBuffer);
+		}
 	}
 
 	// Keep repeating
 	return G_SOURCE_CONTINUE;
 }
+
+// TODO: find by rowId?
+// TODO: find by person address?
