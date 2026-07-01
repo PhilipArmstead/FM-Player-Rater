@@ -8,3 +8,4 @@
 
 uint32_t getCurrentPersonUniqueId(const ProcessContext *processContext);
 Player getPlayerById(const ProcessContext *processContext, uint32_t uniqueId);
+Player getPlayerById(const ProcessContext *processContext, uint32_t uniqueId);

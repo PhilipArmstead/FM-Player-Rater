@@ -14,8 +14,10 @@ static GameContext gameContext = {0};
 static GtkBuilder *builder;
 
 G_MODULE_EXPORT void callbackConnect(void);
+G_MODULE_EXPORT void callbackSearchByUid(void);
 G_MODULE_EXPORT void callbackShowCurrentPlayer(void);
 static gboolean updateGameDetails(gpointer userData);
+static void showPlayerById(uint32_t uniqueId);
 
 static void activate(GtkApplication *app) {
 	// TODO: do something about this path
@@ -74,16 +76,25 @@ G_MODULE_EXPORT void callbackShowCurrentPlayer(void) {
 	}
 
 	const uint32_t uniqueId = getCurrentPersonUniqueId(&processContext);
-	LOG_INFO("Current Player Unique ID: %u", uniqueId);
+	showPlayerById(uniqueId);
+}
 
-	const Player player = getPlayerById(&processContext, uniqueId);
-	LOG_INFO(
-		"Current Player: %s (Age: %d, Ability: %d, Potential: %d)",
-		player.commonName,
-		player.age,
-		player.ca,
-		player.pa
-	);
+G_MODULE_EXPORT void callbackSearchByUid(void) {
+	if (processContext.handle == NULL) {
+		LOG_ERROR("Process handle is NULL, cannot search for player");
+		return;
+	}
+
+	GtkEntry *entry = GTK_ENTRY(GTK_WIDGET(gtk_builder_get_object(builder, "uidEntry")));
+	GtkEntryBuffer *entryBuffer = gtk_entry_get_buffer(entry);
+	const char *buffer = gtk_entry_buffer_get_text(entryBuffer);
+	if (buffer == NULL) {
+		LOG_ERROR("UID entry is empty");
+		return;
+	}
+
+	const uint32_t uniqueId = (uint32_t)strtoul(buffer, NULL, 10);
+	showPlayerById(uniqueId);
 }
 
 static gboolean updateGameDetails(gpointer userData) {
@@ -113,6 +124,31 @@ static gboolean updateGameDetails(gpointer userData) {
 
 	// Keep repeating
 	return G_SOURCE_CONTINUE;
+}
+
+static void showPlayerById(uint32_t uniqueId) {
+	if (uniqueId == 0) {
+		LOG_INFO("Unique ID not found.");
+		return;
+	}
+
+	LOG_INFO("Searching for Player Unique ID: %u", uniqueId);
+
+	const Player player = getPlayerById(&processContext, uniqueId);
+	if (player.personAddress == 0) {
+		LOG_ERROR("Player with Unique ID %u not found", uniqueId);
+		return;
+	}
+
+	LOG_INFO(
+		"Found Player: %s (Age: %d, Ability: %d, Potential: %d, Row ID: %d, Address: 0x%08X)",
+		player.commonName,
+		player.age,
+		player.ca,
+		player.pa,
+		player.rowId,
+		player.personAddress
+	);
 }
 
 // TODO: find by rowId?

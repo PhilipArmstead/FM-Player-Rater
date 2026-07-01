@@ -8,15 +8,19 @@
 
 // All *_PTR_BASE values are relative to the base address of the module (fm.exe)
 
-#define CURRENT_SCREEN_PERSON_ID_PTR_BASE 0x0642EE60
-#define CURRENT_SCREEN_PERSON_ID_PTR_BASE_OFFSET_1 0xB78
-#define CURRENT_SCREEN_PERSON_ID_PTR_BASE_OFFSET_2 0x28
-#define CURRENT_SCREEN_PERSON_ID_PTR_BASE_OFFSET_3 0x48
-#define CURRENT_SCREEN_PERSON_ID_PTR_BASE_OFFSET_4 0x328
-#define CURRENT_SCREEN_PERSON_ID_PTR_BASE_OFFSET_5 0x0
-#define CURRENT_SCREEN_PERSON_ID_PTR_BASE_OFFSET_6 0x28
-#define CURRENT_SCREEN_PERSON_ID_PTR_BASE_OFFSET_7 0x98
-#define CURRENT_SCREEN_PERSON_ID_PTR_BASE_OFFSET_8 0x148
+#define CURRENT_SCREEN_PLAYER_ID_PTR_BASE 0x0642EE60
+#define CURRENT_SCREEN_PLAYER_ID_PTR_BASE_OFFSET_1 0xB78
+#define CURRENT_SCREEN_PLAYER_ID_PTR_BASE_OFFSET_2 0x28
+#define CURRENT_SCREEN_PLAYER_ID_PTR_BASE_OFFSET_3 0x48
+#define CURRENT_SCREEN_PLAYER_ID_PTR_BASE_OFFSET_4 0x328
+#define CURRENT_SCREEN_PLAYER_ID_PTR_BASE_OFFSET_5 0x0
+#define CURRENT_SCREEN_PLAYER_ID_PTR_BASE_OFFSET_6 0x28
+#define CURRENT_SCREEN_PLAYER_ID_PTR_BASE_OFFSET_7 0x98
+#define CURRENT_SCREEN_PLAYER_ID_PTR_BASE_OFFSET_8 0x148
+
+#define CURRENT_SCREEN_STAFF_ID_PTR_BASE 0x06374408
+#define CURRENT_SCREEN_STAFF_ID_PTR_BASE_OFFSET_1 0x18
+#define CURRENT_SCREEN_STAFF_ID_PTR_BASE_OFFSET_2 0x10
 
 #define GAME_VERSION_PTR_BASE 0x063659C0
 #define GAME_VERSION_PTR_OFFSET_1 0x88
@@ -25,13 +29,20 @@
 // When a person is _only_ a player, their details are at 0x278
 // When a person is player + staff, staff is at 0x278 and player is at 0x368
 // TODO: find a way to determine if a person is player + staff or just player
-#define PLAYER_OFFSETS { 0x278, 0x368 }
-#define PLAYER_OFFSET_COUNT 2
+#define PLAYER_OFFSET_FROM_PERSON (-0x278)
+#define STAFF_OFFSET_FROM_PERSON (-0x368)
 
 #define PLAYER_COUNT_PTR_BASE 0x642C034
 #define PLAYER_LIST_PTR_BASE 0x0642EDD0
 #define PLAYER_LIST_PTR_OFFSET_1 0x08
-// Jump to PLAYER_LIST_PTR_OFFSET_1 * index to get the player address
+#define PLAYER_LIST_PTR_OFFSET_2 0x00
+// Jump to PLAYER_LIST_PTR_OFFSET_1 * index to get the person address
+
+#define PEOPLE_LIST_PTR_BASE 0x0642ED38
+#define PEOPLE_LIST_PTR_OFFSET_1 0x80
+#define PEOPLE_LIST_PTR_OFFSET_2 0x00
+#define PEOPLE_LIST_PTR_OFFSET_3 0x08
+// Jump to PEOPLE_LIST_PTR_OFFSET_3 * index to get the person address
 
 // Day is represented with 1 byte and a 1 bit in the following byte to represent values > 255
 // Time is represented as 1 byte (even bits only) determining the number of 15 minute periods since 6AM
@@ -42,16 +53,13 @@
 #define CURRENT_DATETIME_PTR_BASE 0x631d5bc
 
 /** Person definition */
-// It alternates +0x3e0 and +0x3f0 to the next person
-#define PERSON_ROW_ID 0x08
+// The next person is +0x3e8 bytes away
+#define PERSON_OFFSET_ROW_ID 0x08
 #define PERSON_OFFSET_UNIQUE_ID 0x0C
 #define PERSON_OFFSET_RANDOM_ID 0x10
 // 0x40 B8 1A E7 07 Some sort of date?
 // 2 bytes for day of the year, 2 bytes for year
 #define PERSON_OFFSET_DOB 0x44
-// (+0x04 from here)
-#define PERSON_OFFSET_FULLNAME
-// 0x50 E0 9F B3 5D
 // (+0x04 from here)
 #define PERSON_OFFSET_FORENAME 0x58
 // (+0x04 from here)

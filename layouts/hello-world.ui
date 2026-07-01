@@ -26,6 +26,12 @@
 						</child>
 					</object>
 				</child>
+				<child>
+					<object class="GtkEntry" id="uidEntry">
+						<property name="placeholder-text">Enter UID</property>
+						<signal name="activate" handler="callbackSearchByUid"/>
+					</object>
+				</child>
 			</object>
 		</child>
 	</object>

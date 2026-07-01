@@ -66,6 +66,7 @@ typedef struct {
 	char forename[32];
 	char surname[32];
 	Nationality nationality;
+	uint32_t rowId;
 	uint32_t rid;
 	uint32_t uid;
 	uint32_t personAddress;

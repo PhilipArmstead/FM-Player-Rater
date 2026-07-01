@@ -11,13 +11,13 @@
 #include <stdio.h>
 
 
-static uint32_t getPersonAddressFromPlayerAddress(void *handle, uint32_t playerAddress);
-static bool isPlayerValid(void *handle, uint32_t personAddress, uint32_t playerAddress);
-static Player getPlayer(void *handle, uint32_t personAddress, uint32_t playerAddress, Date date);
-static inline void getPlayerName(void *handle, uint8_t pointer[4], char str[32]);
-static inline void getPlayerForename(void *handle, uint64_t attributeBase, char str[32]);
-static inline void getPlayerSurname(void *handle, uint64_t attributeBase, char str[32]);
-static inline void getPlayerCommonName(void *handle, uint64_t attributeBase, char str[64]);
+static bool isPlayerValid(void *handle, uint32_t personAddress);
+static bool isPersonValid(void *handle, uint32_t personAddress);
+static Player getPlayer(void *handle, uint32_t personAddress, Date date);
+static inline void getPersonName(void *handle, uint8_t pointer[4], char str[32]);
+static inline void getPersonForename(void *handle, uint64_t attributeBase, char str[32]);
+static inline void getPersonSurname(void *handle, uint64_t attributeBase, char str[32]);
+static inline void getPersonCommonName(void *handle, uint64_t attributeBase, char str[64]);
 static uint8_t getAge(void *handle, uint64_t address, Date date);
 static Club getClubFromPerson(void *handle, uint32_t personAddress);
 void getSortedPositionRatings(Player *player);
@@ -27,15 +27,15 @@ float getRatingPerPosition(const Player *player, PositionGrouped position);
 uint32_t getCurrentPersonUniqueId(const ProcessContext *processContext) {
 	uint8_t bytes[4];
 	void *handle = processContext->handle;
-	readFromMemory(handle, processContext->moduleBaseAddress + CURRENT_SCREEN_PERSON_ID_PTR_BASE, 4, bytes);
-	readFromMemory(handle, hexBytesToInt(bytes, 4) + CURRENT_SCREEN_PERSON_ID_PTR_BASE_OFFSET_1, 4, bytes);
-	readFromMemory(handle, hexBytesToInt(bytes, 4) + CURRENT_SCREEN_PERSON_ID_PTR_BASE_OFFSET_2, 4, bytes);
-	readFromMemory(handle, hexBytesToInt(bytes, 4) + CURRENT_SCREEN_PERSON_ID_PTR_BASE_OFFSET_3, 4, bytes);
-	readFromMemory(handle, hexBytesToInt(bytes, 4) + CURRENT_SCREEN_PERSON_ID_PTR_BASE_OFFSET_4, 4, bytes);
-	readFromMemory(handle, hexBytesToInt(bytes, 4) + CURRENT_SCREEN_PERSON_ID_PTR_BASE_OFFSET_5, 4, bytes);
-	readFromMemory(handle, hexBytesToInt(bytes, 4) + CURRENT_SCREEN_PERSON_ID_PTR_BASE_OFFSET_6, 4, bytes);
-	readFromMemory(handle, hexBytesToInt(bytes, 4) + CURRENT_SCREEN_PERSON_ID_PTR_BASE_OFFSET_7, 4, bytes);
-	readFromMemory(handle, hexBytesToInt(bytes, 4) + CURRENT_SCREEN_PERSON_ID_PTR_BASE_OFFSET_8, 4, bytes);
+	readFromMemory(handle, processContext->moduleBaseAddress + CURRENT_SCREEN_PLAYER_ID_PTR_BASE, 4, bytes);
+	readFromMemory(handle, hexBytesToInt(bytes, 4) + CURRENT_SCREEN_PLAYER_ID_PTR_BASE_OFFSET_1, 4, bytes);
+	readFromMemory(handle, hexBytesToInt(bytes, 4) + CURRENT_SCREEN_PLAYER_ID_PTR_BASE_OFFSET_2, 4, bytes);
+	readFromMemory(handle, hexBytesToInt(bytes, 4) + CURRENT_SCREEN_PLAYER_ID_PTR_BASE_OFFSET_3, 4, bytes);
+	readFromMemory(handle, hexBytesToInt(bytes, 4) + CURRENT_SCREEN_PLAYER_ID_PTR_BASE_OFFSET_4, 4, bytes);
+	readFromMemory(handle, hexBytesToInt(bytes, 4) + CURRENT_SCREEN_PLAYER_ID_PTR_BASE_OFFSET_5, 4, bytes);
+	readFromMemory(handle, hexBytesToInt(bytes, 4) + CURRENT_SCREEN_PLAYER_ID_PTR_BASE_OFFSET_6, 4, bytes);
+	readFromMemory(handle, hexBytesToInt(bytes, 4) + CURRENT_SCREEN_PLAYER_ID_PTR_BASE_OFFSET_7, 4, bytes);
+	readFromMemory(handle, hexBytesToInt(bytes, 4) + CURRENT_SCREEN_PLAYER_ID_PTR_BASE_OFFSET_8, 4, bytes);
 	return (uint32_t)hexBytesToInt(bytes, 4);
 }
 
@@ -45,7 +45,7 @@ Player getPlayerById(const ProcessContext *processContext, uint32_t uniqueId) {
 	uint8_t bytes[4];
 	readFromMemory(processContext->handle, processContext->moduleBaseAddress + PLAYER_COUNT_PTR_BASE, 4, bytes);
 	const uint32_t playerCount = (uint32_t)hexBytesToInt(bytes, 4);
-	if (playerCount < 1 || playerCount > 350000) {
+	if (playerCount < 1 || playerCount > 500000) {
 		LOG_ERROR("Unexpected number of players in database: %d", playerCount);
 		return (Player){0};
 	}
@@ -57,26 +57,18 @@ Player getPlayerById(const ProcessContext *processContext, uint32_t uniqueId) {
 		bytes
 	);
 	const uint32_t allPlayers = (uint32_t)hexBytesToInt(bytes, 4);
-	uint32_t playerAddress = 0;
-	uint32_t personAddress = 0;
 
 	for (uint32_t i = 0; i < playerCount; ++i) {
 		readFromMemory(processContext->handle, allPlayers + PLAYER_LIST_PTR_OFFSET_1 * i, 4, bytes);
-		playerAddress = (uint32_t)hexBytesToInt(bytes, 4);
-		personAddress = getPersonAddressFromPlayerAddress(processContext->handle, playerAddress);
-		if (!personAddress) {
-			continue;
-		}
+		const uint32_t playerAddress = (uint32_t)hexBytesToInt(bytes, 4) + PLAYER_LIST_PTR_OFFSET_2;
+		const uint32_t personAddress = playerAddress - PLAYER_OFFSET_FROM_PERSON;
 
-		readFromMemory(
-			processContext->handle,
-			personAddress + PERSON_OFFSET_UNIQUE_ID,
-			4,
-			bytes
-		);
+		readFromMemory(processContext->handle, personAddress + PERSON_OFFSET_UNIQUE_ID, 4, bytes);
 		const uint32_t foundPlayerId = (uint32_t)hexBytesToInt(bytes, 4);
 		if (foundPlayerId == uniqueId) {
-			return getPlayer(processContext->handle, personAddress, playerAddress, getDate(processContext));
+			return isPlayerValid(processContext->handle, personAddress)
+				? getPlayer(processContext->handle, personAddress, getDate(processContext))
+				: (Player){0};
 		}
 	}
 
@@ -85,15 +77,19 @@ Player getPlayerById(const ProcessContext *processContext, uint32_t uniqueId) {
 	return (Player){0};
 }
 
-static Player getPlayer(void *handle, uint32_t personAddress, uint32_t playerAddress, Date date) {
-	if (!isPlayerValid(handle, personAddress, playerAddress)) {
+static Player getPlayer(void *handle, uint32_t personAddress, Date date) {
+	if (!isPlayerValid(handle, personAddress)) {
 		return (Player){0};
 	}
+
+	const uint32_t playerAddress = personAddress + PLAYER_OFFSET_FROM_PERSON;
 
 	uint8_t ability[3];
 	readFromMemory(handle, playerAddress + PLAYER_OFFSET_ABILITY, 3, ability);
 
 	uint8_t bytes[6];
+	readFromMemory(handle, personAddress + PERSON_OFFSET_ROW_ID, 4, bytes);
+	const uint32_t rowId = (uint32_t)hexBytesToInt(bytes, 4);
 	readFromMemory(handle, personAddress + PERSON_OFFSET_UNIQUE_ID, 4, bytes);
 	const uint32_t uid = (uint32_t)hexBytesToInt(bytes, 4);
 	readFromMemory(handle, personAddress + PERSON_OFFSET_RANDOM_ID, 4, bytes);
@@ -107,10 +103,11 @@ static Player getPlayer(void *handle, uint32_t personAddress, uint32_t playerAdd
 		.pa = ability[ABILITY_PA],
 		.rid = rid,
 		.uid = uid,
+		.rowId = rowId,
 	};
-	getPlayerForename(handle, personAddress, player.forename);
-	getPlayerSurname(handle, personAddress, player.surname);
-	getPlayerCommonName(handle, personAddress, player.commonName);
+	getPersonForename(handle, personAddress, player.forename);
+	getPersonSurname(handle, personAddress, player.surname);
+	getPersonCommonName(handle, personAddress, player.commonName);
 
 	if (player.commonName[0] == '\0') {
 		snprintf(player.commonName, sizeof(player.commonName), "%s %s", player.forename, player.surname);
@@ -163,25 +160,19 @@ static Player getPlayer(void *handle, uint32_t personAddress, uint32_t playerAdd
 	return player;
 }
 
-static uint32_t getPersonAddressFromPlayerAddress(void *handle, uint32_t playerAddress) {
-	const uint16_t offsets[PLAYER_OFFSET_COUNT] = PLAYER_OFFSETS;
-	for (uint8_t i = 0; i < PLAYER_OFFSET_COUNT; ++i) {
-		const uint32_t personAddress = playerAddress + offsets[i];
-		if (isPlayerValid(handle, personAddress, playerAddress)) {
-			return personAddress;
-		}
-	}
-
-	return 0;
-}
-
-static bool isPlayerValid(void *handle, uint32_t personAddress, uint32_t playerAddress) {
+static bool isPlayerValid(void *handle, uint32_t personAddress) {
+	const uint32_t playerAddress = personAddress + PLAYER_OFFSET_FROM_PERSON;
 	for (uint8_t i = 0; i < 5; ++i) {
 		const uint8_t attribute = readByte(handle, playerAddress + PLAYER_OFFSET_HIDDEN_ATTRIBUTES + i);
 		if (!attribute || attribute > 100) {
 			return false;
 		}
 	}
+
+	return isPersonValid(handle, personAddress);
+}
+
+static bool isPersonValid(void *handle, uint32_t personAddress) {
 	for (uint8_t i = 0; i < 8; ++i) {
 		const uint8_t attribute = readByte(handle, personAddress + PERSON_OFFSET_PERSONALITY + i);
 		if (!attribute || attribute > 20) {
@@ -192,7 +183,7 @@ static bool isPlayerValid(void *handle, uint32_t personAddress, uint32_t playerA
 	return true;
 }
 
-static inline void getPlayerName(void *handle, uint8_t pointer[4], char str[32]) {
+static inline void getPersonName(void *handle, uint8_t pointer[4], char str[32]) {
 	uint32_t a = (uint32_t)hexBytesToInt(pointer, 4);
 	if (!a) {
 		str[0] = '\0';
@@ -203,22 +194,22 @@ static inline void getPlayerName(void *handle, uint8_t pointer[4], char str[32])
 	readFromMemory(handle, a + 4, 32, (uint8_t*)str);
 }
 
-static inline void getPlayerForename(void *handle, uint64_t attributeBase, char str[32]) {
+static inline void getPersonForename(void *handle, uint64_t attributeBase, char str[32]) {
 	uint8_t pointer[4];
 	readFromMemory(handle, attributeBase + PERSON_OFFSET_FORENAME, 4, pointer);
-	getPlayerName(handle, pointer, str);
+	getPersonName(handle, pointer, str);
 }
 
-static inline void getPlayerSurname(void *handle, uint64_t attributeBase, char str[32]) {
+static inline void getPersonSurname(void *handle, uint64_t attributeBase, char str[32]) {
 	uint8_t pointer[4];
 	readFromMemory(handle, attributeBase + PERSON_OFFSET_SURNAME, 4, pointer);
-	getPlayerName(handle, pointer, str);
+	getPersonName(handle, pointer, str);
 }
 
-static inline void getPlayerCommonName(void *handle, uint64_t attributeBase, char str[64]) {
+static inline void getPersonCommonName(void *handle, uint64_t attributeBase, char str[64]) {
 	uint8_t pointer[4];
 	readFromMemory(handle, attributeBase + PERSON_OFFSET_COMMON_NAME, 4, pointer);
-	getPlayerName(handle, pointer, str);
+	getPersonName(handle, pointer, str);
 }
 
 static uint8_t getAge(void *handle, uint64_t address, Date date) {
