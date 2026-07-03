@@ -13,8 +13,11 @@ endif ()
 find_package(PkgConfig REQUIRED)
 pkg_check_modules(GTK4 REQUIRED IMPORTED_TARGET gtk4)
 
+set(REPO_ROOT "${CMAKE_CURRENT_SOURCE_DIR}")
+
 add_executable(fm_player_rater
 	src/main.c
+	src/app/callbacks.c
 	src/app/game-status.c
 	src/app/player.c
 	src/core/logger.c
@@ -58,6 +61,7 @@ target_compile_definitions(fm_player_rater PRIVATE
 	$<$<PLATFORM_ID:Darwin>:ARCH_MACOS>
 	$<$<PLATFORM_ID:Linux>:ARCH_LINUX>
 	$<$<CONFIG:Debug>:DEBUG>
+	REPO_ROOT_DIR="${REPO_ROOT}/layouts"
 )
 
 target_link_libraries(fm_player_rater PRIVATE PkgConfig::GTK4)

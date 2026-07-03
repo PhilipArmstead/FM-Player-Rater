@@ -11,15 +11,19 @@
 #include <stdio.h>
 
 
+extern GameContext gameContext;
+
 static bool isPlayerValid(void *handle, uint32_t personAddress);
 static bool isPersonValid(void *handle, uint32_t personAddress);
-static Player getPlayer(void *handle, uint32_t personAddress, Date date);
+static Player getPlayer(void *handle, uint32_t personAddress);
+static PartialPlayer getPartialPlayer(void *handle, uint32_t personAddress);
 static inline void getPersonName(void *handle, uint8_t pointer[4], char str[32]);
 static inline void getPersonForename(void *handle, uint64_t attributeBase, char str[32]);
 static inline void getPersonSurname(void *handle, uint64_t attributeBase, char str[32]);
 static inline void getPersonCommonName(void *handle, uint64_t attributeBase, char str[64]);
-static uint8_t getAge(void *handle, uint64_t address, Date date);
+static uint8_t getAge(void *handle, uint64_t address);
 static Club getClubFromPerson(void *handle, uint32_t personAddress);
+static uint32_t getPersonAddressFromUid(const ProcessContext *processContext, uint32_t uid);
 void getSortedPositionRatings(Player *player);
 float getRatingPerPosition(const Player *player, PositionGrouped position);
 
@@ -41,35 +45,9 @@ uint32_t getCurrentPersonUniqueId(const ProcessContext *processContext) {
 
 // Assumes valid ProcessContext
 Player getPlayerById(const ProcessContext *processContext, uint32_t uniqueId) {
-	// Iterate over all players to find one with the matching UID
-	uint8_t bytes[4];
-	readFromMemory(processContext->handle, processContext->moduleBaseAddress + PLAYER_COUNT_PTR_BASE, 4, bytes);
-	const uint32_t playerCount = (uint32_t)hexBytesToInt(bytes, 4);
-	if (playerCount < 1 || playerCount > 500000) {
-		LOG_ERROR("Unexpected number of players in database: %d", playerCount);
-		return (Player){0};
-	}
-
-	readFromMemory(
-		processContext->handle,
-		processContext->moduleBaseAddress + PLAYER_LIST_PTR_BASE,
-		4,
-		bytes
-	);
-	const uint32_t allPlayers = (uint32_t)hexBytesToInt(bytes, 4);
-
-	for (uint32_t i = 0; i < playerCount; ++i) {
-		readFromMemory(processContext->handle, allPlayers + PLAYER_LIST_PTR_OFFSET_1 * i, 4, bytes);
-		const uint32_t playerAddress = (uint32_t)hexBytesToInt(bytes, 4) + PLAYER_LIST_PTR_OFFSET_2;
-		const uint32_t personAddress = playerAddress - PLAYER_OFFSET_FROM_PERSON;
-
-		readFromMemory(processContext->handle, personAddress + PERSON_OFFSET_UNIQUE_ID, 4, bytes);
-		const uint32_t foundPlayerId = (uint32_t)hexBytesToInt(bytes, 4);
-		if (foundPlayerId == uniqueId) {
-			return isPlayerValid(processContext->handle, personAddress)
-				? getPlayer(processContext->handle, personAddress, getDate(processContext))
-				: (Player){0};
-		}
+	const uint32_t personAddress = getPersonAddressFromUid(processContext, uniqueId);
+	if (personAddress && isPlayerValid(processContext->handle, personAddress)) {
+		return getPlayer(processContext->handle, personAddress);
 	}
 
 	LOG_ERROR("Could not find player by ID %d", uniqueId);
@@ -77,7 +55,44 @@ Player getPlayerById(const ProcessContext *processContext, uint32_t uniqueId) {
 	return (Player){0};
 }
 
-static Player getPlayer(void *handle, uint32_t personAddress, Date date) {
+// Assumes valid ProcessContext
+PartialPlayer getPlayerByIdPartial(const ProcessContext *processContext, uint32_t uniqueId) {
+	const uint32_t personAddress = getPersonAddressFromUid(processContext, uniqueId);
+	if (personAddress && isPlayerValid(processContext->handle, personAddress)) {
+		return getPartialPlayer(processContext->handle, personAddress);
+	}
+
+	LOG_ERROR("Could not find player by ID %d", uniqueId);
+
+	return (PartialPlayer){0};
+}
+
+static PartialPlayer getPartialPlayer(void *handle, uint32_t personAddress) {
+	const uint32_t playerAddress = personAddress + PLAYER_OFFSET_FROM_PERSON;
+
+	uint8_t ability[3];
+	readFromMemory(handle, playerAddress + PLAYER_OFFSET_ABILITY, 3, ability);
+
+	uint8_t bytes[6];
+	readFromMemory(handle, personAddress + PERSON_OFFSET_UNIQUE_ID, 4, bytes);
+	const uint32_t uid = (uint32_t)hexBytesToInt(bytes, 4);
+
+	PartialPlayer player = {
+		.personAddress = personAddress,
+		.uid = uid,
+	};
+	getPersonForename(handle, personAddress, player.forename);
+	getPersonSurname(handle, personAddress, player.surname);
+	getPersonCommonName(handle, personAddress, player.commonName);
+
+	if (player.commonName[0] == '\0') {
+		snprintf(player.commonName, sizeof(player.commonName), "%s %s", player.forename, player.surname);
+	}
+
+	return player;
+}
+
+static Player getPlayer(void *handle, uint32_t personAddress) {
 	if (!isPlayerValid(handle, personAddress)) {
 		return (Player){0};
 	}
@@ -98,7 +113,7 @@ static Player getPlayer(void *handle, uint32_t personAddress, Date date) {
 	Player player = {
 		.personAddress = personAddress,
 		.playerAddress = playerAddress,
-		.age = getAge(handle, personAddress, date),
+		.age = getAge(handle, personAddress),
 		.ca = ability[ABILITY_CA],
 		.pa = ability[ABILITY_PA],
 		.rid = rid,
@@ -212,15 +227,15 @@ static inline void getPersonCommonName(void *handle, uint64_t attributeBase, cha
 	getPersonName(handle, pointer, str);
 }
 
-static uint8_t getAge(void *handle, uint64_t address, Date date) {
+static uint8_t getAge(void *handle, uint64_t address) {
 	uint8_t bytes[4];
 	readFromMemory(handle, address + PERSON_OFFSET_DOB, 4, bytes);
 	const uint8_t yearBytes[2] = {bytes[2], bytes[3]};
 	const uint16_t yearOfBirth = (uint16_t)hexBytesToInt(yearBytes, 2);
 	const uint16_t dayOfBirth = (uint16_t)hexBytesToInt(bytes, 2);
 
-	uint8_t age = (uint8_t)(date.year - yearOfBirth);
-	if (date.days < dayOfBirth) {
+	uint8_t age = (uint8_t)(gameContext.currentDate.year - yearOfBirth);
+	if (gameContext.currentDate.day < dayOfBirth) {
 		--age;
 	}
 
@@ -699,4 +714,37 @@ void getSortedPositionRatings(Player *player) {
 			player->ratings[best] = tmp;
 		}
 	}
+}
+
+static uint32_t getPersonAddressFromUid(const ProcessContext *processContext, uint32_t uid) {
+	// Iterate over all players to find one with the matching UID
+	uint8_t bytes[4];
+	readFromMemory(processContext->handle, processContext->moduleBaseAddress + PLAYER_COUNT_PTR_BASE, 4, bytes);
+	const uint32_t playerCount = (uint32_t)hexBytesToInt(bytes, 4);
+	if (playerCount < 1 || playerCount > 500000) {
+		LOG_ERROR("Unexpected number of players in database: %d", playerCount);
+		return 0;
+	}
+
+	readFromMemory(
+		processContext->handle,
+		processContext->moduleBaseAddress + PLAYER_LIST_PTR_BASE,
+		4,
+		bytes
+	);
+	const uint32_t allPlayers = (uint32_t)hexBytesToInt(bytes, 4);
+
+	for (uint32_t i = 0; i < playerCount; ++i) {
+		readFromMemory(processContext->handle, allPlayers + PLAYER_LIST_PTR_OFFSET_1 * i, 4, bytes);
+		const uint32_t playerAddress = (uint32_t)hexBytesToInt(bytes, 4) + PLAYER_LIST_PTR_OFFSET_2;
+		const uint32_t personAddress = playerAddress - PLAYER_OFFSET_FROM_PERSON;
+
+		readFromMemory(processContext->handle, personAddress + PERSON_OFFSET_UNIQUE_ID, 4, bytes);
+		const uint32_t foundPlayerId = (uint32_t)hexBytesToInt(bytes, 4);
+		if (foundPlayerId == uid) {
+			return personAddress;
+		}
+	}
+
+	return 0;
 }

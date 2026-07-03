@@ -89,6 +89,14 @@ typedef struct {
 } Player;
 
 typedef struct {
+	char commonName[64];
+	char forename[32];
+	char surname[32];
+	uint32_t uid;
+	uint32_t personAddress;
+} PartialPlayer;
+
+typedef struct {
 	uint16_t days;
 	uint16_t year;
 } Date;
@@ -104,6 +112,7 @@ typedef struct {
 #define GAME_STATUS_STRING_BUFFER_SIZE 32
 
 typedef struct {
+	PartialPlayer currentlyViewedPlayer;
 	char gameVersion[GAME_STATUS_STRING_BUFFER_SIZE];
 	DayMonthYear currentDate;
 } GameContext;
