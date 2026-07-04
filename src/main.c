@@ -20,6 +20,16 @@ static void activate(GtkApplication *app) {
 	GtkWidget *window = GTK_WIDGET(gtk_builder_get_object(builder, "window"));
 	gtk_window_set_application(GTK_WINDOW(window), GTK_APPLICATION(app));
 
+	GtkCssProvider *css_provider = gtk_css_provider_new();
+	snprintf(pathToAppLayout, sizeof(pathToAppLayout), "%s/app.css", REPO_ROOT_DIR);
+	gtk_css_provider_load_from_path(css_provider, pathToAppLayout);
+	gtk_style_context_add_provider_for_display(
+		gdk_display_get_default(),
+		GTK_STYLE_PROVIDER(css_provider),
+		GTK_STYLE_PROVIDER_PRIORITY_APPLICATION
+	);
+	g_object_unref(css_provider);
+
 	// Periodic callbacks
 	g_timeout_add(1000, update, NULL);
 	update(NULL);
@@ -41,6 +51,5 @@ int main(const int argc, char **argv) {
 }
 
 // TODO: print player name + age in UI
-// TODO: print game date + version in UI
 // TODO: print player attributes, ratings, positions, condition
 // TODO: pop out player details in to new window? even for current player?
