@@ -4,6 +4,7 @@
 #include <gtk/gtk.h>
 
 #include "app/callbacks.h"
+#include "app/ui.h"
 #include "core/logger.h"
 
 
@@ -13,16 +14,10 @@ GtkBuilder *builder;
 
 
 static void activate(GtkApplication *app) {
-	char pathToAppLayout[256] = {0};
-	snprintf(pathToAppLayout, sizeof(pathToAppLayout), "%s/app.ui", REPO_ROOT_DIR);
-	builder = gtk_builder_new_from_file(pathToAppLayout);
-
-	GtkWidget *window = GTK_WIDGET(gtk_builder_get_object(builder, "window"));
-	gtk_window_set_application(GTK_WINDOW(window), GTK_APPLICATION(app));
-
+	char pathToStylesheet[256] = {0};
 	GtkCssProvider *css_provider = gtk_css_provider_new();
-	snprintf(pathToAppLayout, sizeof(pathToAppLayout), "%s/app.css", REPO_ROOT_DIR);
-	gtk_css_provider_load_from_path(css_provider, pathToAppLayout);
+	snprintf(pathToStylesheet, sizeof(pathToStylesheet), "%s/app.css", REPO_ROOT_DIR);
+	gtk_css_provider_load_from_path(css_provider, pathToStylesheet);
 	gtk_style_context_add_provider_for_display(
 		gdk_display_get_default(),
 		GTK_STYLE_PROVIDER(css_provider),
@@ -34,7 +29,8 @@ static void activate(GtkApplication *app) {
 	g_timeout_add(1000, update, NULL);
 	update(NULL);
 
-	gtk_window_present(GTK_WINDOW(window));
+	GtkWidget *window = openWindow("app", "window");
+	gtk_window_set_application(GTK_WINDOW(window), GTK_APPLICATION(app));
 }
 
 int main(const int argc, char **argv) {

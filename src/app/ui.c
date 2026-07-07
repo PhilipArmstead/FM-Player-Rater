@@ -83,3 +83,12 @@ void updateShowCurrentPlayerButton(void) {
 		gtk_widget_set_sensitive(buttonWidget, false);
 	}
 }
+
+GtkWidget *openWindow(const char *layoutName, const char *windowName) {
+	char pathToAppLayout[256] = {0};
+	snprintf(pathToAppLayout, sizeof(pathToAppLayout), "%s/%s.ui", REPO_ROOT_DIR, layoutName);
+	builder = gtk_builder_new_from_file(pathToAppLayout);
+	GtkWidget *window = GTK_WIDGET(gtk_builder_get_object(builder, windowName));
+	gtk_window_present(GTK_WINDOW(window));
+	return window;
+}
