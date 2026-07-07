@@ -12,6 +12,7 @@ SPDX-License-Identifier: GPL-3.0-or-later -->
 		<property name="gravity">center</property>
 		<property name="overflow">visible</property>
 		<property name="title">FM Player Rater</property>
+		<property name="can-focus">False</property>
 		<child>
 			<object class="GtkBox">
 				<property name="orientation">vertical</property>
