@@ -1,0 +1,1177 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  FM Player Rater - GTK4 GtkBuilder UI definition.
+  See: https://docs.gtk.org/gtk4/class.Builder.html
+-->
+<interface domain="player-info">
+	<!-- interface-name player-info.ui -->
+	<!-- interface-copyright SPDX-FileCopyrightText: © 2026 Phil Armstead <philarmstead@mailbox.org>
+SPDX-License-Identifier: GPL-3.0-or-later -->
+	<!-- interface-authors Phil Armstead <philarmstead@mailbox.org> -->
+	<requires lib="gtk" version="4.0"/>
+	<object class="GtkWindow" id="window:player-info">
+		<property name="default-height">800</property>
+		<property name="default-width">420</property>
+		<property name="gravity">center</property>
+		<property name="overflow">visible</property>
+		<property name="title">FM Player Rater</property>
+		<property name="can-focus">False</property>
+		<child>
+			<object class="GtkBox">
+				<property name="orientation">1</property>
+				<property name="spacing">16</property>
+				<property name="css-classes">card
+					card-border
+				</property>
+				<child>
+					<object class="GtkBox">
+						<property name="orientation">0</property>
+						<property name="homogeneous">true</property>
+						<child>
+							<object class="GtkBox">
+								<property name="orientation">1</property>
+								<property name="valign">1</property>
+								<property name="spacing">4</property>
+								<child>
+									<object class="GtkLabel" id="label:common-name">
+										<property name="label"/>
+										<property name="css-classes">title-1
+											player-name
+										</property>
+										<property name="halign">1</property>
+										<property name="xalign">0</property>
+									</object>
+								</child>
+								<child>
+									<object class="GtkLabel" id="label:club-name">
+										<property name="label"/>
+										<property name="css-classes">heading
+											club-name
+										</property>
+										<property name="halign">1</property>
+										<property name="xalign">0</property>
+									</object>
+								</child>
+								<child>
+									<object class="GtkLabel" id="label:division-name">
+										<property name="label"></property>
+										<property name="css-classes">dim-label</property>
+										<property name="halign">1</property>
+										<property name="xalign">0</property>
+									</object>
+								</child>
+							</object>
+						</child>
+						<child>
+							<object class="GtkBox">
+								<property name="orientation">1</property>
+								<property name="valign">1</property>
+								<property name="halign">2</property>
+								<property name="spacing">4</property>
+								<child>
+									<object class="GtkLabel" id="label:age">
+										<property name="label"/>
+										<property name="css-classes">dim-label</property>
+										<property name="halign">2</property>
+										<property name="xalign">1</property>
+									</object>
+								</child>
+								<child>
+									<object class="GtkLabel" id="label:nationality">
+										<property name="label"/>
+										<property name="css-classes">dim-label</property>
+										<property name="halign">2</property>
+										<property name="xalign">1</property>
+									</object>
+								</child>
+								<child>
+									<object id="widget:is-fast-learner" class="GtkBox">
+										<property name="halign">2</property>
+										<property name="css-classes">pill-fast-learner</property>
+										<child>
+											<object class="GtkLabel" id="label:is-fast-learner">
+												<property name="label">🧠 Fast Learner</property>
+											</object>
+										</child>
+									</object>
+								</child>
+								<child>
+									<object id="widget:is-hot-prospect" class="GtkBox">
+										<property name="halign">2</property>
+										<property name="css-classes">pill-hot-prospect</property>
+										<child>
+											<object class="GtkLabel" id="label:is-hot-prospect">
+												<property name="label">🔥 Hot Prospect</property>
+											</object>
+										</child>
+									</object>
+								</child>
+							</object>
+						</child>
+					</object>
+				</child>
+				<child>
+					<object class="GtkBox">
+						<property name="orientation">0</property>
+						<property name="css-classes">panel</property>
+						<property name="spacing">12</property>
+						<child>
+							<object class="GtkBox">
+								<property name="orientation">1</property>
+								<property name="hexpand">true</property>
+								<property name="spacing">8</property>
+								<child>
+									<object class="GtkBox">
+										<property name="orientation">0</property>
+										<property name="spacing">12</property>
+										<child>
+											<object class="GtkLabel">
+												<property name="label">CURRENT</property>
+												<property name="css-classes">caption-heading
+													dim-label
+												</property>
+												<property name="width-chars">10</property>
+											</object>
+										</child>
+										<child>
+											<object class="GtkBox">
+												<property name="orientation">0</property>
+												<property name="spacing">2</property>
+												<child>
+													<object class="GtkImage">
+														<property name="icon-name">starred-symbolic</property>
+														<property name="css-classes">star-filled</property>
+													</object>
+												</child>
+												<child>
+													<object class="GtkImage">
+														<property name="icon-name">starred-symbolic</property>
+														<property name="css-classes">star-filled</property>
+													</object>
+												</child>
+												<child>
+													<object class="GtkImage">
+														<property name="icon-name">starred-symbolic</property>
+														<property name="css-classes">star-filled</property>
+													</object>
+												</child>
+												<child>
+													<object class="GtkImage">
+														<property name="icon-name">non-starred-symbolic</property>
+														<property name="css-classes">star-empty</property>
+													</object>
+												</child>
+												<child>
+													<object class="GtkImage">
+														<property name="icon-name">non-starred-symbolic</property>
+														<property name="css-classes">star-empty</property>
+													</object>
+												</child>
+											</object>
+										</child>
+										<child>
+											<object class="GtkLabel">
+												<property name="label">119</property>
+												<property name="css-classes">title-3
+													accent-yellow
+												</property>
+											</object>
+										</child>
+										<child>
+											<object class="GtkLabel">
+												<property name="label">CA</property>
+												<property name="css-classes">dim-label</property>
+											</object>
+										</child>
+									</object>
+								</child>
+								<child>
+									<object class="GtkBox">
+										<property name="orientation">0</property>
+										<property name="spacing">12</property>
+										<child>
+											<object class="GtkLabel">
+												<property name="label">POTENTIAL</property>
+												<property name="css-classes">caption-heading
+													dim-label
+												</property>
+												<property name="width-chars">10</property>
+											</object>
+										</child>
+										<child>
+											<object class="GtkBox">
+												<property name="orientation">0</property>
+												<property name="spacing">2</property>
+												<child>
+													<object class="GtkImage">
+														<property name="icon-name">starred-symbolic</property>
+														<property name="css-classes">star-filled</property>
+													</object>
+												</child>
+												<child>
+													<object class="GtkImage">
+														<property name="icon-name">starred-symbolic</property>
+														<property name="css-classes">star-filled</property>
+													</object>
+												</child>
+												<child>
+													<object class="GtkImage">
+														<property name="icon-name">starred-symbolic</property>
+														<property name="css-classes">star-filled</property>
+													</object>
+												</child>
+												<child>
+													<object class="GtkImage">
+														<property name="icon-name">starred-symbolic</property>
+														<property name="css-classes">star-filled</property>
+													</object>
+												</child>
+												<child>
+													<object class="GtkImage">
+														<property name="icon-name">semi-starred-symbolic</property>
+														<property name="css-classes">star-half</property>
+													</object>
+												</child>
+											</object>
+										</child>
+										<child>
+											<object class="GtkLabel">
+												<property name="label">186</property>
+												<property name="css-classes">title-3
+													accent-yellow
+												</property>
+											</object>
+										</child>
+										<child>
+											<object class="GtkLabel">
+												<property name="label">PA</property>
+												<property name="css-classes">dim-label</property>
+											</object>
+										</child>
+									</object>
+								</child>
+							</object>
+						</child>
+						<child>
+							<object class="GtkBox">
+								<property name="valign">3</property>
+								<property name="halign">2</property>
+								<property name="css-classes">hexagon-badge</property>
+								<child>
+									<object class="GtkBox">
+										<property name="orientation">1</property>
+										<property name="valign">3</property>
+										<property name="halign">3</property>
+										<child>
+											<object class="GtkLabel">
+												<property name="label">11.6</property>
+												<property name="css-classes">title-2</property>
+												<property name="halign">3</property>
+											</object>
+										</child>
+										<child>
+											<object class="GtkLabel">
+												<property name="label">META</property>
+												<property name="css-classes">caption
+													dim-label
+												</property>
+												<property name="halign">3</property>
+											</object>
+										</child>
+									</object>
+								</child>
+							</object>
+						</child>
+					</object>
+				</child>
+				<child>
+					<object class="GtkBox">
+						<property name="orientation">0</property>
+						<property name="homogeneous">true</property>
+						<property name="spacing">24</property>
+						<child>
+							<object class="GtkBox">
+								<property name="orientation">1</property>
+								<property name="spacing">6</property>
+								<child>
+									<object class="GtkLabel">
+										<property name="label">TECHNICAL</property>
+										<property name="css-classes">caption-heading
+											section-heading
+										</property>
+										<property name="halign">1</property>
+									</object>
+								</child>
+								<child>
+									<object class="GtkSeparator">
+										<property name="css-classes">accent-rule</property>
+									</object>
+								</child>
+								<child>
+									<object class="GtkListBox">
+										<property name="css-classes">attribute-list</property>
+										<property name="selection-mode">0</property>
+										<child>
+											<object class="GtkBox">
+												<property name="css-classes">attr-row</property>
+												<child>
+													<object class="GtkLabel">
+														<property name="label">Corners</property>
+														<property name="hexpand">true</property>
+														<property name="xalign">0</property>
+													</object>
+												</child>
+												<child>
+													<object class="GtkLabel">
+														<property name="label">8</property>
+													</object>
+												</child>
+											</object>
+										</child>
+										<child>
+											<object class="GtkBox">
+												<property name="css-classes">attr-row</property>
+												<child>
+													<object class="GtkLabel">
+														<property name="label">Crossing</property>
+														<property name="hexpand">true</property>
+														<property name="xalign">0</property>
+													</object>
+												</child>
+												<child>
+													<object class="GtkLabel">
+														<property name="label">10</property>
+													</object>
+												</child>
+											</object>
+										</child>
+										<child>
+											<object class="GtkBox">
+												<property name="css-classes">attr-row</property>
+												<child>
+													<object class="GtkLabel">
+														<property name="label">Dribbling</property>
+														<property name="hexpand">true</property>
+														<property name="xalign">0</property>
+													</object>
+												</child>
+												<child>
+													<object class="GtkLabel">
+														<property name="label">13</property>
+														<property name="css-classes">accent-orange</property>
+													</object>
+												</child>
+											</object>
+										</child>
+										<child>
+											<object class="GtkBox">
+												<property name="css-classes">attr-row</property>
+												<child>
+													<object class="GtkLabel">
+														<property name="label">Finishing</property>
+														<property name="hexpand">true</property>
+														<property name="xalign">0</property>
+													</object>
+												</child>
+												<child>
+													<object class="GtkLabel">
+														<property name="label">14</property>
+														<property name="css-classes">accent-orange</property>
+													</object>
+												</child>
+											</object>
+										</child>
+										<child>
+											<object class="GtkBox">
+												<property name="css-classes">attr-row</property>
+												<child>
+													<object class="GtkLabel">
+														<property name="label">First Touch</property>
+														<property name="hexpand">true</property>
+														<property name="xalign">0</property>
+													</object>
+												</child>
+												<child>
+													<object class="GtkLabel">
+														<property name="label">12</property>
+													</object>
+												</child>
+											</object>
+										</child>
+										<child>
+											<object class="GtkBox">
+												<property name="css-classes">attr-row</property>
+												<child>
+													<object class="GtkLabel">
+														<property name="label">Free Kicks</property>
+														<property name="hexpand">true</property>
+														<property name="xalign">0</property>
+													</object>
+												</child>
+												<child>
+													<object class="GtkLabel">
+														<property name="label">11</property>
+													</object>
+												</child>
+											</object>
+										</child>
+										<child>
+											<object class="GtkBox">
+												<property name="css-classes">attr-row</property>
+												<child>
+													<object class="GtkLabel">
+														<property name="label">Heading</property>
+														<property name="hexpand">true</property>
+														<property name="xalign">0</property>
+													</object>
+												</child>
+												<child>
+													<object class="GtkLabel">
+														<property name="label">6</property>
+													</object>
+												</child>
+											</object>
+										</child>
+										<child>
+											<object class="GtkBox">
+												<property name="css-classes">attr-row</property>
+												<child>
+													<object class="GtkLabel">
+														<property name="label">Long Shots</property>
+														<property name="hexpand">true</property>
+														<property name="xalign">0</property>
+													</object>
+												</child>
+												<child>
+													<object class="GtkLabel">
+														<property name="label">8</property>
+													</object>
+												</child>
+											</object>
+										</child>
+										<child>
+											<object class="GtkBox">
+												<property name="css-classes">attr-row</property>
+												<child>
+													<object class="GtkLabel">
+														<property name="label">Long Throws</property>
+														<property name="hexpand">true</property>
+														<property name="xalign">0</property>
+													</object>
+												</child>
+												<child>
+													<object class="GtkLabel">
+														<property name="label">4</property>
+													</object>
+												</child>
+											</object>
+										</child>
+										<child>
+											<object class="GtkBox">
+												<property name="css-classes">attr-row</property>
+												<child>
+													<object class="GtkLabel">
+														<property name="label">Marking</property>
+														<property name="hexpand">true</property>
+														<property name="xalign">0</property>
+													</object>
+												</child>
+												<child>
+													<object class="GtkLabel">
+														<property name="label">3</property>
+													</object>
+												</child>
+											</object>
+										</child>
+										<child>
+											<object class="GtkBox">
+												<property name="css-classes">attr-row</property>
+												<child>
+													<object class="GtkLabel">
+														<property name="label">Passing</property>
+														<property name="hexpand">true</property>
+														<property name="xalign">0</property>
+													</object>
+												</child>
+												<child>
+													<object class="GtkLabel">
+														<property name="label">13</property>
+														<property name="css-classes">accent-orange</property>
+													</object>
+												</child>
+											</object>
+										</child>
+										<child>
+											<object class="GtkBox">
+												<property name="css-classes">attr-row</property>
+												<child>
+													<object class="GtkLabel">
+														<property name="label">Penalty Taking</property>
+														<property name="hexpand">true</property>
+														<property name="xalign">0</property>
+													</object>
+												</child>
+												<child>
+													<object class="GtkLabel">
+														<property name="label">8</property>
+													</object>
+												</child>
+											</object>
+										</child>
+										<child>
+											<object class="GtkBox">
+												<property name="css-classes">attr-row</property>
+												<child>
+													<object class="GtkLabel">
+														<property name="label">Tackling</property>
+														<property name="hexpand">true</property>
+														<property name="xalign">0</property>
+													</object>
+												</child>
+												<child>
+													<object class="GtkLabel">
+														<property name="label">9</property>
+													</object>
+												</child>
+											</object>
+										</child>
+										<child>
+											<object class="GtkBox">
+												<property name="css-classes">attr-row</property>
+												<child>
+													<object class="GtkLabel">
+														<property name="label">Technique</property>
+														<property name="hexpand">true</property>
+														<property name="xalign">0</property>
+													</object>
+												</child>
+												<child>
+													<object class="GtkLabel">
+														<property name="label">14</property>
+														<property name="css-classes">accent-orange</property>
+													</object>
+												</child>
+											</object>
+										</child>
+									</object>
+								</child>
+							</object>
+						</child>
+						<child>
+							<object class="GtkBox">
+								<property name="orientation">1</property>
+								<property name="spacing">6</property>
+								<child>
+									<object class="GtkLabel">
+										<property name="label">MENTAL</property>
+										<property name="css-classes">caption-heading
+											section-heading
+										</property>
+										<property name="halign">1</property>
+									</object>
+								</child>
+								<child>
+									<object class="GtkSeparator">
+										<property name="css-classes">accent-rule</property>
+									</object>
+								</child>
+								<child>
+									<object class="GtkListBox">
+										<property name="css-classes">attribute-list</property>
+										<property name="selection-mode">0</property>
+										<child>
+											<object class="GtkBox">
+												<property name="css-classes">attr-row</property>
+												<child>
+													<object class="GtkLabel">
+														<property name="label">Aggression</property>
+														<property name="hexpand">true</property>
+														<property name="xalign">0</property>
+													</object>
+												</child>
+												<child>
+													<object class="GtkLabel">
+														<property name="label">5</property>
+													</object>
+												</child>
+											</object>
+										</child>
+										<child>
+											<object class="GtkBox">
+												<property name="css-classes">attr-row</property>
+												<child>
+													<object class="GtkLabel">
+														<property name="label">Anticipation</property>
+														<property name="hexpand">true</property>
+														<property name="xalign">0</property>
+													</object>
+												</child>
+												<child>
+													<object class="GtkLabel">
+														<property name="label">11</property>
+													</object>
+												</child>
+											</object>
+										</child>
+										<child>
+											<object class="GtkBox">
+												<property name="css-classes">attr-row</property>
+												<child>
+													<object class="GtkLabel">
+														<property name="label">Bravery</property>
+														<property name="hexpand">true</property>
+														<property name="xalign">0</property>
+													</object>
+												</child>
+												<child>
+													<object class="GtkLabel">
+														<property name="label">9</property>
+													</object>
+												</child>
+											</object>
+										</child>
+										<child>
+											<object class="GtkBox">
+												<property name="css-classes">attr-row</property>
+												<child>
+													<object class="GtkLabel">
+														<property name="label">Composure</property>
+														<property name="hexpand">true</property>
+														<property name="xalign">0</property>
+													</object>
+												</child>
+												<child>
+													<object class="GtkLabel">
+														<property name="label">11</property>
+													</object>
+												</child>
+											</object>
+										</child>
+										<child>
+											<object class="GtkBox">
+												<property name="css-classes">attr-row</property>
+												<child>
+													<object class="GtkLabel">
+														<property name="label">Concentration</property>
+														<property name="hexpand">true</property>
+														<property name="xalign">0</property>
+													</object>
+												</child>
+												<child>
+													<object class="GtkLabel">
+														<property name="label">6</property>
+													</object>
+												</child>
+											</object>
+										</child>
+										<child>
+											<object class="GtkBox">
+												<property name="css-classes">attr-row</property>
+												<child>
+													<object class="GtkLabel">
+														<property name="label">Decisions</property>
+														<property name="hexpand">true</property>
+														<property name="xalign">0</property>
+													</object>
+												</child>
+												<child>
+													<object class="GtkLabel">
+														<property name="label">11</property>
+													</object>
+												</child>
+											</object>
+										</child>
+										<child>
+											<object class="GtkBox">
+												<property name="css-classes">attr-row</property>
+												<child>
+													<object class="GtkLabel">
+														<property name="label">Determination</property>
+														<property name="hexpand">true</property>
+														<property name="xalign">0</property>
+													</object>
+												</child>
+												<child>
+													<object class="GtkLabel">
+														<property name="label">15</property>
+														<property name="css-classes">accent-orange</property>
+													</object>
+												</child>
+											</object>
+										</child>
+										<child>
+											<object class="GtkBox">
+												<property name="css-classes">attr-row</property>
+												<child>
+													<object class="GtkLabel">
+														<property name="label">Flair</property>
+														<property name="hexpand">true</property>
+														<property name="xalign">0</property>
+													</object>
+												</child>
+												<child>
+													<object class="GtkLabel">
+														<property name="label">15</property>
+														<property name="css-classes">accent-orange</property>
+													</object>
+												</child>
+											</object>
+										</child>
+										<child>
+											<object class="GtkBox">
+												<property name="css-classes">attr-row</property>
+												<child>
+													<object class="GtkLabel">
+														<property name="label">Leadership</property>
+														<property name="hexpand">true</property>
+														<property name="xalign">0</property>
+													</object>
+												</child>
+												<child>
+													<object class="GtkLabel">
+														<property name="label">3</property>
+													</object>
+												</child>
+											</object>
+										</child>
+										<child>
+											<object class="GtkBox">
+												<property name="css-classes">attr-row</property>
+												<child>
+													<object class="GtkLabel">
+														<property name="label">Off the Ball</property>
+														<property name="hexpand">true</property>
+														<property name="xalign">0</property>
+													</object>
+												</child>
+												<child>
+													<object class="GtkLabel">
+														<property name="label">13</property>
+														<property name="css-classes">accent-orange</property>
+													</object>
+												</child>
+											</object>
+										</child>
+										<child>
+											<object class="GtkBox">
+												<property name="css-classes">attr-row</property>
+												<child>
+													<object class="GtkLabel">
+														<property name="label">Positioning</property>
+														<property name="hexpand">true</property>
+														<property name="xalign">0</property>
+													</object>
+												</child>
+												<child>
+													<object class="GtkLabel">
+														<property name="label">7</property>
+													</object>
+												</child>
+											</object>
+										</child>
+										<child>
+											<object class="GtkBox">
+												<property name="css-classes">attr-row</property>
+												<child>
+													<object class="GtkLabel">
+														<property name="label">Teamwork</property>
+														<property name="hexpand">true</property>
+														<property name="xalign">0</property>
+													</object>
+												</child>
+												<child>
+													<object class="GtkLabel">
+														<property name="label">13</property>
+														<property name="css-classes">accent-orange</property>
+													</object>
+												</child>
+											</object>
+										</child>
+										<child>
+											<object class="GtkBox">
+												<property name="css-classes">attr-row</property>
+												<child>
+													<object class="GtkLabel">
+														<property name="label">Vision</property>
+														<property name="hexpand">true</property>
+														<property name="xalign">0</property>
+													</object>
+												</child>
+												<child>
+													<object class="GtkLabel">
+														<property name="label">10</property>
+													</object>
+												</child>
+											</object>
+										</child>
+										<child>
+											<object class="GtkBox">
+												<property name="css-classes">attr-row</property>
+												<child>
+													<object class="GtkLabel">
+														<property name="label">Work Rate</property>
+														<property name="hexpand">true</property>
+														<property name="xalign">0</property>
+													</object>
+												</child>
+												<child>
+													<object class="GtkLabel">
+														<property name="label">11</property>
+													</object>
+												</child>
+											</object>
+										</child>
+									</object>
+								</child>
+							</object>
+						</child>
+						<child>
+							<object class="GtkBox">
+								<property name="orientation">1</property>
+								<property name="spacing">6</property>
+								<child>
+									<object class="GtkLabel">
+										<property name="label">PHYSICAL</property>
+										<property name="css-classes">caption-heading
+											section-heading
+										</property>
+										<property name="halign">1</property>
+									</object>
+								</child>
+								<child>
+									<object class="GtkSeparator">
+										<property name="css-classes">accent-rule</property>
+									</object>
+								</child>
+								<child>
+									<object class="GtkListBox">
+										<property name="css-classes">attribute-list</property>
+										<property name="selection-mode">0</property>
+										<child>
+											<object class="GtkBox">
+												<property name="css-classes">attr-row</property>
+												<child>
+													<object class="GtkLabel">
+														<property name="label">Acceleration</property>
+														<property name="hexpand">true</property>
+														<property name="xalign">0</property>
+													</object>
+												</child>
+												<child>
+													<object class="GtkLabel">
+														<property name="label">15</property>
+														<property name="css-classes">accent-orange</property>
+													</object>
+												</child>
+											</object>
+										</child>
+										<child>
+											<object class="GtkBox">
+												<property name="css-classes">attr-row</property>
+												<child>
+													<object class="GtkLabel">
+														<property name="label">Agility</property>
+														<property name="hexpand">true</property>
+														<property name="xalign">0</property>
+													</object>
+												</child>
+												<child>
+													<object class="GtkLabel">
+														<property name="label">12</property>
+													</object>
+												</child>
+											</object>
+										</child>
+										<child>
+											<object class="GtkBox">
+												<property name="css-classes">attr-row</property>
+												<child>
+													<object class="GtkLabel">
+														<property name="label">Balance</property>
+														<property name="hexpand">true</property>
+														<property name="xalign">0</property>
+													</object>
+												</child>
+												<child>
+													<object class="GtkLabel">
+														<property name="label">11</property>
+													</object>
+												</child>
+											</object>
+										</child>
+										<child>
+											<object class="GtkBox">
+												<property name="css-classes">attr-row</property>
+												<child>
+													<object class="GtkLabel">
+														<property name="label">Jumping Reach</property>
+														<property name="hexpand">true</property>
+														<property name="xalign">0</property>
+													</object>
+												</child>
+												<child>
+													<object class="GtkLabel">
+														<property name="label">3</property>
+													</object>
+												</child>
+											</object>
+										</child>
+										<child>
+											<object class="GtkBox">
+												<property name="css-classes">attr-row</property>
+												<child>
+													<object class="GtkLabel">
+														<property name="label">Natural Fitness</property>
+														<property name="hexpand">true</property>
+														<property name="xalign">0</property>
+													</object>
+												</child>
+												<child>
+													<object class="GtkLabel">
+														<property name="label">15</property>
+														<property name="css-classes">accent-orange</property>
+													</object>
+												</child>
+											</object>
+										</child>
+										<child>
+											<object class="GtkBox">
+												<property name="css-classes">attr-row</property>
+												<child>
+													<object class="GtkLabel">
+														<property name="label">Pace</property>
+														<property name="hexpand">true</property>
+														<property name="xalign">0</property>
+													</object>
+												</child>
+												<child>
+													<object class="GtkLabel">
+														<property name="label">14</property>
+														<property name="css-classes">accent-orange</property>
+													</object>
+												</child>
+											</object>
+										</child>
+										<child>
+											<object class="GtkBox">
+												<property name="css-classes">attr-row</property>
+												<child>
+													<object class="GtkLabel">
+														<property name="label">Stamina</property>
+														<property name="hexpand">true</property>
+														<property name="xalign">0</property>
+													</object>
+												</child>
+												<child>
+													<object class="GtkLabel">
+														<property name="label">13</property>
+														<property name="css-classes">accent-orange</property>
+													</object>
+												</child>
+											</object>
+										</child>
+										<child>
+											<object class="GtkBox">
+												<property name="css-classes">attr-row</property>
+												<child>
+													<object class="GtkLabel">
+														<property name="label">Strength</property>
+														<property name="hexpand">true</property>
+														<property name="xalign">0</property>
+													</object>
+												</child>
+												<child>
+													<object class="GtkLabel">
+														<property name="label">5</property>
+													</object>
+												</child>
+											</object>
+										</child>
+									</object>
+								</child>
+								<child>
+									<object class="GtkLabel">
+										<property name="label">TOP ROLES</property>
+										<property name="css-classes">caption-heading
+											section-heading
+										</property>
+										<property name="halign">1</property>
+										<property name="margin-top">12</property>
+									</object>
+								</child>
+								<child>
+									<object class="GtkSeparator">
+										<property name="css-classes">accent-rule</property>
+									</object>
+								</child>
+								<child>
+									<object class="GtkBox">
+										<property name="orientation">1</property>
+										<property name="spacing">2</property>
+										<child>
+											<object class="GtkBox">
+												<property name="orientation">0</property>
+												<child>
+													<object class="GtkLabel">
+														<property name="label">Winger</property>
+														<property name="hexpand">true</property>
+														<property name="xalign">0</property>
+														<property name="css-classes">heading</property>
+													</object>
+												</child>
+												<child>
+													<object class="GtkLabel">
+														<property name="label">12.8</property>
+														<property name="css-classes">heading
+															accent-orange
+														</property>
+													</object>
+												</child>
+											</object>
+										</child>
+										<child>
+											<object class="GtkProgressBar">
+												<property name="fraction">0.91</property>
+												<property name="css-classes">role-bar</property>
+											</object>
+										</child>
+									</object>
+								</child>
+								<child>
+									<object class="GtkBox">
+										<property name="orientation">1</property>
+										<property name="spacing">2</property>
+										<child>
+											<object class="GtkBox">
+												<property name="orientation">0</property>
+												<child>
+													<object class="GtkLabel">
+														<property name="label">Inside Forward</property>
+														<property name="hexpand">true</property>
+														<property name="xalign">0</property>
+														<property name="css-classes">heading</property>
+													</object>
+												</child>
+												<child>
+													<object class="GtkLabel">
+														<property name="label">12.7</property>
+														<property name="css-classes">heading
+															accent-orange
+														</property>
+													</object>
+												</child>
+											</object>
+										</child>
+										<child>
+											<object class="GtkProgressBar">
+												<property name="fraction">0.9</property>
+												<property name="css-classes">role-bar</property>
+											</object>
+										</child>
+									</object>
+								</child>
+							</object>
+						</child>
+					</object>
+				</child>
+				<child>
+					<object class="GtkBox">
+						<property name="orientation">0</property>
+						<property name="homogeneous">true</property>
+						<property name="css-classes">panel</property>
+						<child>
+							<object class="GtkBox">
+								<property name="orientation">1</property>
+								<property name="spacing">4</property>
+								<child>
+									<object class="GtkLabel">
+										<property name="label">VALUE</property>
+										<property name="css-classes">caption-heading
+											dim-label
+										</property>
+										<property name="halign">1</property>
+									</object>
+								</child>
+								<child>
+									<object class="GtkLabel">
+										<property name="label">€12.1M</property>
+										<property name="css-classes">title-3
+											accent-yellow
+										</property>
+										<property name="halign">1</property>
+									</object>
+								</child>
+							</object>
+						</child>
+						<child>
+							<object class="GtkBox">
+								<property name="orientation">1</property>
+								<property name="spacing">4</property>
+								<child>
+									<object class="GtkLabel">
+										<property name="label">ASKING PRICE</property>
+										<property name="css-classes">caption-heading
+											dim-label
+										</property>
+										<property name="halign">1</property>
+									</object>
+								</child>
+								<child>
+									<object class="GtkLabel">
+										<property name="label">€13.3M–€18.0M</property>
+										<property name="css-classes">title-4</property>
+										<property name="halign">1</property>
+									</object>
+								</child>
+							</object>
+						</child>
+						<child>
+							<object class="GtkBox">
+								<property name="orientation">1</property>
+								<property name="spacing">4</property>
+								<child>
+									<object class="GtkLabel">
+										<property name="label">WAGE</property>
+										<property name="css-classes">caption-heading
+											dim-label
+										</property>
+										<property name="halign">1</property>
+									</object>
+								</child>
+								<child>
+									<object class="GtkLabel">
+										<property name="label">€1K</property>
+										<property name="css-classes">title-4</property>
+										<property name="halign">1</property>
+									</object>
+								</child>
+							</object>
+						</child>
+						<child>
+							<object class="GtkBox">
+								<property name="orientation">1</property>
+								<property name="spacing">4</property>
+								<child>
+									<object class="GtkLabel">
+										<property name="label">CONTRACT</property>
+										<property name="css-classes">caption-heading
+											dim-label
+										</property>
+										<property name="halign">1</property>
+									</object>
+								</child>
+								<child>
+									<object class="GtkLabel">
+										<property name="label">31-12-2029</property>
+										<property name="css-classes">title-4</property>
+										<property name="halign">1</property>
+									</object>
+								</child>
+							</object>
+						</child>
+					</object>
+				</child>
+			</object>
+		</child>
+	</object>
+</interface>

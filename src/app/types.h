@@ -4,6 +4,7 @@
 #pragma once
 
 #include <stdint.h>
+#include <gtk/gtk.h>
 
 #include "app/constants.h"
 
@@ -48,7 +49,7 @@ typedef enum {
 
 typedef struct {
 	char name[CLUB_NAME_LENGTH];
-	uint64_t address;
+	uint32_t address;
 	uint8_t teamType;
 } Club;
 
@@ -57,6 +58,7 @@ typedef struct {
 
 typedef struct {
 	char name[MAX_NATION_STRING_LENGTH];
+	char code[4];
 } Nation;
 
 typedef struct {
@@ -87,7 +89,7 @@ typedef struct {
 	uint32_t annualWage;
 	int32_t clubIndex; // -1 means unemployed
 	uint16_t sharpness;
-	uint16_t fatigue;
+	int16_t fatigue;
 	uint16_t condition;
 	uint16_t homeReputation;
 	uint16_t currentReputation;
@@ -129,6 +131,7 @@ typedef struct {
 	PartialPlayer currentlyViewedPlayer;
 	char gameVersion[GAME_STATUS_STRING_BUFFER_SIZE];
 	DayMonthYear currentDate;
+	GtkBuilder *builder;
 	Club *clubs;
 	Nation *nations;
 	Player *players;

@@ -97,13 +97,13 @@ SPDX-License-Identifier: GPL-3.0-or-later -->
 								<property name="halign">fill</property>
 								<property name="valign">end</property>
 								<child>
-									<object class="GtkLabel" id="footer:label:status">
+									<object class="GtkLabel" id="label:status">
 										<property name="halign">start</property>
 										<property name="label"/>
 									</object>
 								</child>
 								<child>
-									<object class="GtkLabel" id="footer:label:date">
+									<object class="GtkLabel" id="label:date">
 										<property name="halign">end</property>
 										<property name="hexpand">True</property>
 										<property name="label"/>

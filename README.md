@@ -11,7 +11,22 @@ the [Steam version of Football Manager 24](https://store.steampowered.com/app/22
 
 ### Features
 
-Coming soon.
+#### Analyse players
+
+- See all the attributes for any player (including hidden and personality) as well as a competency rating for all
+  comfortable positions
+- Remove injuries for a given player and improve their condition + sharpness
+- Boost player's morale
+
+#### Search for players
+
+- Search based on a number of factors including age, current/potential ability, position and rating
+
+#### Analyse a club
+
+- List all players for all squads (senior, reserves, U18)
+- Pick the best XI for a given formation based on player competency ratings
+- See squad depth options and identify weaknesses in positions
 
 ## Dependencies
 
@@ -192,7 +207,8 @@ Most modern distributions include X11. For headless systems or when needed:
 
 ## Notes
 
-- CMake selects the compiler from your environment/toolchain. Override with `CC` or `-DCMAKE_C_COMPILER=...` when needed.
+- CMake selects the compiler from your environment/toolchain. Override with `CC` or `-DCMAKE_C_COMPILER=...` when
+  needed.
 - Platform-specific flags are set automatically during build:
 	- Linux: `-DARCH_LINUX`
 	- macOS: `-DARCH_MACOS`

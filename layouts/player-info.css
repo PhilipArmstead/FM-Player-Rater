@@ -1,0 +1,128 @@
+/* Companion stylesheet for player-info.ui
+ * FM SuperScout "Wonderkid" card theme: dark navy background, gold accents.
+ */
+
+.card {
+    background-color: #1b2430;
+    padding: 24px;
+    border-radius: 14px;
+}
+
+.card-border {
+    border: 2px solid #d9a441;
+    outline: 4px solid alpha(#d9a441, 0.35);
+    outline-offset: -8px;
+}
+
+.panel {
+    background-color: alpha(#000000, 0.25);
+    border-radius: 10px;
+    padding: 14px 18px;
+}
+
+.player-name {
+    color: #f2f2f2;
+    font-weight: 900;
+}
+
+.club-name {
+    color: #f2f2f2;
+}
+
+.section-heading {
+    color: #8fa0b3;
+    letter-spacing: 1px;
+}
+
+.caption-heading {
+    font-size: 11px;
+    letter-spacing: 1px;
+}
+
+.accent-rule {
+    min-height: 2px;
+    background-color: #d9a441;
+    margin-bottom: 4px;
+}
+
+.accent-yellow {
+    color: #f0b23c;
+    font-weight: 800;
+}
+
+.accent-orange {
+    color: #e08a2c;
+    font-weight: 800;
+}
+
+.attribute-list {
+    background: transparent;
+}
+
+.attr-row {
+    padding: 3px 0;
+    color: #d7dde5;
+}
+
+.attr-row label:last-child {
+    font-weight: 700;
+}
+
+.pill-fast-learner {
+    border: 1px solid #3182CE;
+    border-radius: 999px;
+    background-color: #2B3A5C;
+    color: #90CDF4;
+    font-weight: 600;
+    padding: 3px 8px;
+}
+
+.pill-hot-prospect {
+    border: 1px solid #DD6B20;
+    border-radius: 999px;
+    background-color: #3D2112;
+    color: #FBD38D;
+    font-weight: 600;
+    padding: 3px 8px;
+}
+
+.wonderkid-text {
+    color: #f0b23c;
+    font-weight: 800;
+    font-size: 12px;
+}
+
+.hexagon-badge {
+    min-width: 90px;
+    min-height: 90px;
+    background-color: alpha(#000000, 0.3);
+    border: 2px solid #d9a441;
+    border-radius: 50%;
+}
+
+.role-bar {
+    min-height: 6px;
+}
+
+.role-bar progress {
+    background-color: #e08a2c;
+    border-radius: 4px;
+}
+
+.role-bar trough {
+    background-color: alpha(#ffffff, 0.08);
+    border-radius: 4px;
+}
+
+.brand-label {
+    color: #f2f2f2;
+    font-weight: 900;
+}
+
+.brand-hex {
+    color: #d9a441;
+}
+
+.dim-label {
+    color: #8fa0b3;
+}

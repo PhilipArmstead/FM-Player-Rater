@@ -5,9 +5,19 @@
 
 #include <gtk/gtk.h>
 
+#include "app/types.h"
+
+
+typedef struct {
+	GtkBuilder *builder;
+	GtkWidget *window;
+} WindowContext;
 
 void updateUi(void);
 void updateGameStatus(void);
 void updateInGameDate(void);
 void updateShowCurrentPlayerButton(void);
-GtkWidget *openWindow(const char *layoutName, const char *windowName);
+WindowContext openWindow(const char *layoutName, const char *windowName);
+
+WindowContext createPlayerInfoWindow(const Player *player);
+void renderPlayerInfoWindow(WindowContext context, const Player *player);

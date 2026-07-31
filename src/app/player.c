@@ -5,6 +5,7 @@
 #include "app/constants.h"
 #include "app/game-status.h"
 #include "app/maths.h"
+#include "app/mocks.h"
 #include "core/logger.h"
 #include "platform/platform.h"
 
@@ -31,6 +32,7 @@ static float getRatingPerPosition(const Player *player, PositionGrouped position
 
 // Assumes valid ProcessContext
 uint32_t getCurrentPersonUniqueId(const ProcessContext *processContext) {
+	#ifndef PLAYER_BY_ID
 	uint8_t bytes[4];
 	void *handle = processContext->handle;
 	readFromMemory(handle, processContext->moduleBaseAddress + CURRENT_SCREEN_PLAYER_ID_PTR_BASE, 4, bytes);
@@ -43,6 +45,10 @@ uint32_t getCurrentPersonUniqueId(const ProcessContext *processContext) {
 	readFromMemory(handle, hexBytesToInt(bytes, 4) + CURRENT_SCREEN_PLAYER_ID_PTR_BASE_OFFSET_7, 4, bytes);
 	readFromMemory(handle, hexBytesToInt(bytes, 4) + CURRENT_SCREEN_PLAYER_ID_PTR_BASE_OFFSET_8, 4, bytes);
 	return (uint32_t)hexBytesToInt(bytes, 4);
+	#else
+	const Player player = PLAYER_BY_ID;
+	return player.uid;
+	#endif
 }
 
 // Assumes valid ProcessContext
@@ -157,7 +163,7 @@ Player getPlayer(void *handle, bool skipValidCheck, uint32_t personAddress, uint
 	// Sharpness, fatigue, condition
 	readFromMemory(handle, playerAddress + PLAYER_OFFSET_SHARPNESS, 6, bytes);
 	player.sharpness = (uint16_t)hexBytesToInt(bytes, 2);
-	player.fatigue = (uint16_t)hexBytesToInt(bytes + 2, 2);
+	player.fatigue = (int16_t)hexBytesToInt(bytes + 2, 2);
 	player.condition = (uint16_t)hexBytesToInt(bytes + 4, 2);
 
 	// Nationality
@@ -287,6 +293,16 @@ static int32_t getClubIndexFromPerson(void *handle, uint32_t personAddress) {
 	const uint32_t clubAddress = (uint32_t)hexBytesToInt(pointer, 4);
 	readFromMemory(handle, clubAddress + CLUB_OFFSET_ROW_ID, 4, pointer);
 	return (int32_t)hexBytesToInt(pointer, 4);
+
+	// readFromMemory(handle, teamsAddress + TEAM_OFFSET_COMPETITION, 4, pointer);
+	// const uint32_t competitionAddress = (uint32_t)hexBytesToInt(pointer, 4);
+	// readFromMemory(handle, competitionAddress + COMPETITION_OFFSET_LONG_NAME_ADDRESS, 4, pointer);
+	// readFromMemory(
+	// 	handle,
+	// 	hexBytesToInt(pointer, 4) + GENERAL_OFFSET_NAME,
+	// 	CLUB_NAME_LENGTH,
+	// 	(uint8_t*)club.divisionName
+	// );
 }
 
 /* Helper structure to represent sparse attribute weights */

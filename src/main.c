@@ -16,7 +16,7 @@ GtkBuilder *builder;
 static void activate(GtkApplication *app) {
 	char pathToStylesheet[256] = {0};
 	GtkCssProvider *css_provider = gtk_css_provider_new();
-	snprintf(pathToStylesheet, sizeof(pathToStylesheet), "%s/app.css", REPO_ROOT_DIR);
+	snprintf(pathToStylesheet, sizeof(pathToStylesheet), "%s/show-players.css", REPO_ROOT_DIR);
 	gtk_css_provider_load_from_path(css_provider, pathToStylesheet);
 	gtk_style_context_add_provider_for_display(
 		gdk_display_get_default(),
@@ -25,12 +25,12 @@ static void activate(GtkApplication *app) {
 	);
 	g_object_unref(css_provider);
 
+	const WindowContext context = openWindow("show-players", "window:show-players");
+	gtk_window_set_application(GTK_WINDOW(context.window), GTK_APPLICATION(app));
+
 	// Periodic callbacks
 	g_timeout_add(1000, update, NULL);
 	update(NULL);
-
-	GtkWidget *window = openWindow("app", "window");
-	gtk_window_set_application(GTK_WINDOW(window), GTK_APPLICATION(app));
 }
 
 int main(const int argc, char **argv) {
