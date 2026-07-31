@@ -2,10 +2,10 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 
 #include "callbacks.h"
-
 #include "app/data.h"
 #include "app/game-status.h"
 #include "app/maths.h"
+#include "app/mocks.h"
 #include "app/player.h"
 #include "app/ui.h"
 #include "core/logger.h"
@@ -91,10 +91,12 @@ void connectToProcess(void) {
 }
 
 G_MODULE_EXPORT void callbackShowCurrentPlayer(void) {
+	#ifndef MOCKS_MODE
 	if (processContext.handle == NULL) {
 		LOG_ERROR("Process handle is NULL, cannot read current player");
 		return;
 	}
+	#endif
 
 	const uint32_t uniqueId = getCurrentPersonUniqueId(&processContext);
 	showPlayerById(uniqueId);
@@ -158,21 +160,19 @@ static void showPlayerById(uint32_t uniqueId) {
 
 	LOG_INFO("Searching for Player Unique ID: %u", uniqueId);
 
+	#ifdef PLAYER_BY_ID
+	const Player player = PLAYER_BY_ID;
+	#else
 	const Player player = getPlayerById(&processContext, uniqueId);
+	#endif
+
 	if (player.personAddress == 0) {
 		LOG_ERROR("Player with Unique ID %u not found", uniqueId);
 		return;
 	}
 
-	LOG_INFO(
-		"Found Player: %s (Age: %d, Ability: %d, Potential: %d, Row ID: %d, Address: 0x%08X)",
-		player.commonName,
-		player.age,
-		player.ca,
-		player.pa,
-		player.rowId,
-		player.personAddress
-	);
+	const WindowContext context = createPlayerInfoWindow(&player);
+	renderPlayerInfoWindow(context, &player);
 }
 
 static void handleDisconnect(void) {
