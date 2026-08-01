@@ -77,11 +77,11 @@ SPDX-License-Identifier: GPL-3.0-or-later -->
 									</object>
 								</child>
 								<child>
-									<object class="GtkLabel" id="label:nationality">
-										<property name="label"/>
-										<property name="css-classes">dim-label</property>
+									<object id="label:nationality" class="GtkBox">
+										<property name="orientation">1</property>
+										<property name="valign">1</property>
 										<property name="halign">2</property>
-										<property name="xalign">1</property>
+										<property name="spacing">4</property>
 									</object>
 								</child>
 								<child>
