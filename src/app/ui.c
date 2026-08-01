@@ -85,7 +85,7 @@ void updateShowCurrentPlayerButton(void) {
 
 WindowContext openWindow(const char *layoutName, const char *windowName) {
 	char pathToAppLayout[256] = {0};
-	snprintf(pathToAppLayout, sizeof(pathToAppLayout), "%s/%s.ui", REPO_ROOT_DIR, layoutName);
+	snprintf(pathToAppLayout, sizeof(pathToAppLayout), "%s/%s.ui", LAYOUTS_DIR, layoutName);
 
 	WindowContext context = {};
 	context.builder = gtk_builder_new_from_file(pathToAppLayout);
@@ -100,7 +100,7 @@ WindowContext createPlayerInfoWindow(const Player *player) {
 
 	char pathToStylesheet[256] = {0};
 	GtkCssProvider *css_provider = gtk_css_provider_new();
-	snprintf(pathToStylesheet, sizeof(pathToStylesheet), "%s/player-info.css", REPO_ROOT_DIR);
+	snprintf(pathToStylesheet, sizeof(pathToStylesheet), "%s/player-info.css", LAYOUTS_DIR);
 	gtk_css_provider_load_from_path(css_provider, pathToStylesheet);
 	gtk_style_context_add_provider_for_display(
 		gdk_display_get_default(),
