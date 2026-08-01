@@ -16,7 +16,7 @@ GtkBuilder *builder;
 static void activate(GtkApplication *app) {
 	char pathToStylesheet[256] = {0};
 	GtkCssProvider *css_provider = gtk_css_provider_new();
-	snprintf(pathToStylesheet, sizeof(pathToStylesheet), "%s/show-players.css", REPO_ROOT_DIR);
+	snprintf(pathToStylesheet, sizeof(pathToStylesheet), "%s/show-players.css", LAYOUTS_DIR);
 	gtk_css_provider_load_from_path(css_provider, pathToStylesheet);
 	gtk_style_context_add_provider_for_display(
 		gdk_display_get_default(),

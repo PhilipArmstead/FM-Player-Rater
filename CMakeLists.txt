@@ -64,10 +64,17 @@ target_compile_definitions(fm_player_rater PRIVATE
 	$<$<PLATFORM_ID:Darwin>:ARCH_MACOS>
 	$<$<PLATFORM_ID:Linux>:ARCH_LINUX>
 	$<$<CONFIG:Debug>:DEBUG>
-	REPO_ROOT_DIR="${REPO_ROOT}/layouts"
+	REPO_ROOT_DIR="${REPO_ROOT}"
+	LAYOUTS_DIR="${REPO_ROOT}/layouts"
 )
 
 target_link_libraries(fm_player_rater PRIVATE PkgConfig::GTK4)
+
+# Export runtime symbols on Linux so GtkBuilder can find G_MODULE_EXPORT callbacks
+if (CMAKE_SYSTEM_NAME STREQUAL "Linux")
+	# -rdynamic makes all symbols available to the dynamic linker for dlsym/lookup
+	set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -rdynamic")
+endif ()
 
 add_custom_target(info
 	COMMAND ${CMAKE_COMMAND} -E echo "Generator: ${CMAKE_GENERATOR}"

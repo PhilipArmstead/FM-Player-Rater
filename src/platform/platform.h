@@ -5,6 +5,8 @@
 
 #include "app/types.h"
 
+#include <unistd.h>
+
 
 // Logger
 void platform_consoleWrite(const char *message, LogLevel colour);
