@@ -147,7 +147,6 @@ void renderPlayerInfoWindow(WindowContext context, const Player *player) {
 	GtkBox *nationalityBox = GTK_BOX(GTK_WIDGET(gtk_builder_get_object(context.builder, "label:nationality")));
 	char pathToFlag[256] = {0};
 	snprintf(pathToFlag, sizeof(pathToFlag), "%s/assets/flags/%s.png", REPO_ROOT_DIR, player->nationality.code);
-	LOG_INFO("Loading flag image for nationality: %s", pathToFlag);
 	GtkWidget *flagImage = gtk_image_new_from_file(pathToFlag);
 	gtk_box_append(nationalityBox, flagImage);
 	gtk_widget_set_tooltip_text(flagImage, player->nationality.name);
@@ -161,5 +160,107 @@ void renderPlayerInfoWindow(WindowContext context, const Player *player) {
 	} else {
 		gtk_label_set_text(clubNameLabel, player->club.name);
 		gtk_label_set_text(divisionNameLabel, player->club.divisionName);
+	}
+
+	// Attributes
+	// TODO: normalise attributes
+	// TODO: GK attributes
+	// Technical
+	GtkWidget *boxTechnical = GTK_WIDGET(gtk_builder_get_object(context.builder, "box:attribute:technical"));
+	if (player->positions[0] < 12) {
+		gtk_widget_set_visible(boxTechnical, true);
+		// TODO: hide GK box
+
+		GtkLabel *accelerationLabel = GTK_LABEL(
+			GTK_WIDGET(gtk_builder_get_object(context.builder, "label:attribute:technical:acceleration"))
+		);
+		GtkLabel *cornersLabel = GTK_LABEL(
+			GTK_WIDGET(gtk_builder_get_object(context.builder, "label:attribute:technical:corners"))
+		);
+		GtkLabel *crossingLabel = GTK_LABEL(
+			GTK_WIDGET(gtk_builder_get_object(context.builder, "label:attribute:technical:crossing"))
+		);
+		GtkLabel *dribblingLabel = GTK_LABEL(
+			GTK_WIDGET(gtk_builder_get_object(context.builder, "label:attribute:technical:dribbling"))
+		);
+		GtkLabel *finishingLabel = GTK_LABEL(
+			GTK_WIDGET(gtk_builder_get_object(context.builder, "label:attribute:technical:finishing"))
+		);
+		GtkLabel *firstTouchLabel = GTK_LABEL(
+			GTK_WIDGET(gtk_builder_get_object(context.builder, "label:attribute:technical:first-touch"))
+		);
+		GtkLabel *freeKicksLabel = GTK_LABEL(
+			GTK_WIDGET(gtk_builder_get_object(context.builder, "label:attribute:technical:free-kicks"))
+		);
+		GtkLabel *headingLabel = GTK_LABEL(
+			GTK_WIDGET(gtk_builder_get_object(context.builder, "label:attribute:technical:heading"))
+		);
+		GtkLabel *longShotsLabel = GTK_LABEL(
+			GTK_WIDGET(gtk_builder_get_object(context.builder, "label:attribute:technical:long-shots"))
+		);
+		GtkLabel *longThrowsLabel = GTK_LABEL(
+			GTK_WIDGET(gtk_builder_get_object(context.builder, "label:attribute:technical:long-throws"))
+		);
+		GtkLabel *markingLabel = GTK_LABEL(
+			GTK_WIDGET(gtk_builder_get_object(context.builder, "label:attribute:technical:marking"))
+		);
+		GtkLabel *passingLabel = GTK_LABEL(
+			GTK_WIDGET(gtk_builder_get_object(context.builder, "label:attribute:technical:passing"))
+		);
+		GtkLabel *penaltyTakingLabel = GTK_LABEL(
+			GTK_WIDGET(gtk_builder_get_object(context.builder, "label:attribute:technical:penalty-taking"))
+		);
+		GtkLabel *tacklingLabel = GTK_LABEL(
+			GTK_WIDGET(gtk_builder_get_object(context.builder, "label:attribute:technical:tackling"))
+		);
+		GtkLabel *techniqueLabel = GTK_LABEL(
+			GTK_WIDGET(gtk_builder_get_object(context.builder, "label:attribute:technical:technique"))
+		);
+
+		char buffer[8] = {0};
+		snprintf(buffer, 8, "%d", player->attributes[ATTR_ACC]);
+		gtk_label_set_text(accelerationLabel, buffer);
+
+		snprintf(buffer, 8, "%d", player->attributes[ATTR_COR]);
+		gtk_label_set_text(cornersLabel, buffer);
+
+		snprintf(buffer, 8, "%d", player->attributes[ATTR_CRO]);
+		gtk_label_set_text(crossingLabel, buffer);
+
+		snprintf(buffer, 8, "%d", player->attributes[ATTR_DRI]);
+		gtk_label_set_text(dribblingLabel, buffer);
+
+		snprintf(buffer, 8, "%d", player->attributes[ATTR_FIN]);
+		gtk_label_set_text(finishingLabel, buffer);
+
+		snprintf(buffer, 8, "%d", player->attributes[ATTR_FIR]);
+		gtk_label_set_text(firstTouchLabel, buffer);
+
+		snprintf(buffer, 8, "%d", player->attributes[ATTR_FRE]);
+		gtk_label_set_text(freeKicksLabel, buffer);
+
+		snprintf(buffer, 8, "%d", player->attributes[ATTR_HEA]);
+		gtk_label_set_text(headingLabel, buffer);
+
+		snprintf(buffer, 8, "%d", player->attributes[ATTR_LON]);
+		gtk_label_set_text(longShotsLabel, buffer);
+
+		snprintf(buffer, 8, "%d", player->attributes[ATTR_LTH]);
+		gtk_label_set_text(longThrowsLabel, buffer);
+
+		snprintf(buffer, 8, "%d", player->attributes[ATTR_MAR]);
+		gtk_label_set_text(markingLabel, buffer);
+
+		snprintf(buffer, 8, "%d", player->attributes[ATTR_PAS]);
+		gtk_label_set_text(passingLabel, buffer);
+
+		snprintf(buffer, 8, "%d", player->attributes[ATTR_PEN]);
+		gtk_label_set_text(penaltyTakingLabel, buffer);
+
+		snprintf(buffer, 8, "%d", player->attributes[ATTR_TCK]);
+		gtk_label_set_text(tacklingLabel, buffer);
+
+		snprintf(buffer, 8, "%d", player->attributes[ATTR_TEC]);
+		gtk_label_set_text(techniqueLabel, buffer);
 	}
 }
