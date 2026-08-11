@@ -716,6 +716,15 @@ static inline int position_group_to_indices(PositionGrouped p, int out_indices[5
 	return n;
 }
 
+void getWeightsForPosition(
+	PositionGrouped position,
+	float out_attr[ATTRIBUTE_COUNT],
+	float out_personality[8],
+	float *out_weight
+) {
+	fill_weights_for_position(position, out_attr, out_personality, out_weight);
+}
+
 static float getRatingPerPosition(const Player *player, PositionGrouped position) {
 	float attr_weights[ATTRIBUTE_COUNT];
 	float pers_weights[8];

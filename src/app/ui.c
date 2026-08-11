@@ -211,8 +211,37 @@ void renderPlayerInfoWindow(WindowContext context, const Player *player) {
 		gtk_label_set_text(divisionNameLabel, player->club.divisionName);
 	}
 
+	float attr_weights[ATTRIBUTE_COUNT];
+	float pers_weights[8];
+	float totalWeight = 1.0f;
+	// TODO: this position should not be hardcoded
+	getWeightsForPosition(POSITION_GROUPED_ST, attr_weights, pers_weights, &totalWeight);
+	float max = 0;
+	for (int i = 0; i < ATTRIBUTE_COUNT; ++i) {
+		if (attr_weights[i] > max) {
+			max = attr_weights[i];
+		}
+	}
+
+	char buffer[8] = {0};
+	char widgetId[64];
+	GtkLabel *label;
+	GtkWidget *widget;
+	#define setRowTextAndHighlight(id, attributeIndex) {																	\
+		snprintf(buffer, 8, "%d", convertTo20Scale(player->attributes[attributeIndex]));		\
+		snprintf(widgetId, 64, "label:%s", id);																							\
+		label = GTK_LABEL(GTK_WIDGET(gtk_builder_get_object(context.builder, widgetId)));		\
+		gtk_label_set_text(label, buffer);																									\
+		snprintf(widgetId, 64, "row:%s", id);																								\
+		widget = GTK_WIDGET(gtk_builder_get_object(context.builder, widgetId));							\
+		if (attr_weights[attributeIndex] > max * 0.5f) {																		\
+			gtk_widget_add_css_class(widget, "attribute-row--high");													\
+		} else if (attr_weights[attributeIndex] > max * 0.15f) {														\
+			gtk_widget_add_css_class(widget, "attribute-row--mid");														\
+		}																																										\
+	}
+
 	// Attributes
-	// TODO: normalise attributes
 	// TODO: GK attributes
 	// Technical
 	GtkWidget *boxTechnical = GTK_WIDGET(gtk_builder_get_object(context.builder, "box:attribute:technical"));
@@ -220,236 +249,45 @@ void renderPlayerInfoWindow(WindowContext context, const Player *player) {
 		gtk_widget_set_visible(boxTechnical, true);
 		// TODO: hide GK box
 
-		// GtkLabel *accelerationLabel = GTK_LABEL(
-		// GTK_WIDGET(gtk_builder_get_object(context.builder, "label:attribute:technical:acceleration"))
-		// );
-		GtkLabel *cornersLabel = GTK_LABEL(
-			GTK_WIDGET(gtk_builder_get_object(context.builder, "label:attribute:technical:corners"))
-		);
-		GtkLabel *crossingLabel = GTK_LABEL(
-			GTK_WIDGET(gtk_builder_get_object(context.builder, "label:attribute:technical:crossing"))
-		);
-		GtkLabel *dribblingLabel = GTK_LABEL(
-			GTK_WIDGET(gtk_builder_get_object(context.builder, "label:attribute:technical:dribbling"))
-		);
-		GtkLabel *finishingLabel = GTK_LABEL(
-			GTK_WIDGET(gtk_builder_get_object(context.builder, "label:attribute:technical:finishing"))
-		);
-		GtkLabel *firstTouchLabel = GTK_LABEL(
-			GTK_WIDGET(gtk_builder_get_object(context.builder, "label:attribute:technical:first-touch"))
-		);
-		GtkLabel *freeKicksLabel = GTK_LABEL(
-			GTK_WIDGET(gtk_builder_get_object(context.builder, "label:attribute:technical:free-kicks"))
-		);
-		GtkLabel *headingLabel = GTK_LABEL(
-			GTK_WIDGET(gtk_builder_get_object(context.builder, "label:attribute:technical:heading"))
-		);
-		GtkLabel *longShotsLabel = GTK_LABEL(
-			GTK_WIDGET(gtk_builder_get_object(context.builder, "label:attribute:technical:long-shots"))
-		);
-		GtkLabel *longThrowsLabel = GTK_LABEL(
-			GTK_WIDGET(gtk_builder_get_object(context.builder, "label:attribute:technical:long-throws"))
-		);
-		GtkLabel *markingLabel = GTK_LABEL(
-			GTK_WIDGET(gtk_builder_get_object(context.builder, "label:attribute:technical:marking"))
-		);
-		GtkLabel *passingLabel = GTK_LABEL(
-			GTK_WIDGET(gtk_builder_get_object(context.builder, "label:attribute:technical:passing"))
-		);
-		GtkLabel *penaltyTakingLabel = GTK_LABEL(
-			GTK_WIDGET(gtk_builder_get_object(context.builder, "label:attribute:technical:penalty-taking"))
-		);
-		GtkLabel *tacklingLabel = GTK_LABEL(
-			GTK_WIDGET(gtk_builder_get_object(context.builder, "label:attribute:technical:tackling"))
-		);
-		GtkLabel *techniqueLabel = GTK_LABEL(
-			GTK_WIDGET(gtk_builder_get_object(context.builder, "label:attribute:technical:technique"))
-		);
-
-		char buffer[8] = {0};
-		snprintf(buffer, 8, "%d", convertTo20Scale(player->attributes[ATTR_COR]));
-		gtk_label_set_text(cornersLabel, buffer);
-
-		snprintf(buffer, 8, "%d", convertTo20Scale(player->attributes[ATTR_CRO]));
-		gtk_label_set_text(crossingLabel, buffer);
-
-		snprintf(buffer, 8, "%d", convertTo20Scale(player->attributes[ATTR_DRI]));
-		gtk_label_set_text(dribblingLabel, buffer);
-
-		snprintf(buffer, 8, "%d", convertTo20Scale(player->attributes[ATTR_FIN]));
-		gtk_label_set_text(finishingLabel, buffer);
-
-		snprintf(buffer, 8, "%d", convertTo20Scale(player->attributes[ATTR_FIR]));
-		gtk_label_set_text(firstTouchLabel, buffer);
-
-		snprintf(buffer, 8, "%d", convertTo20Scale(player->attributes[ATTR_FRE]));
-		gtk_label_set_text(freeKicksLabel, buffer);
-
-		snprintf(buffer, 8, "%d", convertTo20Scale(player->attributes[ATTR_HEA]));
-		gtk_label_set_text(headingLabel, buffer);
-
-		snprintf(buffer, 8, "%d", convertTo20Scale(player->attributes[ATTR_LON]));
-		gtk_label_set_text(longShotsLabel, buffer);
-
-		snprintf(buffer, 8, "%d", convertTo20Scale(player->attributes[ATTR_LTH]));
-		gtk_label_set_text(longThrowsLabel, buffer);
-
-		snprintf(buffer, 8, "%d", convertTo20Scale(player->attributes[ATTR_MAR]));
-		gtk_label_set_text(markingLabel, buffer);
-
-		snprintf(buffer, 8, "%d", convertTo20Scale(player->attributes[ATTR_PAS]));
-		gtk_label_set_text(passingLabel, buffer);
-
-		snprintf(buffer, 8, "%d", convertTo20Scale(player->attributes[ATTR_PEN]));
-		gtk_label_set_text(penaltyTakingLabel, buffer);
-
-		snprintf(buffer, 8, "%d", convertTo20Scale(player->attributes[ATTR_TCK]));
-		gtk_label_set_text(tacklingLabel, buffer);
-
-		snprintf(buffer, 8, "%d", convertTo20Scale(player->attributes[ATTR_TEC]));
-		gtk_label_set_text(techniqueLabel, buffer);
+		setRowTextAndHighlight("attribute:technical:corners", ATTR_COR);
+		setRowTextAndHighlight("attribute:technical:crossing", ATTR_CRO);
+		setRowTextAndHighlight("attribute:technical:dribbling", ATTR_DRI);
+		setRowTextAndHighlight("attribute:technical:finishing", ATTR_FIN);
+		setRowTextAndHighlight("attribute:technical:first-touch", ATTR_FIR);
+		setRowTextAndHighlight("attribute:technical:free-kicks", ATTR_FRE);
+		setRowTextAndHighlight("attribute:technical:heading", ATTR_HEA);
+		setRowTextAndHighlight("attribute:technical:long-shots", ATTR_LON);
+		setRowTextAndHighlight("attribute:technical:long-throws", ATTR_LTH);
+		setRowTextAndHighlight("attribute:technical:marking", ATTR_MAR);
+		setRowTextAndHighlight("attribute:technical:passing", ATTR_PAS);
+		setRowTextAndHighlight("attribute:technical:penalty-taking", ATTR_PEN);
+		setRowTextAndHighlight("attribute:technical:tackling", ATTR_TCK);
+		setRowTextAndHighlight("attribute:technical:technique", ATTR_TEC);
 	}
 
-	// Mental
-	GtkLabel *aggressionLabel = GTK_LABEL(
-		GTK_WIDGET(gtk_builder_get_object(context.builder, "label:attribute:mental:aggression"))
-	);
-	GtkLabel *anticipationLabel = GTK_LABEL(
-		GTK_WIDGET(gtk_builder_get_object(context.builder, "label:attribute:mental:anticipation"))
-	);
-	GtkLabel *braveryLabel = GTK_LABEL(
-		GTK_WIDGET(gtk_builder_get_object(context.builder, "label:attribute:mental:bravery"))
-	);
-	GtkLabel *composureLabel = GTK_LABEL(
-		GTK_WIDGET(gtk_builder_get_object(context.builder, "label:attribute:mental:composure"))
-	);
-	GtkLabel *concentrationLabel = GTK_LABEL(
-		GTK_WIDGET(gtk_builder_get_object(context.builder, "label:attribute:mental:concentration"))
-	);
-	GtkLabel *decisionsLabel = GTK_LABEL(
-		GTK_WIDGET(gtk_builder_get_object(context.builder, "label:attribute:mental:decisions"))
-	);
-	GtkLabel *determinationLabel = GTK_LABEL(
-		GTK_WIDGET(gtk_builder_get_object(context.builder, "label:attribute:mental:determination"))
-	);
-	GtkLabel *flairLabel = GTK_LABEL(
-		GTK_WIDGET(gtk_builder_get_object(context.builder, "label:attribute:mental:flair"))
-	);
-	GtkLabel *leadershipLabel = GTK_LABEL(
-		GTK_WIDGET(gtk_builder_get_object(context.builder, "label:attribute:mental:leadership"))
-	);
-	GtkLabel *offTheBallLabel = GTK_LABEL(
-		GTK_WIDGET(gtk_builder_get_object(context.builder, "label:attribute:mental:off-the-ball"))
-	);
-	GtkLabel *positioningLabel = GTK_LABEL(
-		GTK_WIDGET(gtk_builder_get_object(context.builder, "label:attribute:mental:positioning"))
-	);
-	GtkLabel *teamworkLabel = GTK_LABEL(
-		GTK_WIDGET(gtk_builder_get_object(context.builder, "label:attribute:mental:teamwork"))
-	);
-	GtkLabel *visionLabel = GTK_LABEL(
-		GTK_WIDGET(gtk_builder_get_object(context.builder, "label:attribute:mental:vision"))
-	);
-	GtkLabel *workRateLabel = GTK_LABEL(
-		GTK_WIDGET(gtk_builder_get_object(context.builder, "label:attribute:mental:work-rate"))
-	);
+	setRowTextAndHighlight("attribute:mental:aggression", ATTR_COR);
+	setRowTextAndHighlight("attribute:mental:anticipation", ATTR_ANT);
+	setRowTextAndHighlight("attribute:mental:bravery", ATTR_BRA);
+	setRowTextAndHighlight("attribute:mental:concentration", ATTR_CNT);
+	setRowTextAndHighlight("attribute:mental:composure", ATTR_CMP);
+	setRowTextAndHighlight("attribute:mental:decisions", ATTR_DEC);
+	setRowTextAndHighlight("attribute:mental:determination", ATTR_DET);
+	setRowTextAndHighlight("attribute:mental:flair", ATTR_FLA);
+	setRowTextAndHighlight("attribute:mental:leadership", ATTR_LDR);
+	setRowTextAndHighlight("attribute:mental:off-the-ball", ATTR_OTB);
+	setRowTextAndHighlight("attribute:mental:positioning", ATTR_POS);
+	setRowTextAndHighlight("attribute:mental:teamwork", ATTR_TEA);
+	setRowTextAndHighlight("attribute:mental:vision", ATTR_VIS);
+	setRowTextAndHighlight("attribute:mental:work-rate", ATTR_WOR);
 
-	char buffer[8] = {0};
-	snprintf(buffer, 8, "%d", convertTo20Scale(player->attributes[ATTR_AGG]));
-	gtk_label_set_text(aggressionLabel, buffer);
-
-	snprintf(buffer, 8, "%d", convertTo20Scale(player->attributes[ATTR_ANT]));
-	gtk_label_set_text(anticipationLabel, buffer);
-
-	snprintf(buffer, 8, "%d", convertTo20Scale(player->attributes[ATTR_BRA]));
-	gtk_label_set_text(braveryLabel, buffer);
-
-	snprintf(buffer, 8, "%d", convertTo20Scale(player->attributes[ATTR_CNT]));
-	gtk_label_set_text(concentrationLabel, buffer);
-
-	snprintf(buffer, 8, "%d", convertTo20Scale(player->attributes[ATTR_CMP]));
-	gtk_label_set_text(composureLabel, buffer);
-
-	snprintf(buffer, 8, "%d", convertTo20Scale(player->attributes[ATTR_DEC]));
-	gtk_label_set_text(decisionsLabel, buffer);
-
-	snprintf(buffer, 8, "%d", convertTo20Scale(player->attributes[ATTR_DET]));
-	gtk_label_set_text(determinationLabel, buffer);
-
-	snprintf(buffer, 8, "%d", convertTo20Scale(player->attributes[ATTR_FLA]));
-	gtk_label_set_text(flairLabel, buffer);
-
-	snprintf(buffer, 8, "%d", convertTo20Scale(player->attributes[ATTR_LDR]));
-	gtk_label_set_text(leadershipLabel, buffer);
-
-	snprintf(buffer, 8, "%d", convertTo20Scale(player->attributes[ATTR_OTB]));
-	gtk_label_set_text(offTheBallLabel, buffer);
-
-	snprintf(buffer, 8, "%d", convertTo20Scale(player->attributes[ATTR_POS]));
-	gtk_label_set_text(positioningLabel, buffer);
-
-	snprintf(buffer, 8, "%d", convertTo20Scale(player->attributes[ATTR_TEA]));
-	gtk_label_set_text(teamworkLabel, buffer);
-
-	snprintf(buffer, 8, "%d", convertTo20Scale(player->attributes[ATTR_VIS]));
-	gtk_label_set_text(visionLabel, buffer);
-
-	snprintf(buffer, 8, "%d", convertTo20Scale(player->attributes[ATTR_WOR]));
-	gtk_label_set_text(workRateLabel, buffer);
-
-	// Physical
-	GtkLabel *accelerationLabel = GTK_LABEL(
-		GTK_WIDGET(gtk_builder_get_object(context.builder, "label:attribute:physical:acceleration"))
-	);
-	GtkLabel *agilityLabel = GTK_LABEL(
-		GTK_WIDGET(gtk_builder_get_object(context.builder, "label:attribute:physical:agility"))
-	);
-	GtkLabel *balanceLabel = GTK_LABEL(
-		GTK_WIDGET(gtk_builder_get_object(context.builder, "label:attribute:physical:balance"))
-	);
-	GtkLabel *jumpingReachLabel = GTK_LABEL(
-		GTK_WIDGET(gtk_builder_get_object(context.builder, "label:attribute:physical:jumping-reach"))
-	);
-	GtkLabel *naturalFitnessLabel = GTK_LABEL(
-		GTK_WIDGET(gtk_builder_get_object(context.builder, "label:attribute:physical:natural-fitness"))
-	);
-	GtkLabel *paceLabel = GTK_LABEL(
-		GTK_WIDGET(gtk_builder_get_object(context.builder, "label:attribute:physical:pace"))
-	);
-	GtkLabel *staminaLabel = GTK_LABEL(
-		GTK_WIDGET(gtk_builder_get_object(context.builder, "label:attribute:physical:stamina"))
-	);
-	GtkLabel *strengthLabel = GTK_LABEL(
-		GTK_WIDGET(gtk_builder_get_object(context.builder, "label:attribute:physical:strength"))
-	);
-
-	snprintf(buffer, 8, "%d", convertTo20Scale(player->attributes[ATTR_ACC]));
-	gtk_label_set_text(accelerationLabel, buffer);
-
-	snprintf(buffer, 8, "%d", convertTo20Scale(player->attributes[ATTR_AGI]));
-	gtk_label_set_text(agilityLabel, buffer);
-
-	snprintf(buffer, 8, "%d", convertTo20Scale(player->attributes[ATTR_BAL]));
-	gtk_label_set_text(balanceLabel, buffer);
-
-	snprintf(buffer, 8, "%d", convertTo20Scale(player->attributes[ATTR_JUM]));
-	gtk_label_set_text(jumpingReachLabel, buffer);
-
-	snprintf(buffer, 8, "%d", convertTo20Scale(player->attributes[ATTR_NAT]));
-	gtk_label_set_text(naturalFitnessLabel, buffer);
-
-	snprintf(buffer, 8, "%d", convertTo20Scale(player->attributes[ATTR_PAC]));
-	gtk_label_set_text(paceLabel, buffer);
-
-	snprintf(buffer, 8, "%d", convertTo20Scale(player->attributes[ATTR_STA]));
-	gtk_label_set_text(staminaLabel, buffer);
-
-	snprintf(buffer, 8, "%d", convertTo20Scale(player->attributes[ATTR_STR]));
-	gtk_label_set_text(strengthLabel, buffer);
-
-	// To colour the backgrounds of attributes,
-	// get the max weight of the current groupedPosition weight system.
-	// Low is max * 0.15, mid is max * 0.5, high is above this
+	setRowTextAndHighlight("attribute:physical:acceleration", ATTR_ACC);
+	setRowTextAndHighlight("attribute:physical:agility", ATTR_AGI);
+	setRowTextAndHighlight("attribute:physical:balance", ATTR_BAL);
+	setRowTextAndHighlight("attribute:physical:jumping-reach", ATTR_JUM);
+	setRowTextAndHighlight("attribute:physical:natural-fitness", ATTR_NAT);
+	setRowTextAndHighlight("attribute:physical:pace", ATTR_PAC);
+	setRowTextAndHighlight("attribute:physical:stamina", ATTR_STA);
+	setRowTextAndHighlight("attribute:physical:strength", ATTR_STR);
 }
 
 
