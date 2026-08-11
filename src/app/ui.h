@@ -13,6 +13,8 @@ typedef struct {
 	GtkWidget *window;
 } WindowContext;
 
+void connectToProcess(void);
+gboolean update(gpointer userData);
 void updateUi(void);
 void updateGameStatus(void);
 void updateInGameDate(void);

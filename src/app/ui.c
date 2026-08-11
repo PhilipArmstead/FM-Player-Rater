@@ -2,8 +2,13 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 
 #include "ui.h"
+#include "app/config.h"
+#include "app/game-status.h"
+#include "app/maths.h"
+#include "app/player.h"
 #include "app/helpers/date.h"
 #include "core/logger.h"
+#include "platform/platform.h"
 
 #include <gtk/gtk.h>
 
@@ -11,17 +16,88 @@
 extern ProcessContext processContext;
 extern GameContext gameContext;
 
+static void handleDisconnect(void);
+static void handleConnect(void);
+static inline void updateWhileConnected(void);
+static inline void updateWhileDisconnected(void);
+
+void connectToProcess(void) {
+	platform_openProcess(&processContext);
+
+	if (processContext.handle != NULL) {
+		handleConnect();
+	}
+}
+
+gboolean update(gpointer userData) {
+	#ifndef MOCKS_MODE
+	if (processContext.handle != NULL) {
+		updateWhileConnected();
+	} else {
+		updateWhileDisconnected();
+	}
+	#else
+	updateWhileConnected();
+	#endif
+
+	return G_SOURCE_CONTINUE;
+}
+
 void updateUi(void) {
 	updateGameStatus();
+}
+
+static inline void updateWhileConnected(void) {
+	// Get the current time/date
+	DayMonthYear dayMonthYear = getDayMonthYear(&processContext);
+
+	// Bail if the date is invalid and assume we're no longer connected
+	if (dayMonthYear.day == 0 || dayMonthYear.year == 0) {
+		handleDisconnect();
+		return;
+	}
+
+	// Cache the new date if it's different from the last one we saw
+	if (
+		dayMonthYear.day != gameContext.currentDate.day ||
+		dayMonthYear.year != gameContext.currentDate.year ||
+		strncmp(dayMonthYear.month, gameContext.currentDate.month, MONTH_NAME_LENGTH) != 0
+	) {
+		gameContext.currentDate = dayMonthYear;
+		LOG_INFO(
+			"Current Date: %s %d, %d",
+			dayMonthYear.month,
+			dayMonthYear.day,
+			dayMonthYear.year
+		);
+
+		updateInGameDate();
+	}
+
+	// Update the game version if it's different from the last one we saw
+	char versionBuffer[GAME_STATUS_STRING_BUFFER_SIZE] = {0};
+	getGameVersion(&processContext, versionBuffer, GAME_STATUS_STRING_BUFFER_SIZE);
+	if (strncmp(versionBuffer, gameContext.gameVersion, GAME_STATUS_STRING_BUFFER_SIZE) != 0) {
+		strncpy(gameContext.gameVersion, versionBuffer, GAME_STATUS_STRING_BUFFER_SIZE);
+		LOG_INFO("Game Version: %s", versionBuffer);
+
+		updateGameStatus();
+	}
+}
+
+static inline void updateWhileDisconnected(void) {
+	connectToProcess();
 }
 
 void updateInGameDate(void) {
 	GtkLabel *dateLabel = GTK_LABEL(GTK_WIDGET(gtk_builder_get_object(gameContext.builder, "label:date")));
 
+	#ifndef MOCKS_MODE
 	if (processContext.handle == NULL || gameContext.currentDate.year <= 1970) {
 		gtk_label_set_text(dateLabel, "\0");
 		return;
 	}
+	#endif
 
 	char buffer[64] = {0};
 	snprintf(
@@ -39,10 +115,12 @@ void updateInGameDate(void) {
 void updateGameStatus(void) {
 	GtkLabel *versionLabel = GTK_LABEL(GTK_WIDGET(gtk_builder_get_object(gameContext.builder, "label:status")));
 
+	#ifndef MOCKS_MODE
 	if (processContext.handle == NULL) {
 		gtk_label_set_text(versionLabel, "Not connected");
 		return;
 	}
+	#endif
 
 	if (gameContext.gameVersion[0] == '\0') {
 		gtk_label_set_text(versionLabel, "\0");
@@ -52,35 +130,6 @@ void updateGameStatus(void) {
 	char buffer[64] = {0};
 	snprintf(buffer, 64, "📝 %s", gameContext.gameVersion);
 	gtk_label_set_text(versionLabel, buffer);
-}
-
-void updateShowCurrentPlayerButton(void) {
-	const PartialPlayer currentPlayer = gameContext.currentlyViewedPlayer;
-	GtkWidget *buttonWidget = GTK_WIDGET(gtk_builder_get_object(gameContext.builder, "buttonShowCurrentPlayer"));
-	GtkLabel *label = GTK_LABEL(GTK_WIDGET(gtk_builder_get_object(gameContext.builder, "labelShowCurrentPlayer")));
-	if (currentPlayer.uid != 0) {
-		#define PLAYER_NAME_SIZE 64
-		char playerName[PLAYER_NAME_SIZE] = {0};
-		if (currentPlayer.commonName[0] != '\0') {
-			snprintf(playerName, PLAYER_NAME_SIZE, "%s", currentPlayer.commonName);
-		} else {
-			snprintf(playerName, PLAYER_NAME_SIZE, "%s %s", currentPlayer.forename, currentPlayer.surname);
-		}
-		char buffer[128] = {0};
-		snprintf(
-			buffer,
-			sizeof(buffer),
-			"%s\n(%s, ID: %u)",
-			"Show current player",
-			playerName,
-			currentPlayer.uid
-		);
-		gtk_label_set_text(label, buffer);
-		gtk_widget_set_sensitive(buttonWidget, true);
-	} else {
-		gtk_label_set_text(label, "Show current player");
-		gtk_widget_set_sensitive(buttonWidget, false);
-	}
 }
 
 WindowContext openWindow(const char *layoutName, const char *windowName) {
@@ -171,9 +220,9 @@ void renderPlayerInfoWindow(WindowContext context, const Player *player) {
 		gtk_widget_set_visible(boxTechnical, true);
 		// TODO: hide GK box
 
-		GtkLabel *accelerationLabel = GTK_LABEL(
-			GTK_WIDGET(gtk_builder_get_object(context.builder, "label:attribute:technical:acceleration"))
-		);
+		// GtkLabel *accelerationLabel = GTK_LABEL(
+		// GTK_WIDGET(gtk_builder_get_object(context.builder, "label:attribute:technical:acceleration"))
+		// );
 		GtkLabel *cornersLabel = GTK_LABEL(
 			GTK_WIDGET(gtk_builder_get_object(context.builder, "label:attribute:technical:corners"))
 		);
@@ -218,49 +267,207 @@ void renderPlayerInfoWindow(WindowContext context, const Player *player) {
 		);
 
 		char buffer[8] = {0};
-		snprintf(buffer, 8, "%d", player->attributes[ATTR_ACC]);
-		gtk_label_set_text(accelerationLabel, buffer);
-
-		snprintf(buffer, 8, "%d", player->attributes[ATTR_COR]);
+		snprintf(buffer, 8, "%d", convertTo20Scale(player->attributes[ATTR_COR]));
 		gtk_label_set_text(cornersLabel, buffer);
 
-		snprintf(buffer, 8, "%d", player->attributes[ATTR_CRO]);
+		snprintf(buffer, 8, "%d", convertTo20Scale(player->attributes[ATTR_CRO]));
 		gtk_label_set_text(crossingLabel, buffer);
 
-		snprintf(buffer, 8, "%d", player->attributes[ATTR_DRI]);
+		snprintf(buffer, 8, "%d", convertTo20Scale(player->attributes[ATTR_DRI]));
 		gtk_label_set_text(dribblingLabel, buffer);
 
-		snprintf(buffer, 8, "%d", player->attributes[ATTR_FIN]);
+		snprintf(buffer, 8, "%d", convertTo20Scale(player->attributes[ATTR_FIN]));
 		gtk_label_set_text(finishingLabel, buffer);
 
-		snprintf(buffer, 8, "%d", player->attributes[ATTR_FIR]);
+		snprintf(buffer, 8, "%d", convertTo20Scale(player->attributes[ATTR_FIR]));
 		gtk_label_set_text(firstTouchLabel, buffer);
 
-		snprintf(buffer, 8, "%d", player->attributes[ATTR_FRE]);
+		snprintf(buffer, 8, "%d", convertTo20Scale(player->attributes[ATTR_FRE]));
 		gtk_label_set_text(freeKicksLabel, buffer);
 
-		snprintf(buffer, 8, "%d", player->attributes[ATTR_HEA]);
+		snprintf(buffer, 8, "%d", convertTo20Scale(player->attributes[ATTR_HEA]));
 		gtk_label_set_text(headingLabel, buffer);
 
-		snprintf(buffer, 8, "%d", player->attributes[ATTR_LON]);
+		snprintf(buffer, 8, "%d", convertTo20Scale(player->attributes[ATTR_LON]));
 		gtk_label_set_text(longShotsLabel, buffer);
 
-		snprintf(buffer, 8, "%d", player->attributes[ATTR_LTH]);
+		snprintf(buffer, 8, "%d", convertTo20Scale(player->attributes[ATTR_LTH]));
 		gtk_label_set_text(longThrowsLabel, buffer);
 
-		snprintf(buffer, 8, "%d", player->attributes[ATTR_MAR]);
+		snprintf(buffer, 8, "%d", convertTo20Scale(player->attributes[ATTR_MAR]));
 		gtk_label_set_text(markingLabel, buffer);
 
-		snprintf(buffer, 8, "%d", player->attributes[ATTR_PAS]);
+		snprintf(buffer, 8, "%d", convertTo20Scale(player->attributes[ATTR_PAS]));
 		gtk_label_set_text(passingLabel, buffer);
 
-		snprintf(buffer, 8, "%d", player->attributes[ATTR_PEN]);
+		snprintf(buffer, 8, "%d", convertTo20Scale(player->attributes[ATTR_PEN]));
 		gtk_label_set_text(penaltyTakingLabel, buffer);
 
-		snprintf(buffer, 8, "%d", player->attributes[ATTR_TCK]);
+		snprintf(buffer, 8, "%d", convertTo20Scale(player->attributes[ATTR_TCK]));
 		gtk_label_set_text(tacklingLabel, buffer);
 
-		snprintf(buffer, 8, "%d", player->attributes[ATTR_TEC]);
+		snprintf(buffer, 8, "%d", convertTo20Scale(player->attributes[ATTR_TEC]));
 		gtk_label_set_text(techniqueLabel, buffer);
 	}
+
+	// Mental
+	GtkLabel *aggressionLabel = GTK_LABEL(
+		GTK_WIDGET(gtk_builder_get_object(context.builder, "label:attribute:mental:aggression"))
+	);
+	GtkLabel *anticipationLabel = GTK_LABEL(
+		GTK_WIDGET(gtk_builder_get_object(context.builder, "label:attribute:mental:anticipation"))
+	);
+	GtkLabel *braveryLabel = GTK_LABEL(
+		GTK_WIDGET(gtk_builder_get_object(context.builder, "label:attribute:mental:bravery"))
+	);
+	GtkLabel *composureLabel = GTK_LABEL(
+		GTK_WIDGET(gtk_builder_get_object(context.builder, "label:attribute:mental:composure"))
+	);
+	GtkLabel *concentrationLabel = GTK_LABEL(
+		GTK_WIDGET(gtk_builder_get_object(context.builder, "label:attribute:mental:concentration"))
+	);
+	GtkLabel *decisionsLabel = GTK_LABEL(
+		GTK_WIDGET(gtk_builder_get_object(context.builder, "label:attribute:mental:decisions"))
+	);
+	GtkLabel *determinationLabel = GTK_LABEL(
+		GTK_WIDGET(gtk_builder_get_object(context.builder, "label:attribute:mental:determination"))
+	);
+	GtkLabel *flairLabel = GTK_LABEL(
+		GTK_WIDGET(gtk_builder_get_object(context.builder, "label:attribute:mental:flair"))
+	);
+	GtkLabel *leadershipLabel = GTK_LABEL(
+		GTK_WIDGET(gtk_builder_get_object(context.builder, "label:attribute:mental:leadership"))
+	);
+	GtkLabel *offTheBallLabel = GTK_LABEL(
+		GTK_WIDGET(gtk_builder_get_object(context.builder, "label:attribute:mental:off-the-ball"))
+	);
+	GtkLabel *positioningLabel = GTK_LABEL(
+		GTK_WIDGET(gtk_builder_get_object(context.builder, "label:attribute:mental:positioning"))
+	);
+	GtkLabel *teamworkLabel = GTK_LABEL(
+		GTK_WIDGET(gtk_builder_get_object(context.builder, "label:attribute:mental:teamwork"))
+	);
+	GtkLabel *visionLabel = GTK_LABEL(
+		GTK_WIDGET(gtk_builder_get_object(context.builder, "label:attribute:mental:vision"))
+	);
+	GtkLabel *workRateLabel = GTK_LABEL(
+		GTK_WIDGET(gtk_builder_get_object(context.builder, "label:attribute:mental:work-rate"))
+	);
+
+	char buffer[8] = {0};
+	snprintf(buffer, 8, "%d", convertTo20Scale(player->attributes[ATTR_AGG]));
+	gtk_label_set_text(aggressionLabel, buffer);
+
+	snprintf(buffer, 8, "%d", convertTo20Scale(player->attributes[ATTR_ANT]));
+	gtk_label_set_text(anticipationLabel, buffer);
+
+	snprintf(buffer, 8, "%d", convertTo20Scale(player->attributes[ATTR_BRA]));
+	gtk_label_set_text(braveryLabel, buffer);
+
+	snprintf(buffer, 8, "%d", convertTo20Scale(player->attributes[ATTR_CNT]));
+	gtk_label_set_text(concentrationLabel, buffer);
+
+	snprintf(buffer, 8, "%d", convertTo20Scale(player->attributes[ATTR_CMP]));
+	gtk_label_set_text(composureLabel, buffer);
+
+	snprintf(buffer, 8, "%d", convertTo20Scale(player->attributes[ATTR_DEC]));
+	gtk_label_set_text(decisionsLabel, buffer);
+
+	snprintf(buffer, 8, "%d", convertTo20Scale(player->attributes[ATTR_DET]));
+	gtk_label_set_text(determinationLabel, buffer);
+
+	snprintf(buffer, 8, "%d", convertTo20Scale(player->attributes[ATTR_FLA]));
+	gtk_label_set_text(flairLabel, buffer);
+
+	snprintf(buffer, 8, "%d", convertTo20Scale(player->attributes[ATTR_LDR]));
+	gtk_label_set_text(leadershipLabel, buffer);
+
+	snprintf(buffer, 8, "%d", convertTo20Scale(player->attributes[ATTR_OTB]));
+	gtk_label_set_text(offTheBallLabel, buffer);
+
+	snprintf(buffer, 8, "%d", convertTo20Scale(player->attributes[ATTR_POS]));
+	gtk_label_set_text(positioningLabel, buffer);
+
+	snprintf(buffer, 8, "%d", convertTo20Scale(player->attributes[ATTR_TEA]));
+	gtk_label_set_text(teamworkLabel, buffer);
+
+	snprintf(buffer, 8, "%d", convertTo20Scale(player->attributes[ATTR_VIS]));
+	gtk_label_set_text(visionLabel, buffer);
+
+	snprintf(buffer, 8, "%d", convertTo20Scale(player->attributes[ATTR_WOR]));
+	gtk_label_set_text(workRateLabel, buffer);
+
+	// Physical
+	GtkLabel *accelerationLabel = GTK_LABEL(
+		GTK_WIDGET(gtk_builder_get_object(context.builder, "label:attribute:physical:acceleration"))
+	);
+	GtkLabel *agilityLabel = GTK_LABEL(
+		GTK_WIDGET(gtk_builder_get_object(context.builder, "label:attribute:physical:agility"))
+	);
+	GtkLabel *balanceLabel = GTK_LABEL(
+		GTK_WIDGET(gtk_builder_get_object(context.builder, "label:attribute:physical:balance"))
+	);
+	GtkLabel *jumpingReachLabel = GTK_LABEL(
+		GTK_WIDGET(gtk_builder_get_object(context.builder, "label:attribute:physical:jumping-reach"))
+	);
+	GtkLabel *naturalFitnessLabel = GTK_LABEL(
+		GTK_WIDGET(gtk_builder_get_object(context.builder, "label:attribute:physical:natural-fitness"))
+	);
+	GtkLabel *paceLabel = GTK_LABEL(
+		GTK_WIDGET(gtk_builder_get_object(context.builder, "label:attribute:physical:pace"))
+	);
+	GtkLabel *staminaLabel = GTK_LABEL(
+		GTK_WIDGET(gtk_builder_get_object(context.builder, "label:attribute:physical:stamina"))
+	);
+	GtkLabel *strengthLabel = GTK_LABEL(
+		GTK_WIDGET(gtk_builder_get_object(context.builder, "label:attribute:physical:strength"))
+	);
+
+	snprintf(buffer, 8, "%d", convertTo20Scale(player->attributes[ATTR_ACC]));
+	gtk_label_set_text(accelerationLabel, buffer);
+
+	snprintf(buffer, 8, "%d", convertTo20Scale(player->attributes[ATTR_AGI]));
+	gtk_label_set_text(agilityLabel, buffer);
+
+	snprintf(buffer, 8, "%d", convertTo20Scale(player->attributes[ATTR_BAL]));
+	gtk_label_set_text(balanceLabel, buffer);
+
+	snprintf(buffer, 8, "%d", convertTo20Scale(player->attributes[ATTR_JUM]));
+	gtk_label_set_text(jumpingReachLabel, buffer);
+
+	snprintf(buffer, 8, "%d", convertTo20Scale(player->attributes[ATTR_NAT]));
+	gtk_label_set_text(naturalFitnessLabel, buffer);
+
+	snprintf(buffer, 8, "%d", convertTo20Scale(player->attributes[ATTR_PAC]));
+	gtk_label_set_text(paceLabel, buffer);
+
+	snprintf(buffer, 8, "%d", convertTo20Scale(player->attributes[ATTR_STA]));
+	gtk_label_set_text(staminaLabel, buffer);
+
+	snprintf(buffer, 8, "%d", convertTo20Scale(player->attributes[ATTR_STR]));
+	gtk_label_set_text(strengthLabel, buffer);
+
+	// To colour the backgrounds of attributes,
+	// get the max weight of the current groupedPosition weight system.
+	// Low is max * 0.15, mid is max * 0.5, high is above this
+}
+
+
+static void handleDisconnect(void) {
+	processContext.handle = NULL;
+
+	gameContext.gameVersion[0] = '\0';
+	gameContext.currentDate = (DayMonthYear){0};
+
+	updateUi();
+}
+
+static void handleConnect(void) {
+	LOG_INFO(
+		"Process opened with PID: %u (base module address of %p)",
+		processContext.pid,
+		(void*)processContext.moduleBaseAddress
+	);
+	updateUi();
+	update(NULL);
 }

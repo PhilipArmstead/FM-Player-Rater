@@ -54,7 +54,7 @@ SPDX-License-Identifier: GPL-3.0-or-later -->
 								</child>
 								<child>
 									<object class="GtkLabel" id="label:division-name">
-										<property name="label"></property>
+										<property name="label"/>
 										<property name="css-classes">dim-label</property>
 										<property name="halign">1</property>
 										<property name="xalign">0</property>
@@ -358,7 +358,6 @@ SPDX-License-Identifier: GPL-3.0-or-later -->
 												<child>
 													<object id="label:attribute:technical:dribbling" class="GtkLabel">
 														<property name="label"/>
-														<property name="css-classes">accent-orange</property>
 													</object>
 												</child>
 											</object>
