@@ -6,7 +6,5 @@
 #include <gtk/gtk.h>
 
 
-void connectToProcess(void);
 G_MODULE_EXPORT void callbackSearchByUid(void);
 G_MODULE_EXPORT void callbackShowCurrentPlayer(void);
-gboolean update(gpointer userData);

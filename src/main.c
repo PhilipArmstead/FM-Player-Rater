@@ -3,15 +3,12 @@
 
 #include <gtk/gtk.h>
 
-#include "app/callbacks.h"
 #include "app/ui.h"
 #include "core/logger.h"
 
 
 ProcessContext processContext = {0};
 GameContext gameContext = {0};
-GtkBuilder *builder;
-
 
 static void activate(GtkApplication *app) {
 	char pathToStylesheet[256] = {0};
@@ -26,6 +23,7 @@ static void activate(GtkApplication *app) {
 	g_object_unref(css_provider);
 
 	const WindowContext context = openWindow("show-players", "window:show-players");
+	gameContext.builder = context.builder;
 	gtk_window_set_application(GTK_WINDOW(context.window), GTK_APPLICATION(app));
 
 	// Periodic callbacks

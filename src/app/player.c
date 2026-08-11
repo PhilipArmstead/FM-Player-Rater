@@ -76,6 +76,7 @@ PartialPlayer getPlayerByIdPartial(const ProcessContext *processContext, uint32_
 }
 
 static PartialPlayer getPartialPlayer(void *handle, uint32_t personAddress) {
+	#ifndef PLAYER_BY_ID
 	const uint32_t playerAddress = personAddress + PLAYER_OFFSET_FROM_PERSON;
 
 	uint8_t ability[3];
@@ -92,6 +93,16 @@ static PartialPlayer getPartialPlayer(void *handle, uint32_t personAddress) {
 	getPersonForename(handle, personAddress, player.forename);
 	getPersonSurname(handle, personAddress, player.surname);
 	getPersonCommonName(handle, personAddress, player.commonName);
+	#else
+	const Player p = PLAYER_BY_ID;
+	PartialPlayer player = {
+		.personAddress = personAddress,
+		.uid = p.uid,
+	};
+	strncpy(player.forename, p.forename, sizeof(player.forename));
+	strncpy(player.surname, p.surname, sizeof(player.surname));
+	strncpy(player.commonName, p.commonName, sizeof(player.commonName));
+	#endif
 
 	if (player.commonName[0] == '\0') {
 		snprintf(player.commonName, sizeof(player.commonName), "%s %s", player.forename, player.surname);
@@ -117,6 +128,7 @@ uint32_t getPersonAddressFromPlayerAddress(void *handle, uint32_t playerAddress)
 }
 
 Player getPlayer(void *handle, bool skipValidCheck, uint32_t personAddress, uint32_t playerAddress) {
+	#ifndef PLAYER_BY_ID
 	if (!skipValidCheck && !isPlayerValid(handle, personAddress)) {
 		return (Player){0};
 	}
@@ -195,6 +207,9 @@ Player getPlayer(void *handle, bool skipValidCheck, uint32_t personAddress, uint
 	} else {
 		player.isHotProspect = false;
 	}
+	#else
+	const Player player = PLAYER_BY_ID;
+	#endif
 
 	return player;
 }
@@ -213,6 +228,7 @@ static bool isPersonAlsoStaff(void *handle, uint32_t personAddress) {
 }
 
 static bool isPlayerValid(void *handle, uint32_t personAddress) {
+	#ifndef MOCKS_MODE
 	const uint32_t playerAddress = personAddress + PLAYER_OFFSET_FROM_PERSON;
 	for (uint8_t i = 0; i < 5; ++i) {
 		const uint8_t attribute = readByte(handle, playerAddress + PLAYER_OFFSET_HIDDEN_ATTRIBUTES + i);
@@ -222,15 +238,20 @@ static bool isPlayerValid(void *handle, uint32_t personAddress) {
 	}
 
 	return isPersonValid(handle, personAddress);
+	#else
+	return true;
+	#endif
 }
 
 static bool isPersonValid(void *handle, uint32_t personAddress) {
+	#ifndef MOCKS_MODE
 	for (uint8_t i = 0; i < 8; ++i) {
 		const uint8_t attribute = readByte(handle, personAddress + PERSON_OFFSET_PERSONALITY + i);
 		if (!attribute || attribute > 20) {
 			return false;
 		}
 	}
+	#endif
 
 	return true;
 }
@@ -695,7 +716,7 @@ static inline int position_group_to_indices(PositionGrouped p, int out_indices[5
 	return n;
 }
 
-float getRatingPerPosition(const Player *player, PositionGrouped position) {
+static float getRatingPerPosition(const Player *player, PositionGrouped position) {
 	float attr_weights[ATTRIBUTE_COUNT];
 	float pers_weights[8];
 	float totalWeight = 1.0f;
@@ -740,7 +761,7 @@ float getRatingPerPosition(const Player *player, PositionGrouped position) {
 	return rating;
 }
 
-void getSortedPositionRatings(Player *player) {
+static void getSortedPositionRatings(Player *player) {
 	const char *labels[POSITION_GROUPED_COUNT] = {"GK", "FB", "CB", "WB", "DM", "MC", "W", "AM", "ST"};
 	for (int i = 0; i < POSITION_GROUPED_COUNT; ++i) {
 		player->ratings[i].value = getRatingPerPosition(player, (PositionGrouped)i);
@@ -763,6 +784,7 @@ void getSortedPositionRatings(Player *player) {
 }
 
 static uint32_t getPersonAddressFromUid(const ProcessContext *processContext, uint32_t uid) {
+	#ifndef PLAYER_BY_ID
 	// Iterate over all players to find one with the matching UID
 	uint8_t bytes[4];
 	readFromMemory(processContext->handle, processContext->moduleBaseAddress + PLAYER_COUNT_PTR_BASE, 4, bytes);
@@ -793,4 +815,7 @@ static uint32_t getPersonAddressFromUid(const ProcessContext *processContext, ui
 	}
 
 	return 0;
+	#else
+	return 0x5E18008;
+	#endif
 }

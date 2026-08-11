@@ -128,7 +128,6 @@ typedef struct {
 #define GAME_STATUS_STRING_BUFFER_SIZE 32
 
 typedef struct {
-	PartialPlayer currentlyViewedPlayer;
 	char gameVersion[GAME_STATUS_STRING_BUFFER_SIZE];
 	DayMonthYear currentDate;
 	GtkBuilder *builder;
