@@ -312,7 +312,7 @@ SPDX-License-Identifier: GPL-3.0-or-later -->
 										<property name="css-classes">attribute-list</property>
 										<property name="selection-mode">0</property>
 										<child>
-											<object class="GtkBox">
+											<object class="GtkBox" id="row:attribute:technical:corners">
 												<property name="css-classes">attr-row</property>
 												<child>
 													<object class="GtkLabel">
@@ -329,7 +329,7 @@ SPDX-License-Identifier: GPL-3.0-or-later -->
 											</object>
 										</child>
 										<child>
-											<object class="GtkBox">
+											<object class="GtkBox" id="row:attribute:technical:crossing">
 												<property name="css-classes">attr-row</property>
 												<child>
 													<object class="GtkLabel">
@@ -346,7 +346,7 @@ SPDX-License-Identifier: GPL-3.0-or-later -->
 											</object>
 										</child>
 										<child>
-											<object class="GtkBox">
+											<object class="GtkBox" id="row:attribute:technical:dribbling">
 												<property name="css-classes">attr-row</property>
 												<child>
 													<object class="GtkLabel">
@@ -363,7 +363,7 @@ SPDX-License-Identifier: GPL-3.0-or-later -->
 											</object>
 										</child>
 										<child>
-											<object class="GtkBox">
+											<object class="GtkBox" id="row:attribute:technical:finishing">
 												<property name="css-classes">attr-row</property>
 												<child>
 													<object class="GtkLabel">
@@ -380,7 +380,7 @@ SPDX-License-Identifier: GPL-3.0-or-later -->
 											</object>
 										</child>
 										<child>
-											<object class="GtkBox">
+											<object class="GtkBox" id="row:attribute:technical:first-touch">
 												<property name="css-classes">attr-row</property>
 												<child>
 													<object class="GtkLabel">
@@ -397,7 +397,7 @@ SPDX-License-Identifier: GPL-3.0-or-later -->
 											</object>
 										</child>
 										<child>
-											<object class="GtkBox">
+											<object class="GtkBox" id="row:attribute:technical:free-kicks">
 												<property name="css-classes">attr-row</property>
 												<child>
 													<object class="GtkLabel">
@@ -414,7 +414,7 @@ SPDX-License-Identifier: GPL-3.0-or-later -->
 											</object>
 										</child>
 										<child>
-											<object class="GtkBox">
+											<object class="GtkBox" id="row:attribute:technical:heading">
 												<property name="css-classes">attr-row</property>
 												<child>
 													<object class="GtkLabel">
@@ -431,7 +431,7 @@ SPDX-License-Identifier: GPL-3.0-or-later -->
 											</object>
 										</child>
 										<child>
-											<object class="GtkBox">
+											<object class="GtkBox" id="row:attribute:technical:long-shots">
 												<property name="css-classes">attr-row</property>
 												<child>
 													<object class="GtkLabel">
@@ -448,7 +448,7 @@ SPDX-License-Identifier: GPL-3.0-or-later -->
 											</object>
 										</child>
 										<child>
-											<object class="GtkBox">
+											<object class="GtkBox" id="row:attribute:technical:long-throws">
 												<property name="css-classes">attr-row</property>
 												<child>
 													<object class="GtkLabel">
@@ -465,7 +465,7 @@ SPDX-License-Identifier: GPL-3.0-or-later -->
 											</object>
 										</child>
 										<child>
-											<object class="GtkBox">
+											<object class="GtkBox" id="row:attribute:technical:marking">
 												<property name="css-classes">attr-row</property>
 												<child>
 													<object class="GtkLabel">
@@ -482,7 +482,7 @@ SPDX-License-Identifier: GPL-3.0-or-later -->
 											</object>
 										</child>
 										<child>
-											<object class="GtkBox">
+											<object class="GtkBox" id="row:attribute:technical:passing">
 												<property name="css-classes">attr-row</property>
 												<child>
 													<object class="GtkLabel">
@@ -499,7 +499,7 @@ SPDX-License-Identifier: GPL-3.0-or-later -->
 											</object>
 										</child>
 										<child>
-											<object class="GtkBox">
+											<object class="GtkBox" id="row:attribute:technical:penalty-taking">
 												<property name="css-classes">attr-row</property>
 												<child>
 													<object class="GtkLabel">
@@ -516,7 +516,7 @@ SPDX-License-Identifier: GPL-3.0-or-later -->
 											</object>
 										</child>
 										<child>
-											<object class="GtkBox">
+											<object class="GtkBox" id="row:attribute:technical:tackling">
 												<property name="css-classes">attr-row</property>
 												<child>
 													<object class="GtkLabel">
@@ -533,7 +533,7 @@ SPDX-License-Identifier: GPL-3.0-or-later -->
 											</object>
 										</child>
 										<child>
-											<object class="GtkBox">
+											<object class="GtkBox" id="row:attribute:technical:technique">
 												<property name="css-classes">attr-row</property>
 												<child>
 													<object class="GtkLabel">
@@ -576,7 +576,7 @@ SPDX-License-Identifier: GPL-3.0-or-later -->
 										<property name="css-classes">attribute-list</property>
 										<property name="selection-mode">0</property>
 										<child>
-											<object class="GtkBox">
+											<object class="GtkBox" id="row:attribute:mental:aggression">
 												<property name="css-classes">attr-row</property>
 												<child>
 													<object class="GtkLabel">
@@ -593,7 +593,7 @@ SPDX-License-Identifier: GPL-3.0-or-later -->
 											</object>
 										</child>
 										<child>
-											<object class="GtkBox">
+											<object class="GtkBox" id="row:attribute:mental:anticipation">
 												<property name="css-classes">attr-row</property>
 												<child>
 													<object class="GtkLabel">
@@ -610,7 +610,7 @@ SPDX-License-Identifier: GPL-3.0-or-later -->
 											</object>
 										</child>
 										<child>
-											<object class="GtkBox">
+											<object class="GtkBox" id="row:attribute:mental:bravery">
 												<property name="css-classes">attr-row</property>
 												<child>
 													<object class="GtkLabel">
@@ -627,7 +627,7 @@ SPDX-License-Identifier: GPL-3.0-or-later -->
 											</object>
 										</child>
 										<child>
-											<object class="GtkBox">
+											<object class="GtkBox" id="row:attribute:mental:composure">
 												<property name="css-classes">attr-row</property>
 												<child>
 													<object class="GtkLabel">
@@ -644,7 +644,7 @@ SPDX-License-Identifier: GPL-3.0-or-later -->
 											</object>
 										</child>
 										<child>
-											<object class="GtkBox">
+											<object class="GtkBox" id="row:attribute:mental:concentration">
 												<property name="css-classes">attr-row</property>
 												<child>
 													<object class="GtkLabel">
@@ -661,7 +661,7 @@ SPDX-License-Identifier: GPL-3.0-or-later -->
 											</object>
 										</child>
 										<child>
-											<object class="GtkBox">
+											<object class="GtkBox" id="row:attribute:mental:decisions">
 												<property name="css-classes">attr-row</property>
 												<child>
 													<object class="GtkLabel">
@@ -678,7 +678,7 @@ SPDX-License-Identifier: GPL-3.0-or-later -->
 											</object>
 										</child>
 										<child>
-											<object class="GtkBox">
+											<object class="GtkBox" id="row:attribute:mental:determination">
 												<property name="css-classes">attr-row</property>
 												<child>
 													<object class="GtkLabel">
@@ -695,7 +695,7 @@ SPDX-License-Identifier: GPL-3.0-or-later -->
 											</object>
 										</child>
 										<child>
-											<object class="GtkBox">
+											<object class="GtkBox" id="row:attribute:mental:flair">
 												<property name="css-classes">attr-row</property>
 												<child>
 													<object class="GtkLabel">
@@ -712,7 +712,7 @@ SPDX-License-Identifier: GPL-3.0-or-later -->
 											</object>
 										</child>
 										<child>
-											<object class="GtkBox">
+											<object class="GtkBox" id="row:attribute:mental:leadership">
 												<property name="css-classes">attr-row</property>
 												<child>
 													<object class="GtkLabel">
@@ -729,7 +729,7 @@ SPDX-License-Identifier: GPL-3.0-or-later -->
 											</object>
 										</child>
 										<child>
-											<object class="GtkBox">
+											<object class="GtkBox" id="row:attribute:mental:off-the-ball">
 												<property name="css-classes">attr-row</property>
 												<child>
 													<object class="GtkLabel">
@@ -746,7 +746,7 @@ SPDX-License-Identifier: GPL-3.0-or-later -->
 											</object>
 										</child>
 										<child>
-											<object class="GtkBox">
+											<object class="GtkBox" id="row:attribute:mental:positioning">
 												<property name="css-classes">attr-row</property>
 												<child>
 													<object class="GtkLabel">
@@ -763,7 +763,7 @@ SPDX-License-Identifier: GPL-3.0-or-later -->
 											</object>
 										</child>
 										<child>
-											<object class="GtkBox">
+											<object class="GtkBox" id="row:attribute:mental:teamwork">
 												<property name="css-classes">attr-row</property>
 												<child>
 													<object class="GtkLabel">
@@ -780,7 +780,7 @@ SPDX-License-Identifier: GPL-3.0-or-later -->
 											</object>
 										</child>
 										<child>
-											<object class="GtkBox">
+											<object class="GtkBox" id="row:attribute:mental:vision">
 												<property name="css-classes">attr-row</property>
 												<child>
 													<object class="GtkLabel">
@@ -797,7 +797,7 @@ SPDX-License-Identifier: GPL-3.0-or-later -->
 											</object>
 										</child>
 										<child>
-											<object class="GtkBox">
+											<object class="GtkBox" id="row:attribute:mental:work-rate">
 												<property name="css-classes">attr-row</property>
 												<child>
 													<object class="GtkLabel">
@@ -840,7 +840,7 @@ SPDX-License-Identifier: GPL-3.0-or-later -->
 										<property name="css-classes">attribute-list</property>
 										<property name="selection-mode">0</property>
 										<child>
-											<object class="GtkBox">
+											<object class="GtkBox" id="row:attribute:physical:acceleration">
 												<property name="css-classes">attr-row</property>
 												<child>
 													<object class="GtkLabel">
@@ -857,7 +857,7 @@ SPDX-License-Identifier: GPL-3.0-or-later -->
 											</object>
 										</child>
 										<child>
-											<object class="GtkBox">
+											<object class="GtkBox" id="row:attribute:physical:agility">
 												<property name="css-classes">attr-row</property>
 												<child>
 													<object class="GtkLabel">
@@ -874,7 +874,7 @@ SPDX-License-Identifier: GPL-3.0-or-later -->
 											</object>
 										</child>
 										<child>
-											<object class="GtkBox">
+											<object class="GtkBox" id="row:attribute:physical:balance">
 												<property name="css-classes">attr-row</property>
 												<child>
 													<object class="GtkLabel">
@@ -891,7 +891,7 @@ SPDX-License-Identifier: GPL-3.0-or-later -->
 											</object>
 										</child>
 										<child>
-											<object class="GtkBox">
+											<object class="GtkBox" id="row:attribute:physical:jumping-reach">
 												<property name="css-classes">attr-row</property>
 												<child>
 													<object class="GtkLabel">
@@ -908,7 +908,7 @@ SPDX-License-Identifier: GPL-3.0-or-later -->
 											</object>
 										</child>
 										<child>
-											<object class="GtkBox">
+											<object class="GtkBox" id="row:attribute:physical:natural-fitness">
 												<property name="css-classes">attr-row</property>
 												<child>
 													<object class="GtkLabel">
@@ -925,7 +925,7 @@ SPDX-License-Identifier: GPL-3.0-or-later -->
 											</object>
 										</child>
 										<child>
-											<object class="GtkBox">
+											<object class="GtkBox" id="row:attribute:physical:pace">
 												<property name="css-classes">attr-row</property>
 												<child>
 													<object class="GtkLabel">
@@ -942,7 +942,7 @@ SPDX-License-Identifier: GPL-3.0-or-later -->
 											</object>
 										</child>
 										<child>
-											<object class="GtkBox">
+											<object class="GtkBox" id="row:attribute:physical:stamina">
 												<property name="css-classes">attr-row</property>
 												<child>
 													<object class="GtkLabel">
@@ -959,7 +959,7 @@ SPDX-License-Identifier: GPL-3.0-or-later -->
 											</object>
 										</child>
 										<child>
-											<object class="GtkBox">
+											<object class="GtkBox" id="row:attribute:physical:strength">
 												<property name="css-classes">attr-row</property>
 												<child>
 													<object class="GtkLabel">

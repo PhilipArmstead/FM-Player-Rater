@@ -114,6 +114,6 @@ void getGameVersion(const ProcessContext *context, char *versionBuffer, const ui
 	);
 	versionBuffer[bufferSize - 1] = '\0';
 	#else
-	strncpy(versionBuffer, "FM 2024", bufferSize - 1);
+	strncpy(versionBuffer, "24.4.2+2081827 (m.e v24.2.0.0)", bufferSize - 1);
 	#endif
 }
