@@ -182,7 +182,28 @@ Player getPlayer(void *handle, bool skipValidCheck, uint32_t personAddress, uint
 	readFromMemory(handle, personAddress + PERSON_OFFSET_NATIONALITY, 4, bytes);
 	const uint32_t country = (uint32_t)hexBytesToInt(bytes, 4);
 	readFromMemory(handle, country + NATION_OFFSET_ROW_ID, 4, bytes);
-	player.nationIndex = (uint8_t)hexBytesToInt(bytes, 4);
+	player.nationality[0] = (uint8_t)hexBytesToInt(bytes, 4);
+
+	uint8_t nationalityIndex = 1;
+	readFromMemory(handle, personAddress + PERSON_OFFSET_RELATIONSHIPS, 4, bytes);
+	const uint32_t relationships = (uint32_t)hexBytesToInt(bytes, 4);
+	readFromMemory(handle, relationships, 4, bytes);
+	uint32_t relationshipStart = (uint32_t)hexBytesToInt(bytes, 4);
+	readFromMemory(handle, relationships + 0x08, 4, bytes);
+	const uint32_t relationshipEnd = (uint32_t)hexBytesToInt(bytes, 4);
+	while (relationshipStart < relationshipEnd && nationalityIndex < 4) {
+		readFromMemory(handle, relationshipStart + RELATIONSHIP_OFFSET_TYPE, 2, bytes);
+		const uint16_t type = (uint16_t)hexBytesToInt(bytes, 2);
+		if (type == 0x0908) {
+			readFromMemory(handle, relationshipStart + RELATIONSHIP_OFFSET_TARGET_ADDRESS, 4, bytes);
+			const uint32_t nationality = (uint32_t)hexBytesToInt(bytes, 4);
+			readFromMemory(handle, nationality + NATION_OFFSET_ROW_ID, 4, bytes);
+			player.nationality[nationalityIndex] = (uint8_t)hexBytesToInt(bytes, 4);
+
+			nationalityIndex++;
+		}
+		relationshipStart += 0x10;
+	}
 
 	// Reputation
 	readFromMemory(handle, playerAddress + PLAYER_OFFSET_HOME_REPUTATION, 6, bytes);

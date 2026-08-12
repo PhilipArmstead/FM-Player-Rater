@@ -192,13 +192,22 @@ void renderPlayerInfoWindow(WindowContext context, const Player *player) {
 
 
 	// Player nationality
-	// TODO: show all nationalities
-	GtkBox *nationalityBox = GTK_BOX(GTK_WIDGET(gtk_builder_get_object(context.builder, "label:nationality")));
-	char pathToFlag[256] = {0};
-	snprintf(pathToFlag, sizeof(pathToFlag), "%s/assets/flags/%s.png", REPO_ROOT_DIR, player->nationality.code);
-	GtkWidget *flagImage = gtk_image_new_from_file(pathToFlag);
-	gtk_box_append(nationalityBox, flagImage);
-	gtk_widget_set_tooltip_text(flagImage, player->nationality.name);
+	uint8_t nationalityIndex = 0;
+	while (nationalityIndex < 4 && player->nationality[nationalityIndex].name[0] != '\0') {
+		GtkBox *nationalityBox = GTK_BOX(GTK_WIDGET(gtk_builder_get_object(context.builder, "label:nationality")));
+		char pathToFlag[256] = {0};
+		snprintf(
+			pathToFlag,
+			sizeof(pathToFlag),
+			"%s/assets/flags/%s.png",
+			REPO_ROOT_DIR,
+			player->nationality[nationalityIndex].code
+		);
+		GtkWidget *flagImage = gtk_image_new_from_file(pathToFlag);
+		gtk_box_append(nationalityBox, flagImage);
+		gtk_widget_set_tooltip_text(flagImage, player->nationality[nationalityIndex].name);
+		nationalityIndex++;
+	}
 
 	// Club name
 	GtkLabel *clubNameLabel = GTK_LABEL(GTK_WIDGET(gtk_builder_get_object(context.builder, "label:club-name")));
