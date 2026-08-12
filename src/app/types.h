@@ -80,6 +80,7 @@ typedef struct {
 	char forename[PERSON_FORENAME_LENGTH];
 	char surname[PERSON_SURNAME_LENGTH];
 	char commonName[PERSON_COMMON_NAME_LENGTH];
+	uint8_t nationalities[4];
 	uint32_t rowId;
 	uint32_t rid;
 	uint32_t uid;
@@ -99,7 +100,6 @@ typedef struct {
 	uint8_t ca;
 	uint8_t pa;
 	uint8_t personality[8];
-	uint8_t nationIndex;
 	bool canDevelopQuickly;
 	bool isHotProspect;
 } Player;
