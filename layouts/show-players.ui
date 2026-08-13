@@ -97,14 +97,6 @@ SPDX-License-Identifier: GPL-3.0-or-later -->
 								<property name="hexpand">true</property>
 							</object>
 						</child>
-						<!--						<child>-->
-						<!--							<object class="GtkLabel">-->
-						<!--								<property name="label">💰 51,079</property>-->
-						<!--								<style>-->
-						<!--									<class name="budget"/>-->
-						<!--								</style>-->
-						<!--							</object>-->
-						<!--						</child>-->
 						<child>
 							<object class="GtkLabel" id="label:date">
 								<property name="label"/>

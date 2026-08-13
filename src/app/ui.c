@@ -43,8 +43,64 @@ gboolean update(gpointer userData) {
 	return G_SOURCE_CONTINUE;
 }
 
+// static bool hasPolledNationalities = false;
+
 void updateUi(void) {
 	updateGameStatus();
+
+	// if (!hasPolledNationalities) {
+	// 	uint8_t bytes[4];
+	// 	hasPolledNationalities = true;
+	// 	readFromMemory(
+	// 		processContext.handle,
+	// 		processContext.moduleBaseAddress + COMPETITION_LIST_PTR_BASE,
+	// 		4,
+	// 		bytes
+	// 	);
+	// 	const uint32_t allCompetitions = (uint32_t)hexBytesToInt(bytes, 4);
+	// 	char longestCompetitionName[64] = {0};
+	// 	uint32_t a = 0;
+	// 	size_t longestCompetitionNameLength = 0;
+	//
+	// 	for (uint8_t i = 0; i < 200; ++i) {
+	// 		readFromMemory(processContext.handle, allCompetitions + COMPETITION_LIST_PTR_OFFSET_1, 4, bytes);
+	// 		readFromMemory(
+	// 			processContext.handle,
+	// 			(uint32_t)hexBytesToInt(bytes, 4) + COMPETITION_LIST_PTR_OFFSET_2,
+	// 			4,
+	// 			bytes
+	// 		);
+	// 		readFromMemory(
+	// 			processContext.handle,
+	// 			(uint32_t)hexBytesToInt(bytes, 4) + COMPETITION_LIST_PTR_OFFSET_3 * i,
+	// 			4,
+	// 			bytes
+	// 		);
+	// 		const uint32_t competitionAddress = (uint32_t)hexBytesToInt(bytes, 4);
+	// 		char name[CLUB_NAME_LENGTH] = {0};
+	// 		readFromMemory(processContext.handle, competitionAddress + COMPETITION_OFFSET_LONG_NAME_ADDRESS, 4, bytes);
+	// 		readFromMemory(
+	// 			processContext.handle,
+	// 			hexBytesToInt(bytes, 4) + GENERAL_OFFSET_NAME,
+	// 			CLUB_NAME_LENGTH,
+	// 			(uint8_t*)name
+	// 		);
+	// 		const size_t length = strlen(name);
+	// 		if (length > longestCompetitionNameLength) {
+	// 			longestCompetitionNameLength = length;
+	// 			strncpy(longestCompetitionName, name, CLUB_NAME_LENGTH - 1);
+	// 			longestCompetitionName[length] = '\0'; // Ensure null-termination
+	// 			a = competitionAddress;
+	// 		}
+	// 	}
+	//
+	// 	LOG_INFO(
+	// 		"Longest Competition Name: %s (%d chars, Address: 0x%" PRIx32 ")",
+	// 		longestCompetitionName,
+	// 		longestCompetitionNameLength,
+	// 		a
+	// 	);
+	// }
 }
 
 static inline void updateWhileConnected(void) {
@@ -191,7 +247,7 @@ void renderPlayerInfoWindow(WindowContext context, const Player *player) {
 	gtk_widget_set_visible(isHotProspect, player->isHotProspect);
 
 
-	// Player nationality
+	// Player nationalities
 	uint8_t nationalityIndex = 0;
 	while (nationalityIndex < 4 && player->nationality[nationalityIndex].name[0] != '\0') {
 		GtkBox *nationalityBox = GTK_BOX(GTK_WIDGET(gtk_builder_get_object(context.builder, "label:nationality")));

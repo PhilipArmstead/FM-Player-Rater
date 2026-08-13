@@ -44,6 +44,5 @@ int main(const int argc, char **argv) {
 	return status;
 }
 
-// TODO: print player name + age in UI
-// TODO: print player attributes, ratings, positions, condition
+// TODO: print player ratings, positions, condition
 // TODO: pop out player details in to new window? even for current player?

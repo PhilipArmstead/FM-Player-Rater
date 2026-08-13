@@ -24,7 +24,7 @@
 	.commonName = "Robert Lewandowski", \
 	.forename = "Robert", \
 	.surname = "Lewandowski", \
-	.nationality = { .name = "Poland", .code = "POL" }, \
+	.nationality = { {.name = "Poland", .code = "POL"} }, \
 	.rowId = 1152, \
 	.rid = 719601, \
 	.uid = 719601, \
@@ -47,5 +47,4 @@
 	.isHotProspect = false, \
 	})
 // todo fix club
-// todo find longest people names
 #endif
