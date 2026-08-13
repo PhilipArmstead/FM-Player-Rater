@@ -89,6 +89,12 @@
 // Longest club name: Club de FÃºtbol Lobos de la BenemÃ©rita Universidad AutÃ³noma de Puebla, 71 chars
 // Longest club short name: Persatuan Sepakbola Indonesia Karawang, 38 chars
 
+#define COMPETITION_LIST_PTR_BASE 0x0642ECE8
+#define COMPETITION_LIST_PTR_OFFSET_1 0x80
+#define COMPETITION_LIST_PTR_OFFSET_2 0x00
+#define COMPETITION_LIST_PTR_OFFSET_3 0x08
+// Jump to COMPETITION_LIST_PTR_OFFSET_3 * index to get the competition address
+
 // Day is represented with 1 byte and a 1 bit in the following byte to represent values > 255
 // Time is represented as 1 byte (even bits only) determining the number of 15 minute periods since 6AM
 // (plus 1 because 0 is midnight)
@@ -106,10 +112,13 @@
 // 2 bytes for day of the year, 2 bytes for year
 #define PERSON_OFFSET_DOB 0x44
 // (+0x04 from here)
+// Longest common name: 23 chars, Valentín Mariano José
 #define PERSON_OFFSET_FORENAME 0x58
 // (+0x04 from here)
+// Longest common name: 32 chars, Aparecido Leite de Souza Júnior
 #define PERSON_OFFSET_SURNAME 0x60
 // (+0x04 from here)
+// Longest common name: 30 chars, Steinþór Freyr Þorsteinsson
 #define PERSON_OFFSET_COMMON_NAME 0x68
 #define PERSON_OFFSET_NATIONALITY 0x70
 #define PERSON_OFFSET_PERSONALITY 0x78
@@ -373,8 +382,10 @@
 #define COMPETITION_OFFSET_ROW_ID 0x08
 #define COMPETITION_OFFSET_UNIQUE_ID 0x0C
 #define COMPETITION_OFFSET_RANDOM_ID 0x10
+// Longest name: The Emperor's Cup JFA All-Japan Soccer Championship Tournament, 62 chars
 #define COMPETITION_OFFSET_LONG_NAME_ADDRESS 0x40
 // (+0x04 from here)
+// Longest name: Liga Profesional de Primera División Apertura, 46 chars
 #define COMPETITION_OFFSET_SHORT_NAME_ADDRESS 0x48
 #define COMPETITION_OFFSET_CONTINENT_ADDRESS 0x58
 #define COMPETITION_OFFSET_NATION_ADDRESS 0x60
