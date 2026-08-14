@@ -9,17 +9,7 @@
 #ifdef MOCKS_MODE
 #define PLAYER_BY_ID ((Player){ \
 	.attributes = {40, 65, 90, 85, 60, 35, 90, 65, 95, 35, 70, 10, 20, 10, 15, 15, 5, 85, 85, 10, 35, 5, 90, 80, 65, 100, 70, 15, 70, 75, 15, 15, 10, 10, 65, 75, 80, 80, 70, 75, 75, 40, 90, 75, 75, 70, 65, 75, 10, 40, 90, 90, 85, 85 }, \
-	.ratings = { \
-		{ .value = 75.4058762, .position = "ST" }, \
-		{ .value = 0, .position = "FB" }, \
-		{ .value = 0, .position = "CB" }, \
-		{ .value = 0, .position = "WB" }, \
-		{ .value = 0, .position = "DM" }, \
-		{ .value = 0, .position = "MC" }, \
-		{ .value = 0, .position = "W" }, \
-		{ .value = 0, .position = "AM" }, \
-		{ .value = 0, .position = "GK" }, \
-	}, \
+	.ratings = { { .value = 75.4058762, .position = POSITION_GROUPED_ST } }, \
 	.club = { .name = "Barcelona", .divisionName = "LALIGA HYPERMOTION", .address = 0x5b0eefe0, .teamType = 0 }, \
 	.commonName = "Robert Lewandowski", \
 	.forename = "Robert", \

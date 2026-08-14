@@ -30,7 +30,7 @@ typedef struct {
 } ProcessContext;
 
 // Application
-typedef enum {
+typedef enum PositionGrouped {
 	POSITION_GROUPED_GK = 0,
 	POSITION_GROUPED_FB,
 	POSITION_GROUPED_CB,
@@ -63,7 +63,7 @@ typedef struct {
 
 typedef struct {
 	float value;
-	char position[2];
+	PositionGrouped position;
 } Rating;
 
 // TODO: note I only tested players, not all people

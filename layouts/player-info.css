@@ -100,18 +100,14 @@
 	min-width: 90px;
 }
 
-.role-bar {
-	min-height: 6px;
-}
-
-.role-bar progress {
-	background-color: #e08a2c;
-	border-radius: 4px;
+.role-bar, .role-bar progress {
+	border: 0;
+	padding: 0;
 }
 
 .role-bar trough {
-	background-color: alpha(#fff, 0.08);
-	border-radius: 4px;
+	border: none;
+	border-radius: 0;
 }
 
 .brand-label {
