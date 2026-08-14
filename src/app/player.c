@@ -792,18 +792,24 @@ static float getRatingPerPosition(const Player *player, PositionGrouped position
 }
 
 static void getSortedPositionRatings(Player *player) {
-	const char *labels[POSITION_GROUPED_COUNT] = {"GK", "FB", "CB", "WB", "DM", "MC", "W", "AM", "ST"};
-	for (int i = 0; i < POSITION_GROUPED_COUNT; ++i) {
-		player->ratings[i].value = getRatingPerPosition(player, (PositionGrouped)i);
-		player->ratings[i].position[0] = labels[i][0];
-		player->ratings[i].position[1] = labels[i][1] ? labels[i][1] : '\0';
+	uint8_t i = 0;
+	uint8_t j = 0;
+	while (i < POSITION_GROUPED_COUNT) {
+		const float value = getRatingPerPosition(player, (PositionGrouped)i);
+		if (value >= 0.f) {
+			player->ratings[j].value = value;
+			player->ratings[j].position = i;
+			++j;
+		}
 	}
 
 	/* simple selection sort descending */
-	for (int i = 0; i < POSITION_GROUPED_COUNT; ++i) {
-		int best = i;
-		for (int j = i + 1; j < POSITION_GROUPED_COUNT; ++j) {
-			if (player->ratings[j].value > player->ratings[best].value) best = j;
+	for (i = 0; i < POSITION_GROUPED_COUNT; ++i) {
+		uint8_t best = i;
+		for (j = i + 1; j < POSITION_GROUPED_COUNT; ++j) {
+			if (player->ratings[j].value > player->ratings[best].value) {
+				best = j;
+			}
 		}
 		if (best != i) {
 			const Rating tmp = player->ratings[i];

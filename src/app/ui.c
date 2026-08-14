@@ -353,6 +353,56 @@ void renderPlayerInfoWindow(WindowContext context, const Player *player) {
 	setRowTextAndHighlight("attribute:physical:pace", ATTR_PAC);
 	setRowTextAndHighlight("attribute:physical:stamina", ATTR_STA);
 	setRowTextAndHighlight("attribute:physical:strength", ATTR_STR);
+
+	// Ratings
+	{
+		static const char *labels[POSITION_GROUPED_COUNT] = {
+			"Goalkeeper",
+			"Full back",
+			"Centre back",
+			"Wing back",
+			"Defensive midfielder",
+			"Midfielder",
+			"Winger",
+			"Attacking midfielder",
+			"Striker"
+		};
+		GtkBox *boxRoles = GTK_BOX(GTK_WIDGET(gtk_builder_get_object(context.builder, "box:top-roles")));
+		uint8_t i = 0;
+		while (i < POSITION_GROUPED_COUNT && player->ratings[i].value > 0.f) {
+			GtkWidget *parent = gtk_box_new(GTK_ORIENTATION_VERTICAL, 2);
+			gtk_box_append(boxRoles, parent);
+
+			GtkWidget *labelContainer = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 0);
+			GtkWidget *roleLabel = gtk_label_new(labels[player->ratings[i].position]);
+			gtk_label_set_xalign(GTK_LABEL(roleLabel), 0);
+			gtk_widget_add_css_class(roleLabel, "heading");
+			gtk_widget_set_hexpand(roleLabel, true);
+			gtk_box_append(GTK_BOX(labelContainer), roleLabel);
+
+			char valueBuffer[8] = {0};
+			snprintf(valueBuffer, 8, "%.1f", player->ratings[i].value);
+			GtkWidget *roleValue = gtk_label_new(valueBuffer);
+			gtk_widget_add_css_class(roleValue, "heading");
+			gtk_widget_add_css_class(roleValue, "accent-orange");
+			gtk_box_append(GTK_BOX(labelContainer), roleValue);
+
+			GtkWidget *progressBar = gtk_progress_bar_new();
+			gtk_progress_bar_set_fraction(GTK_PROGRESS_BAR(progressBar), player->ratings[i].value / 100.0f);
+			gtk_widget_add_css_class(progressBar, "role-bar");
+
+			gtk_box_append(GTK_BOX(parent), labelContainer);
+			gtk_box_append(GTK_BOX(parent), progressBar);
+			//  child: GtkBox
+			//    child: GtkLabel
+			//    child: GtkLabel
+			//    value: value
+			//  child: GtkProgressBar
+			//  <property name="fraction">value as float, normalise to 1.0</property>
+
+			i++;
+		}
+	}
 }
 
 
