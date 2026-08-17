@@ -1,289 +1,287 @@
 window,
 .app-root {
-    background-color: #0f1216;
-    color: #d7dbe0;
-    font-family: "Segoe UI", "Helvetica Neue", sans-serif;
-    font-size: 12px;
+	background-color: #0f1216;
+	color: #d7dbe0;
+	font-family: "Segoe UI", "Helvetica Neue", sans-serif;
+	font-size: 12px;
 }
 
 headerbar {
-    background-color: #0b0e11;
-    color: #d7dbe0;
-    min-height: 30px;
+	background: #0b0e11;
+	color: #d7dbe0;
+	min-height: 30px;
 }
 
 headerbar .title {
-    font-weight: bold;
+	font-weight: bold;
 }
 
-/* ---- top navigation bar ---- */
 .topbar {
-    background-color: #14181d;
-    padding: 6px 10px;
-    border-bottom: 1px solid #232a31;
+	background-color: #14181d;
+	border-bottom: 1px solid #232a31;
+	padding: 6px 10px;
 }
 
 .brand {
-    font-weight: bold;
-    color: #ffffff;
-    margin: 0 6px;
+	color: #fff;
+	font-weight: bold;
+	margin: 0 6px;
 }
 
 .icon-btn {
-    min-width: 22px;
-    min-height: 22px;
-    padding: 2px;
-    color: #9aa4ad;
-    background: transparent;
-    border: none;
-    box-shadow: none;
+	background: transparent;
+	border: none;
+	box-shadow: none;
+	color: #9aa4ad;
+	min-height: 22px;
+	min-width: 22px;
+	padding: 2px;
 }
 
 .icon-btn:hover {
-    color: #ffffff;
+	color: #fff;
 }
 
 .nav-tab {
-    background: transparent;
-    border: none;
-    box-shadow: none;
-    color: #aab2ba;
-    padding: 4px 10px;
-    border-radius: 4px;
+	background: transparent;
+	border: none;
+	border-radius: 4px;
+	box-shadow: none;
+	color: #aab2ba;
+	padding: 4px 10px;
 }
 
 .nav-tab:hover {
-    color: #ffffff;
+	color: #fff;
 }
 
 .nav-tab-active {
-    background-color: #2f6fed;
-    color: #ffffff;
+	background-color: #2f6fed;
+	color: #fff;
 }
 
 .version, .date {
-    color: #9aa4ad;
+	color: #9aa4ad;
 }
 
 .new-data-btn {
-    background-color: #1f9d55;
-    color: #ffffff;
-    border: none;
-    border-radius: 4px;
-    padding: 4px 12px;
-    font-weight: bold;
+	background-color: #1f9d55;
+	border: none;
+	border-radius: 4px;
+	color: #fff;
+	font-weight: bold;
+	padding: 4px 12px;
 }
 
 .new-data-btn:hover {
-    background-color: #24b062;
+	background-color: #24b062;
 }
 
 .avatar {
-    color: #d24d57;
+	color: #d24d57;
 }
 
 /* ---- filter chips bar ---- */
 .filterbar {
-    background-color: #10141a;
-    padding: 6px 12px;
-    border-bottom: 1px solid #232a31;
+	background-color: #10141a;
+	border-bottom: 1px solid #232a31;
+	padding: 6px 12px;
 }
 
 .results-count {
-    color: #7f8a93;
-    margin-right: 6px;
+	color: #7f8a93;
+	margin-right: 6px;
 }
 
 .chip {
-    background-color: #1c2530;
-    border: 1px solid #2a3542;
-    border-radius: 12px;
-    padding: 2px 8px;
+	background-color: #1c2530;
+	border: 1px solid #2a3542;
+	border-radius: 12px;
+	padding: 2px 8px;
 }
 
 .chip-text {
-    color: #c9d1d9;
+	color: #c9d1d9;
 }
 
 .chip-x {
-    color: #7f8a93;
+	color: #7f8a93;
 }
 
 .link-btn {
-    background: transparent;
-    border: none;
-    box-shadow: none;
-    color: #4a90e2;
-    padding: 2px 6px;
+	background: transparent;
+	border: none;
+	box-shadow: none;
+	color: #4a90e2;
+	padding: 2px 6px;
 }
 
 /* ---- sidebar ---- */
 .sidebar {
-    background-color: #10141a;
-    padding: 10px;
-    border-right: 1px solid #232a31;
+	background-color: #10141a;
+	border-right: 1px solid #232a31;
+	padding: 10px;
 }
 
 .sidebar-search {
-    background-color: #1a2028;
-    color: #d7dbe0;
-    border: 1px solid #2a3542;
-    border-radius: 4px;
-    min-height: 26px;
+	background-color: #1a2028;
+	border: 1px solid #2a3542;
+	border-radius: 4px;
+	color: #d7dbe0;
+	min-height: 26px;
 }
 
 .sidebar-heading {
-    color: #6f7a83;
-    font-size: 10px;
-    font-weight: bold;
-    margin-top: 8px;
+	color: #6f7a83;
+	font-size: 10px;
+	font-weight: bold;
+	margin-top: 8px;
 }
 
 .save-filter-btn,
 .attr-filter-btn,
 .clear-filters-btn {
-    background-color: #1a2028;
-    color: #c9d1d9;
-    border: 1px solid #2a3542;
-    border-radius: 4px;
-    padding: 5px 8px;
+	background-color: #1a2028;
+	border: 1px solid #2a3542;
+	border-radius: 4px;
+	color: #c9d1d9;
+	padding: 5px 8px;
 }
 
 .attr-filter-btn {
-    background-color: #182a3d;
-    border-color: #24455f;
+	background-color: #182a3d;
+	border-color: #24455f;
 }
 
 .clear-filters-btn {
-    background-color: #182233;
+	background-color: #182233;
 }
 
 .sidebar-section-header {
-    padding: 8px 2px;
-    border-bottom: 1px solid #1c232b;
+	border-bottom: 1px solid #1c232b;
+	padding: 8px 2px;
 }
 
 .section-title {
-    color: #cdd5dd;
-    font-weight: bold;
-    font-size: 11px;
+	color: #cdd5dd;
+	font-size: 11px;
+	font-weight: bold;
 }
 
 .section-chevron {
-    color: #7f8a93;
+	color: #7f8a93;
 }
 
 .section-title.quality {
-    color: #4a90e2;
+	color: #4a90e2;
 }
 
 .quality-body {
-    padding: 4px 0 8px 0;
+	padding: 4px 0 8px 0;
 }
 
 .quality-row {
-    padding: 2px 0;
+	padding: 2px 0;
 }
 
 .quality-label {
-    color: #aab2ba;
-    min-width: 34px;
+	color: #aab2ba;
+	min-width: 34px;
 }
 
 .quality-dash {
-    color: #57606a;
+	color: #57606a;
 }
 
 .quality-entry {
-    background-color: #1a2028;
-    color: #d7dbe0;
-    border: 1px solid #2a3542;
-    border-radius: 3px;
-    min-height: 20px;
-    padding: 0 4px;
+	background-color: #1a2028;
+	border: 1px solid #2a3542;
+	border-radius: 3px;
+	color: #d7dbe0;
+	min-height: 20px;
+	padding: 0 4px;
 }
 
-/* ---- player table ---- */
 .table-scroll {
-    background-color: #0f1216;
+	background-color: #0f1216;
 }
 
 .player-table {
-    background-color: #0f1216;
+	background-color: #0f1216;
 }
 
 .th {
-    color: #7f8a93;
-    font-size: 10px;
-    font-weight: bold;
-    padding: 8px 10px;
-    border-bottom: 1px solid #2a3542;
+	border-bottom: 1px solid #2a3542;
+	color: #7f8a93;
+	font-size: 10px;
+	font-weight: bold;
+	padding: 8px 10px;
 }
 
 .tcell {
-    padding: 6px 10px;
-    color: #c2c9d0;
-    border-bottom: 1px solid #171d24;
+	border-bottom: 1px solid #171d24;
+	color: #c2c9d0;
+	padding: 6px 10px;
 }
 
 .trow-odd {
-    background-color: #0f1216;
+	background-color: #0f1216;
 }
 
 .trow-even {
-    background-color: #12171d;
+	background-color: #12171d;
 }
 
 .tname {
-    color: #e6eaee;
-    font-weight: 600;
+	color: #e6eaee;
+	font-weight: 600;
 }
 
 .tname.name-link {
-    color: #4a90e2;
+	color: #4a90e2;
 }
 
 /* CA / PA numbers are green in the reference */
 .tca, .tpa {
-    color: #4caf6d;
-    font-weight: 600;
+	color: #4caf6d;
+	font-weight: 600;
 }
 
 /* interest pills */
 .pill {
-    border-radius: 3px;
-    padding: 1px 8px;
-    font-size: 10px;
-    font-weight: bold;
-    color: #ffffff;
+	border-radius: 3px;
+	color: #fff;
+	font-size: 10px;
+	font-weight: bold;
+	padding: 1px 8px;
 }
 
 .pill-no {
-    background-color: #3a4450;
-    color: #c9d1d9;
+	background-color: #3a4450;
+	color: #c9d1d9;
 }
 
 .pill-fair {
-    background-color: #7a5c1e;
-    color: #ffd98a;
+	background-color: #7a5c1e;
+	color: #ffd98a;
 }
 
 .pill-high {
-    background-color: #1f6b3a;
-    color: #a8f0c4;
+	background-color: #1f6b3a;
+	color: #a8f0c4;
 }
 
 .pill-low {
-    background-color: #6b3a1f;
-    color: #ffc9a8;
+	background-color: #6b3a1f;
+	color: #ffc9a8;
 }
 
 .pill-unknown {
-    background-color: #3a4450;
-    color: #c9d1d9;
+	background-color: #3a4450;
+	color: #c9d1d9;
 }
 
 .pill-loan {
-    background-color: #6b5a1f;
-    color: #ffe9a8;
+	background-color: #6b5a1f;
+	color: #ffe9a8;
 }

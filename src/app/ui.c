@@ -393,12 +393,6 @@ void renderPlayerInfoWindow(WindowContext context, const Player *player) {
 
 			gtk_box_append(GTK_BOX(parent), labelContainer);
 			gtk_box_append(GTK_BOX(parent), progressBar);
-			//  child: GtkBox
-			//    child: GtkLabel
-			//    child: GtkLabel
-			//    value: value
-			//  child: GtkProgressBar
-			//  <property name="fraction">value as float, normalise to 1.0</property>
 
 			i++;
 		}
