@@ -2,6 +2,8 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 
 #include "callbacks.h"
+
+#include "app/data.h"
 #include "app/game-status.h"
 #include "app/player.h"
 #include "app/ui.h"
@@ -18,6 +20,7 @@ static void handleDisconnect(void);
 static void handleConnect(void);
 
 void connectToProcess(void) {
+	clearCaches(&gameContext);
 	platform_openProcess(&processContext);
 
 	if (processContext.handle != NULL) {
@@ -128,4 +131,7 @@ static void handleConnect(void) {
 	);
 	updateUi();
 	update(NULL);
+
+	// TODO: multithread this?
+	cacheNations(processContext, &gameContext);
 }

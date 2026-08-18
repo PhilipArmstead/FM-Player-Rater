@@ -17,3 +17,6 @@ void writeToMemory(void *handle, uintptr_t address, size_t length, const uint8_t
 
 // Process
 void platform_openProcess(ProcessContext *context);
+
+// Time
+int64_t platform_getMicroseconds(void);
