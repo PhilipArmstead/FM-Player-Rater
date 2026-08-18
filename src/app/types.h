@@ -48,10 +48,12 @@ typedef struct {
 	uint8_t teamType;
 } Club;
 
+// "Saint Vincent and the Grenadines" is the longest at 32 bytes
+#define MAX_NATION_STRING_LENGTH 32
+
 typedef struct {
-	char name[28];
-	char code[4];
-} Nationality;
+	char name[MAX_NATION_STRING_LENGTH];
+} Nation;
 
 typedef struct {
 	float value;
@@ -65,7 +67,6 @@ typedef struct {
 	char commonName[64];
 	char forename[32];
 	char surname[32];
-	Nationality nationality;
 	uint32_t rowId;
 	uint32_t rid;
 	uint32_t uid;
@@ -84,6 +85,7 @@ typedef struct {
 	uint8_t ca;
 	uint8_t pa;
 	uint8_t personality[8];
+	uint8_t nationIndex;
 	bool canDevelopQuickly;
 	bool isHotProspect;
 } Player;
@@ -115,4 +117,6 @@ typedef struct {
 	PartialPlayer currentlyViewedPlayer;
 	char gameVersion[GAME_STATUS_STRING_BUFFER_SIZE];
 	DayMonthYear currentDate;
+	Nation *nations;
+	uint64_t nationCount;
 } GameContext;

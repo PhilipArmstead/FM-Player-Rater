@@ -143,4 +143,12 @@ void platform_openProcess(ProcessContext *context) {
 	context->pid = pid;
 	context->moduleBaseAddress = baseAddr;
 }
+
+// Time
+int64_t platform_getMicroseconds(void) {
+	LARGE_INTEGER freq, count;
+	QueryPerformanceFrequency(&freq);
+	QueryPerformanceCounter(&count);
+	return count.QuadPart * 1000000 / freq.QuadPart;
+}
 #endif
