@@ -26,6 +26,31 @@
 #define GAME_VERSION_PTR_OFFSET_1 0x88
 #define GAME_VERSION_PTR_OFFSET_2 0x04
 
+#define COMPETITION_LIST_PTR_BASE 0x0642ECE8
+#define COMPETITION_LIST_PTR_OFFSET_1 0x80
+#define COMPETITION_LIST_PTR_OFFSET_2 0x00
+#define COMPETITION_LIST_PTR_OFFSET_3 0x08
+// Jump to COMPETITION_LIST_PTR_OFFSET_3 * index to get the competition address
+
+#define CONTINENT_LIST_PTR_BASE 0x0642ECF0
+#define CONTINENT_LIST_PTR_OFFSET_1 0x80
+#define CONTINENT_LIST_PTR_OFFSET_2 0x00
+#define CONTINENT_LIST_PTR_OFFSET_3 0x08
+// Jump to CONTINENT_LIST_PTR_OFFSET_3 * index to get the continent address
+
+#define NATION_LIST_PTR_BASE 0x0642ECF8
+#define NATION_LIST_PTR_BASE_OFFSET 0x80
+#define NATION_LIST_START 0x00
+#define NATION_LIST_END 0x08
+#define NATION_LIST_STRIDE 0x08
+// Jump to NATION_LIST_STRIDE * index to get the nation address
+
+#define INJURIES_LIST_PTR_BASE 0x0642ED10
+#define INJURIES_LIST_PTR_OFFSET_1 0x80
+#define INJURIES_LIST_PTR_OFFSET_2 0x00
+#define INJURIES_LIST_PTR_OFFSET_3 0x08
+// Jump to INJURIES_LIST_PTR_OFFSET_3 * index to get the injury address
+
 // When a person is _only_ a player, their details are at 0x278
 // When a person is player + staff, staff is at 0x278 and player is at 0x368
 // TODO: find a way to determine if a person is player + staff or just player
@@ -257,16 +282,22 @@
 // 0 is part-time, 1 is full time, 2 is amateur, 3 is youth, 4 is non-contract
 #define CONTRACTS_OFFSET_CONTRACT_TYPE 0xB4
 
-/** Country */
-#define POINTER_TO_COUNTRY_LIST 0x3ce38c0
-#define COUNTRY_LIST_ITEM_SIZE 0x1d8
-#define COUNTRY_COUNT 255
-
+/** Continent */
 // (+0x04 from here)
-#define COUNTRY_OFFSET_NAME 0x18
-#define COUNTRY_OFFSET_NAME_SHORT 0x20
-#define COUNTRY_OFFSET_NAME_CODE 0x28
-#define COUNTRY_OFFSET_DEMONYM 0x30
+#define CONTINENT_OFFSET_NAME 0x18
+#define CONTINENT_OFFSET_DEMONYM 0x28
+#define CONTINENT_OFFSET_CONFED 0x30
+#define CONTINENT_OFFSET_NAME_CODE 0x38
+
+/** Nation */
+// (+0x04 from here)
+#define NATION_OFFSET_ROW_ID 0x08
+#define NATION_OFFSET_NAME 0x18
+#define NATION_OFFSET_NAME_SHORT 0x20
+#define NATION_OFFSET_NAME_CODE 0x28
+#define NATION_OFFSET_DEMONYM 0x30
+#define NATION_OFFSET_CAPITAL_CITY 0xE8
+#define NATION_OFFSET_CONTINENT 0xF0
 
 /** Relationships */
 #define RELATIONSHIP_OFFSET_TARGET_ADDRESS 0x00
@@ -321,4 +352,5 @@
 // (+0x04 from here)
 #define CITY_OFFSET_NAME 0x18
 
-#define GENERAL_OFFSET_NAME 0x04
+#define STRING_OFFSET_LENGTH 0x0
+#define STRING_OFFSET_VALUE 0x04

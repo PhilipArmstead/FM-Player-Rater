@@ -143,10 +143,8 @@ static Player getPlayer(void *handle, uint32_t personAddress) {
 	// Nationality
 	readFromMemory(handle, personAddress + PERSON_OFFSET_NATIONALITY, 4, bytes);
 	const uint32_t country = (uint32_t)hexBytesToInt(bytes, 4);
-	readFromMemory(handle, country + COUNTRY_OFFSET_NAME_SHORT, 4, bytes);
-	readFromMemory(handle, hexBytesToInt(bytes, 4) + GENERAL_OFFSET_NAME, 28, player.nationality.name);
-	readFromMemory(handle, country + COUNTRY_OFFSET_NAME_CODE, 4, bytes);
-	readFromMemory(handle, hexBytesToInt(bytes, 4) + GENERAL_OFFSET_NAME, 4, player.nationality.code);
+	readFromMemory(handle, country + NATION_OFFSET_ROW_ID, 4, bytes);
+	player.nationIndex = (uint8_t)hexBytesToInt(bytes, 4);
 
 	// Reputation
 	readFromMemory(handle, playerAddress + PLAYER_OFFSET_HOME_REPUTATION, 6, bytes);
@@ -254,7 +252,7 @@ static Club getClubFromPerson(void *handle, uint32_t personAddress) {
 	const uint32_t nameAddress = (uint32_t)hexBytesToInt(pointer, 4);
 
 	const Club club = {.address = teamsAddress};
-	readFromMemory(handle, nameAddress + GENERAL_OFFSET_NAME, 64, (uint8_t*)club.name);
+	readFromMemory(handle, nameAddress + STRING_OFFSET_VALUE, 64, (uint8_t*)club.name);
 
 	return club;
 }
