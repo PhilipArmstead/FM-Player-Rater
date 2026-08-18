@@ -22,7 +22,7 @@ static inline void getPersonForename(void *handle, uint64_t attributeBase, char 
 static inline void getPersonSurname(void *handle, uint64_t attributeBase, char str[32]);
 static inline void getPersonCommonName(void *handle, uint64_t attributeBase, char str[64]);
 static uint8_t getAge(void *handle, uint64_t address);
-static Club getClubFromPerson(void *handle, uint32_t personAddress);
+static uint32_t getClubIndexFromPerson(void *handle, uint32_t personAddress);
 static uint32_t getPersonAddressFromUid(const ProcessContext *processContext, uint32_t uid);
 void getSortedPositionRatings(Player *player);
 float getRatingPerPosition(const Player *player, PositionGrouped position);
@@ -131,7 +131,7 @@ static Player getPlayer(void *handle, uint32_t personAddress) {
 	readFromMemory(handle, personAddress + PERSON_OFFSET_PERSONALITY, 8, player.personality);
 	readFromMemory(handle, playerAddress + PLAYER_OFFSET_ATTRIBUTES, ATTRIBUTE_COUNT, player.attributes);
 	readFromMemory(handle, playerAddress + PLAYER_OFFSET_POSITIONS, 15, player.positions);
-	player.club = getClubFromPerson(handle, personAddress);
+	player.clubIndex = getClubIndexFromPerson(handle, personAddress);
 	getSortedPositionRatings(&player);
 
 	// Sharpness, fatigue, condition
@@ -240,21 +240,16 @@ static uint8_t getAge(void *handle, uint64_t address) {
 	return age;
 }
 
-static Club getClubFromPerson(void *handle, uint32_t personAddress) {
+static uint32_t getClubIndexFromPerson(void *handle, uint32_t personAddress) {
 	uint8_t pointer[4];
 	readFromMemory(handle, personAddress + PERSON_OFFSET_CONTRACTS, 4, pointer);
 	const uint32_t contractAddress = (uint32_t)hexBytesToInt(pointer, 4);
-	readFromMemory(handle, contractAddress + CONTRACTS_OFFSET_CLUB, 4, pointer);
+	readFromMemory(handle, contractAddress + CONTRACTS_OFFSET_TEAM, 4, pointer);
+	const uint32_t teamAddress = (uint32_t)hexBytesToInt(pointer, 4);
+	readFromMemory(handle, teamAddress + TEAM_OFFSET_CLUB, 4, pointer);
 	const uint32_t clubAddress = (uint32_t)hexBytesToInt(pointer, 4);
-	readFromMemory(handle, clubAddress + CLUB_OFFSET_TEAM, 4, pointer);
-	const uint32_t teamsAddress = (uint32_t)hexBytesToInt(pointer, 4);
-	readFromMemory(handle, teamsAddress + TEAM_OFFSET_SHORT_NAME_ADDRESS, 4, pointer);
-	const uint32_t nameAddress = (uint32_t)hexBytesToInt(pointer, 4);
-
-	const Club club = {.address = teamsAddress};
-	readFromMemory(handle, nameAddress + STRING_OFFSET_VALUE, 64, (uint8_t*)club.name);
-
-	return club;
+	readFromMemory(handle, clubAddress + CLUB_OFFSET_ROW_ID, 4, pointer);
+	return (uint32_t)hexBytesToInt(pointer, 4);
 }
 
 /* Helper structure to represent sparse attribute weights */
