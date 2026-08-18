@@ -41,11 +41,13 @@ void platform_consoleWriteError(const char *message, const LogLevel colour) {
 #include <stdint.h>
 
 
-void readFromMemory(void *handle, const uintptr_t address, const size_t length, uint8_t *bytes) {
+bool readFromMemory(void *handle, const uintptr_t address, const size_t length, uint8_t *bytes) {
 	if (!ReadProcessMemory(handle, (LPCVOID)address, bytes, length, NULL)) {
 		memset(bytes, 0, length);
 		platform_consoleWriteError("Failed to read memory\n", LogLevelError);
+		return false;
 	}
+	return true;
 }
 
 uint8_t readByte(void *handle, const uintptr_t address) {
