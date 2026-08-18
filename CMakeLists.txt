@@ -18,6 +18,7 @@ set(REPO_ROOT "${CMAKE_CURRENT_SOURCE_DIR}")
 add_executable(fm_player_rater
 	src/main.c
 	src/app/callbacks.c
+	src/app/data.c
 	src/app/game-status.c
 	src/app/helpers/date.c
 	src/app/player.c

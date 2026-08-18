@@ -133,5 +133,9 @@ static void handleConnect(void) {
 	update(NULL);
 
 	// TODO: multithread this?
+	cacheClubs(processContext, &gameContext);
 	cacheNations(processContext, &gameContext);
+	// TODO: cache forenames
+	// TODO: cache surnames
+	// TODO: cache common names
 }

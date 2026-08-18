@@ -63,7 +63,6 @@ typedef struct {
 typedef struct {
 	uint8_t attributes[ATTRIBUTE_COUNT];
 	Rating ratings[POSITION_GROUPED_COUNT];
-	Club club;
 	char commonName[64];
 	char forename[32];
 	char surname[32];
@@ -74,6 +73,7 @@ typedef struct {
 	uint32_t playerAddress;
 	uint32_t guideValue;
 	uint32_t annualWage;
+	uint32_t clubIndex;
 	uint16_t sharpness;
 	uint16_t fatigue;
 	uint16_t condition;
@@ -118,5 +118,7 @@ typedef struct {
 	char gameVersion[GAME_STATUS_STRING_BUFFER_SIZE];
 	DayMonthYear currentDate;
 	Nation *nations;
+	Club *clubs;
 	uint64_t nationCount;
+	uint64_t clubCount;
 } GameContext;
