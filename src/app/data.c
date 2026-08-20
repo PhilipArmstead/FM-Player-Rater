@@ -2,21 +2,29 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 
 #include "data.h"
-#include "maths.h"
+#include "app/maths.h"
+#include "app/player.h"
 #include "core/logger.h"
 #include "platform/platform.h"
 
+#include <string.h>
+
 
 void clearCaches(GameContext *gameContext) {
+	if (gameContext->clubs != NULL) {
+		free(gameContext->clubs);
+		gameContext->clubs = NULL;
+		gameContext->clubCount = 0;
+	}
 	if (gameContext->nations != NULL) {
 		free(gameContext->nations);
 		gameContext->nations = NULL;
 		gameContext->nationCount = 0;
 	}
-	if (gameContext->clubs != NULL) {
-		free(gameContext->clubs);
-		gameContext->clubs = NULL;
-		gameContext->clubCount = 0;
+	if (gameContext->players != NULL) {
+		free(gameContext->players);
+		gameContext->players = NULL;
+		gameContext->playerCount = 0;
 	}
 }
 
@@ -42,7 +50,8 @@ void cacheClubs(const ProcessContext processContext, GameContext *gameContext) {
 		uint8_t clubBuffer[4];
 		readFromMemory(processContext.handle, clubStart + i * CLUB_LIST_STRIDE, 4, clubBuffer);
 		readFromMemory(processContext.handle, hexBytesToInt(clubBuffer, 4) + CLUB_OFFSET_NAME, 4, bytes);
-		if (!readFromMemory(
+		const uint32_t namePointer = (uint32_t)hexBytesToInt(bytes, 4);
+		if (!namePointer || !readFromMemory(
 			processContext.handle,
 			hexBytesToInt(bytes, 4) + STRING_OFFSET_VALUE,
 			64,
@@ -57,7 +66,6 @@ void cacheClubs(const ProcessContext processContext, GameContext *gameContext) {
 	const int64_t timeEnd = platform_getMicroseconds();
 	LOG_INFO("Cached %d clubs in %llu microseconds", gameContext->clubCount, timeEnd - timeStart);
 }
-
 
 void cacheNations(const ProcessContext processContext, GameContext *gameContext) {
 	const int64_t timeStart = platform_getMicroseconds();
@@ -89,4 +97,26 @@ void cacheNations(const ProcessContext processContext, GameContext *gameContext)
 
 	const int64_t timeEnd = platform_getMicroseconds();
 	LOG_INFO("Cached %d nations in %llu microseconds", nationCount, timeEnd - timeStart);
+}
+
+void cachePlayers(const ProcessContext processContext, GameContext *gameContext, uint8_t half) {
+	const int64_t timeStart = platform_getMicroseconds();
+
+	const uint64_t halfCount = (gameContext->playerCount - 1) / 2;
+	const uint64_t start = half ? halfCount + 1 : 0;
+	const uint64_t end = half ? gameContext->playerCount : halfCount + 1;
+
+	uint8_t bytes[4];
+	readFromMemory(processContext.handle, processContext.moduleBaseAddress + PLAYER_LIST_PTR_BASE, 4, bytes);
+	const uint64_t playerStart = hexBytesToInt(bytes, 4);
+	for (uint64_t i = start; i < end; i++) {
+		readFromMemory(processContext.handle, playerStart + i * PLAYER_LIST_STRIDE, 4, bytes);
+		const uint32_t playerAddress = (uint32_t)hexBytesToInt(bytes, 4);
+		const uint32_t personAddress = getPersonAddressFromPlayerAddress(processContext.handle, playerAddress);
+		Player player = getPlayer(processContext.handle, true, personAddress, playerAddress);
+		memcpy(&gameContext->players[i], &player, sizeof(Player));
+	}
+
+	const int64_t timeEnd = platform_getMicroseconds();
+	LOG_INFO("Cached %d players in %llu microseconds", end - start, timeEnd - timeStart);
 }

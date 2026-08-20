@@ -42,8 +42,12 @@ typedef enum {
 	POSITION_GROUPED_COUNT,
 } PositionGrouped;
 
+// Longest club name: Club de Fútbol Lobos de la Benemérita Universidad Autónoma de Puebla, 71 chars
+// Longest club short name: Persatuan Sepakbola Indonesia Karawang, 38 chars
+#define CLUB_NAME_LENGTH 40
+
 typedef struct {
-	char name[64];
+	char name[CLUB_NAME_LENGTH];
 	uint64_t address;
 	uint8_t teamType;
 } Club;
@@ -60,12 +64,20 @@ typedef struct {
 	char position[2];
 } Rating;
 
+// TODO: note I only tested players, not all people
+// Longest person forename: Kenji Syed Rusydi Al-Asyraf, 27 chars
+// Longest person surname: Conceição Benevenuto Malaquias, 32 chars
+// Longest person common name: Yamanalage Lakshitha Jayathunga, 31 chars
+#define PERSON_FORENAME_LENGTH 32
+#define PERSON_SURNAME_LENGTH 32
+#define PERSON_COMMON_NAME_LENGTH 32
+
 typedef struct {
 	uint8_t attributes[ATTRIBUTE_COUNT];
 	Rating ratings[POSITION_GROUPED_COUNT];
-	char commonName[64];
-	char forename[32];
-	char surname[32];
+	char forename[PERSON_FORENAME_LENGTH];
+	char surname[PERSON_SURNAME_LENGTH];
+	char commonName[PERSON_COMMON_NAME_LENGTH];
 	uint32_t rowId;
 	uint32_t rid;
 	uint32_t uid;
@@ -73,7 +85,7 @@ typedef struct {
 	uint32_t playerAddress;
 	uint32_t guideValue;
 	uint32_t annualWage;
-	uint32_t clubIndex;
+	int32_t clubIndex; // -1 means unemployed
 	uint16_t sharpness;
 	uint16_t fatigue;
 	uint16_t condition;
@@ -91,9 +103,9 @@ typedef struct {
 } Player;
 
 typedef struct {
-	char commonName[64];
-	char forename[32];
-	char surname[32];
+	char forename[PERSON_FORENAME_LENGTH];
+	char surname[PERSON_SURNAME_LENGTH];
+	char commonName[PERSON_COMMON_NAME_LENGTH];
 	uint32_t uid;
 	uint32_t personAddress;
 } PartialPlayer;
@@ -117,8 +129,10 @@ typedef struct {
 	PartialPlayer currentlyViewedPlayer;
 	char gameVersion[GAME_STATUS_STRING_BUFFER_SIZE];
 	DayMonthYear currentDate;
-	Nation *nations;
 	Club *clubs;
-	uint64_t nationCount;
+	Nation *nations;
+	Player *players;
 	uint64_t clubCount;
+	uint64_t nationCount;
+	uint64_t playerCount;
 } GameContext;
