@@ -9,3 +9,4 @@
 void clearCaches(GameContext *gameContext);
 void cacheClubs(ProcessContext processContext, GameContext *gameContext);
 void cacheNations(ProcessContext processContext, GameContext *gameContext);
+void cachePlayers(ProcessContext processContext, GameContext *gameContext, uint8_t half);

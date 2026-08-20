@@ -66,9 +66,8 @@
 
 #define PLAYER_COUNT_PTR_BASE 0x642C034
 #define PLAYER_LIST_PTR_BASE 0x0642EDD0
-#define PLAYER_LIST_PTR_OFFSET_1 0x08
-#define PLAYER_LIST_PTR_OFFSET_2 0x00
-// Jump to PLAYER_LIST_PTR_OFFSET_1 * index to get the person address
+#define PLAYER_LIST_STRIDE 0x08
+// Jump to PLAYER_LIST_STRIDE * index to get the player address
 
 #define PEOPLE_LIST_PTR_BASE 0x0642ED38
 #define PEOPLE_LIST_PTR_OFFSET_1 0x80
