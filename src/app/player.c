@@ -13,19 +13,21 @@
 
 extern GameContext gameContext;
 
+static bool isPlayerAlsoStaff(void *handle, uint32_t playerAddress);
+static bool isPersonAlsoStaff(void *handle, uint32_t playerAddress);
 static bool isPlayerValid(void *handle, uint32_t personAddress);
 static bool isPersonValid(void *handle, uint32_t personAddress);
-static Player getPlayer(void *handle, uint32_t personAddress);
+static uint32_t getPlayerAddressFromPersonAddress(void *handle, uint32_t personAddress);
 static PartialPlayer getPartialPlayer(void *handle, uint32_t personAddress);
 static inline void getPersonName(void *handle, uint8_t pointer[4], char str[32]);
 static inline void getPersonForename(void *handle, uint64_t attributeBase, char str[32]);
 static inline void getPersonSurname(void *handle, uint64_t attributeBase, char str[32]);
 static inline void getPersonCommonName(void *handle, uint64_t attributeBase, char str[64]);
 static uint8_t getAge(void *handle, uint64_t address);
-static uint32_t getClubIndexFromPerson(void *handle, uint32_t personAddress);
+static int32_t getClubIndexFromPerson(void *handle, uint32_t personAddress);
 static uint32_t getPersonAddressFromUid(const ProcessContext *processContext, uint32_t uid);
-void getSortedPositionRatings(Player *player);
-float getRatingPerPosition(const Player *player, PositionGrouped position);
+static void getSortedPositionRatings(Player *player);
+static float getRatingPerPosition(const Player *player, PositionGrouped position);
 
 // Assumes valid ProcessContext
 uint32_t getCurrentPersonUniqueId(const ProcessContext *processContext) {
@@ -47,7 +49,7 @@ uint32_t getCurrentPersonUniqueId(const ProcessContext *processContext) {
 Player getPlayerById(const ProcessContext *processContext, uint32_t uniqueId) {
 	const uint32_t personAddress = getPersonAddressFromUid(processContext, uniqueId);
 	if (personAddress && isPlayerValid(processContext->handle, personAddress)) {
-		return getPlayer(processContext->handle, personAddress);
+		return getPlayer(processContext->handle, false, personAddress, 0);
 	}
 
 	LOG_ERROR("Could not find player by ID %d", uniqueId);
@@ -92,12 +94,30 @@ static PartialPlayer getPartialPlayer(void *handle, uint32_t personAddress) {
 	return player;
 }
 
-static Player getPlayer(void *handle, uint32_t personAddress) {
-	if (!isPlayerValid(handle, personAddress)) {
+static uint32_t getPlayerAddressFromPersonAddress(void *handle, uint32_t personAddress) {
+	const int32_t offset = isPersonAlsoStaff(handle, personAddress)
+		? STAFF_OFFSET_FROM_PERSON
+		: PLAYER_OFFSET_FROM_PERSON;
+
+	return personAddress + offset;
+}
+
+uint32_t getPersonAddressFromPlayerAddress(void *handle, uint32_t playerAddress) {
+	const int32_t offset = isPlayerAlsoStaff(handle, playerAddress)
+		? STAFF_OFFSET_FROM_PERSON
+		: PLAYER_OFFSET_FROM_PERSON;
+
+	return playerAddress - offset;
+}
+
+Player getPlayer(void *handle, bool skipValidCheck, uint32_t personAddress, uint32_t playerAddress) {
+	if (!skipValidCheck && !isPlayerValid(handle, personAddress)) {
 		return (Player){0};
 	}
 
-	const uint32_t playerAddress = personAddress + PLAYER_OFFSET_FROM_PERSON;
+	if (playerAddress == 0) {
+		playerAddress = getPlayerAddressFromPersonAddress(handle, personAddress);
+	}
 
 	uint8_t ability[3];
 	readFromMemory(handle, playerAddress + PLAYER_OFFSET_ABILITY, 3, ability);
@@ -173,6 +193,19 @@ static Player getPlayer(void *handle, uint32_t personAddress) {
 	return player;
 }
 
+static bool isPlayerAlsoStaff(void *handle, uint32_t playerAddress) {
+	uint8_t bytes[8];
+	readFromMemory(handle, playerAddress - PLAYER_OFFSET_FROM_PERSON + 0x0C, 8, bytes);
+	const uint64_t ids = hexBytesToInt(bytes, 8);
+	return ids >> 32 != (ids & 0xFFFFFFFF);
+}
+
+static bool isPersonAlsoStaff(void *handle, uint32_t personAddress) {
+	uint8_t bytes[4];
+	readFromMemory(handle, personAddress + PLAYER_OFFSET_FROM_PERSON + 0x08, 4, bytes);
+	return hexBytesToInt(bytes, 4) == 0;
+}
+
 static bool isPlayerValid(void *handle, uint32_t personAddress) {
 	const uint32_t playerAddress = personAddress + PLAYER_OFFSET_FROM_PERSON;
 	for (uint8_t i = 0; i < 5; ++i) {
@@ -240,16 +273,20 @@ static uint8_t getAge(void *handle, uint64_t address) {
 	return age;
 }
 
-static uint32_t getClubIndexFromPerson(void *handle, uint32_t personAddress) {
+static int32_t getClubIndexFromPerson(void *handle, uint32_t personAddress) {
 	uint8_t pointer[4];
 	readFromMemory(handle, personAddress + PERSON_OFFSET_CONTRACTS, 4, pointer);
 	const uint32_t contractAddress = (uint32_t)hexBytesToInt(pointer, 4);
+	if (!contractAddress) {
+		return -1;
+	}
+
 	readFromMemory(handle, contractAddress + CONTRACTS_OFFSET_TEAM, 4, pointer);
 	const uint32_t teamAddress = (uint32_t)hexBytesToInt(pointer, 4);
 	readFromMemory(handle, teamAddress + TEAM_OFFSET_CLUB, 4, pointer);
 	const uint32_t clubAddress = (uint32_t)hexBytesToInt(pointer, 4);
 	readFromMemory(handle, clubAddress + CLUB_OFFSET_ROW_ID, 4, pointer);
-	return (uint32_t)hexBytesToInt(pointer, 4);
+	return (int32_t)hexBytesToInt(pointer, 4);
 }
 
 /* Helper structure to represent sparse attribute weights */
@@ -728,8 +765,8 @@ static uint32_t getPersonAddressFromUid(const ProcessContext *processContext, ui
 	const uint32_t allPlayers = (uint32_t)hexBytesToInt(bytes, 4);
 
 	for (uint32_t i = 0; i < playerCount; ++i) {
-		readFromMemory(processContext->handle, allPlayers + PLAYER_LIST_PTR_OFFSET_1 * i, 4, bytes);
-		const uint32_t playerAddress = (uint32_t)hexBytesToInt(bytes, 4) + PLAYER_LIST_PTR_OFFSET_2;
+		readFromMemory(processContext->handle, allPlayers + PLAYER_LIST_STRIDE * i, 4, bytes);
+		const uint32_t playerAddress = (uint32_t)hexBytesToInt(bytes, 4);
 		const uint32_t personAddress = playerAddress - PLAYER_OFFSET_FROM_PERSON;
 
 		readFromMemory(processContext->handle, personAddress + PERSON_OFFSET_UNIQUE_ID, 4, bytes);
