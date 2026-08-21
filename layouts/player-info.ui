@@ -52,14 +52,6 @@ SPDX-License-Identifier: GPL-3.0-or-later -->
 										<property name="xalign">0</property>
 									</object>
 								</child>
-								<child>
-									<object class="GtkLabel" id="label:division-name">
-										<property name="label"/>
-										<property name="css-classes">dim-label</property>
-										<property name="halign">1</property>
-										<property name="xalign">0</property>
-									</object>
-								</child>
 							</object>
 						</child>
 						<child>
@@ -993,7 +985,10 @@ SPDX-License-Identifier: GPL-3.0-or-later -->
 									</object>
 								</child>
 								<child>
-									<object class="GtkBox" id="box:top-roles"/>
+									<object class="GtkBox" id="box:top-roles">
+										<property name="orientation">1</property>
+										<property name="spacing">8</property>
+									</object>
 								</child>
 							</object>
 						</child>

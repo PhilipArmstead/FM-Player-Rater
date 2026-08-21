@@ -3,6 +3,7 @@
 
 #include "ui.h"
 #include "app/config.h"
+#include "app/data.h"
 #include "app/game-status.h"
 #include "app/maths.h"
 #include "app/player.h"
@@ -15,6 +16,7 @@
 
 extern ProcessContext processContext;
 extern GameContext gameContext;
+extern GtkBuilder *builder;
 
 static void handleDisconnect(void);
 static void handleConnect(void);
@@ -22,6 +24,7 @@ static inline void updateWhileConnected(void);
 static inline void updateWhileDisconnected(void);
 
 void connectToProcess(void) {
+	clearCaches();
 	platform_openProcess(&processContext);
 
 	if (processContext.handle != NULL) {
@@ -146,7 +149,7 @@ static inline void updateWhileDisconnected(void) {
 }
 
 void updateInGameDate(void) {
-	GtkLabel *dateLabel = GTK_LABEL(GTK_WIDGET(gtk_builder_get_object(gameContext.builder, "label:date")));
+	GtkLabel *dateLabel = GTK_LABEL(GTK_WIDGET(gtk_builder_get_object(builder, "label:date")));
 
 	#ifndef MOCKS_MODE
 	if (processContext.handle == NULL || gameContext.currentDate.year <= 1970) {
@@ -169,7 +172,7 @@ void updateInGameDate(void) {
 }
 
 void updateGameStatus(void) {
-	GtkLabel *versionLabel = GTK_LABEL(GTK_WIDGET(gtk_builder_get_object(gameContext.builder, "label:status")));
+	GtkLabel *versionLabel = GTK_LABEL(GTK_WIDGET(gtk_builder_get_object(builder, "label:status")));
 
 	#ifndef MOCKS_MODE
 	if (processContext.handle == NULL) {
@@ -249,31 +252,30 @@ void renderPlayerInfoWindow(WindowContext context, const Player *player) {
 
 	// Player nationalities
 	uint8_t nationalityIndex = 0;
-	while (nationalityIndex < 4 && player->nationality[nationalityIndex].name[0] != '\0') {
+	while (nationalityIndex < 4 && player->nationality[nationalityIndex] != 0xFF) {
 		GtkBox *nationalityBox = GTK_BOX(GTK_WIDGET(gtk_builder_get_object(context.builder, "label:nationality")));
 		char pathToFlag[256] = {0};
+		const Nation nation = gameContext.nations[player->nationality[nationalityIndex]];
 		snprintf(
 			pathToFlag,
 			sizeof(pathToFlag),
 			"%s/assets/flags/%s.png",
 			REPO_ROOT_DIR,
-			player->nationality[nationalityIndex].code
+			nation.code
 		);
 		GtkWidget *flagImage = gtk_image_new_from_file(pathToFlag);
 		gtk_box_append(nationalityBox, flagImage);
-		gtk_widget_set_tooltip_text(flagImage, player->nationality[nationalityIndex].name);
+		gtk_widget_set_tooltip_text(flagImage, nation.name);
 		nationalityIndex++;
 	}
 
 	// Club name
 	GtkLabel *clubNameLabel = GTK_LABEL(GTK_WIDGET(gtk_builder_get_object(context.builder, "label:club-name")));
-	GtkLabel *divisionNameLabel = GTK_LABEL(GTK_WIDGET(gtk_builder_get_object(context.builder, "label:division-name")));
-	if (player->club.name[0] == '\0') {
+	if (player->clubIndex == -1) {
 		gtk_label_set_text(clubNameLabel, "Free agent");
-		gtk_label_set_text(divisionNameLabel, "");
 	} else {
-		gtk_label_set_text(clubNameLabel, player->club.name);
-		gtk_label_set_text(divisionNameLabel, player->club.divisionName);
+		const Club club = gameContext.clubs[player->clubIndex];
+		gtk_label_set_text(clubNameLabel, club.name);
 	}
 
 	float attr_weights[ATTRIBUTE_COUNT];
@@ -385,6 +387,7 @@ void renderPlayerInfoWindow(WindowContext context, const Player *player) {
 			GtkWidget *roleValue = gtk_label_new(valueBuffer);
 			gtk_widget_add_css_class(roleValue, "heading");
 			gtk_widget_add_css_class(roleValue, "accent-orange");
+			gtk_widget_add_css_class(roleValue, "role-value");
 			gtk_box_append(GTK_BOX(labelContainer), roleValue);
 
 			GtkWidget *progressBar = gtk_progress_bar_new();
@@ -417,4 +420,6 @@ static void handleConnect(void) {
 	);
 	updateUi();
 	update(NULL);
+
+	runMultiThreadedCache();
 }
