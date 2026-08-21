@@ -5,8 +5,17 @@
 
 #include "app/types.h"
 
+#define THREAD_COUNT 4
 
-void clearCaches(GameContext *gameContext);
-void cacheClubs(ProcessContext processContext, GameContext *gameContext);
-void cacheNations(ProcessContext processContext, GameContext *gameContext);
-void cachePlayers(ProcessContext processContext, GameContext *gameContext, uint8_t half);
+
+void clearCaches(void);
+void cacheClubs(void);
+void cacheNations(void);
+void cachePlayers(uint8_t half);
+void runMultiThreadedCache(void);
+#ifdef ARCH_WIN
+#include <windows.h>
+DWORD WINAPI threadFunction(LPVOID arg);
+#elif
+void *threadFunction(void *arg);
+#endif

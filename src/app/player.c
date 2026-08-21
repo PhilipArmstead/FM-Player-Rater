@@ -127,9 +127,9 @@ uint32_t getPersonAddressFromPlayerAddress(void *handle, uint32_t playerAddress)
 	return playerAddress - offset;
 }
 
-Player getPlayer(void *handle, bool skipValidCheck, uint32_t personAddress, uint32_t playerAddress) {
+Player getPlayer(void *handle, bool skipIsValidCheck, uint32_t personAddress, uint32_t playerAddress) {
 	#ifndef PLAYER_BY_ID
-	if (!skipValidCheck && !isPlayerValid(handle, personAddress)) {
+	if (!skipIsValidCheck && !isPlayerValid(handle, personAddress)) {
 		return (Player){0};
 	}
 
@@ -157,6 +157,7 @@ Player getPlayer(void *handle, bool skipValidCheck, uint32_t personAddress, uint
 		.rid = rid,
 		.uid = uid,
 		.rowId = rowId,
+		.nationality = {0xFF, 0xFF, 0xFF, 0xFF}
 	};
 	getPersonForename(handle, personAddress, player.forename);
 	getPersonSurname(handle, personAddress, player.surname);
@@ -335,16 +336,6 @@ static int32_t getClubIndexFromPerson(void *handle, uint32_t personAddress) {
 	const uint32_t clubAddress = (uint32_t)hexBytesToInt(pointer, 4);
 	readFromMemory(handle, clubAddress + CLUB_OFFSET_ROW_ID, 4, pointer);
 	return (int32_t)hexBytesToInt(pointer, 4);
-
-	// readFromMemory(handle, teamsAddress + TEAM_OFFSET_COMPETITION, 4, pointer);
-	// const uint32_t competitionAddress = (uint32_t)hexBytesToInt(pointer, 4);
-	// readFromMemory(handle, competitionAddress + COMPETITION_OFFSET_LONG_NAME_ADDRESS, 4, pointer);
-	// readFromMemory(
-	// 	handle,
-	// 	hexBytesToInt(pointer, 4) + GENERAL_OFFSET_NAME,
-	// 	CLUB_NAME_LENGTH,
-	// 	(uint8_t*)club.divisionName
-	// );
 }
 
 /* Helper structure to represent sparse attribute weights */
@@ -801,6 +792,7 @@ static void getSortedPositionRatings(Player *player) {
 			player->ratings[j].position = i;
 			++j;
 		}
+		++i;
 	}
 
 	/* simple selection sort descending */

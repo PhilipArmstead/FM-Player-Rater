@@ -80,7 +80,7 @@ typedef struct {
 	char forename[PERSON_FORENAME_LENGTH];
 	char surname[PERSON_SURNAME_LENGTH];
 	char commonName[PERSON_COMMON_NAME_LENGTH];
-	uint8_t nationalities[4];
+	uint8_t nationality[4];
 	uint32_t rowId;
 	uint32_t rid;
 	uint32_t uid;
@@ -130,7 +130,6 @@ typedef struct {
 typedef struct {
 	char gameVersion[GAME_STATUS_STRING_BUFFER_SIZE];
 	DayMonthYear currentDate;
-	GtkBuilder *builder;
 	Club *clubs;
 	Nation *nations;
 	Player *players;
