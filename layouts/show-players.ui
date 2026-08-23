@@ -315,7 +315,7 @@ SPDX-License-Identifier: GPL-3.0-or-later -->
 											<object class="GtkLabel">
 												<property name="label">POSITION</property>
 												<property name="halign">start</property>
-												<property name="hexpand">true</property>
+												<property name="hexpand">false</property>
 												<style>
 													<class name="section-title"/>
 												</style>
@@ -339,7 +339,7 @@ SPDX-License-Identifier: GPL-3.0-or-later -->
 											<object class="GtkLabel">
 												<property name="label">TACTICAL ROLE</property>
 												<property name="halign">start</property>
-												<property name="hexpand">true</property>
+												<property name="hexpand">false</property>
 												<style>
 													<class name="section-title"/>
 												</style>
@@ -363,7 +363,7 @@ SPDX-License-Identifier: GPL-3.0-or-later -->
 											<object class="GtkLabel">
 												<property name="label">QUALITY &amp; AGE</property>
 												<property name="halign">start</property>
-												<property name="hexpand">true</property>
+												<property name="hexpand">false</property>
 												<style>
 													<class name="section-title"/>
 												</style>
@@ -552,7 +552,7 @@ SPDX-License-Identifier: GPL-3.0-or-later -->
 											<object class="GtkLabel">
 												<property name="label">FINANCIAL</property>
 												<property name="halign">start</property>
-												<property name="hexpand">true</property>
+												<property name="hexpand">false</property>
 												<style>
 													<class name="section-title"/>
 												</style>
@@ -576,7 +576,7 @@ SPDX-License-Identifier: GPL-3.0-or-later -->
 											<object class="GtkLabel">
 												<property name="label">ORIGIN &amp; COMPETITION</property>
 												<property name="halign">start</property>
-												<property name="hexpand">true</property>
+												<property name="hexpand">false</property>
 												<style>
 													<class name="section-title"/>
 												</style>
@@ -600,7 +600,7 @@ SPDX-License-Identifier: GPL-3.0-or-later -->
 											<object class="GtkLabel">
 												<property name="label">AVAILABILITY</property>
 												<property name="halign">start</property>
-												<property name="hexpand">true</property>
+												<property name="hexpand">false</property>
 												<style>
 													<class name="section-title"/>
 												</style>
@@ -645,7 +645,7 @@ SPDX-License-Identifier: GPL-3.0-or-later -->
 										<property name="row-spacing">2</property>
 										<child>
 											<object class="GtkLabel">
-												<property name="label"></property>
+												<property name="label"/>
 												<property name="halign">start</property>
 												<property name="css-classes">th</property>
 												<layout>

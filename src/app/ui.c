@@ -46,64 +46,8 @@ gboolean update(gpointer userData) {
 	return G_SOURCE_CONTINUE;
 }
 
-// static bool hasPolledNationalities = false;
-
 void updateUi(void) {
 	updateGameStatus();
-
-	// if (!hasPolledNationalities) {
-	// 	uint8_t bytes[4];
-	// 	hasPolledNationalities = true;
-	// 	readFromMemory(
-	// 		processContext.handle,
-	// 		processContext.moduleBaseAddress + COMPETITION_LIST_PTR_BASE,
-	// 		4,
-	// 		bytes
-	// 	);
-	// 	const uint32_t allCompetitions = (uint32_t)hexBytesToInt(bytes, 4);
-	// 	char longestCompetitionName[64] = {0};
-	// 	uint32_t a = 0;
-	// 	size_t longestCompetitionNameLength = 0;
-	//
-	// 	for (uint8_t i = 0; i < 200; ++i) {
-	// 		readFromMemory(processContext.handle, allCompetitions + COMPETITION_LIST_PTR_OFFSET_1, 4, bytes);
-	// 		readFromMemory(
-	// 			processContext.handle,
-	// 			(uint32_t)hexBytesToInt(bytes, 4) + COMPETITION_LIST_PTR_OFFSET_2,
-	// 			4,
-	// 			bytes
-	// 		);
-	// 		readFromMemory(
-	// 			processContext.handle,
-	// 			(uint32_t)hexBytesToInt(bytes, 4) + COMPETITION_LIST_PTR_OFFSET_3 * i,
-	// 			4,
-	// 			bytes
-	// 		);
-	// 		const uint32_t competitionAddress = (uint32_t)hexBytesToInt(bytes, 4);
-	// 		char name[CLUB_NAME_LENGTH] = {0};
-	// 		readFromMemory(processContext.handle, competitionAddress + COMPETITION_OFFSET_LONG_NAME_ADDRESS, 4, bytes);
-	// 		readFromMemory(
-	// 			processContext.handle,
-	// 			hexBytesToInt(bytes, 4) + GENERAL_OFFSET_NAME,
-	// 			CLUB_NAME_LENGTH,
-	// 			(uint8_t*)name
-	// 		);
-	// 		const size_t length = strlen(name);
-	// 		if (length > longestCompetitionNameLength) {
-	// 			longestCompetitionNameLength = length;
-	// 			strncpy(longestCompetitionName, name, CLUB_NAME_LENGTH - 1);
-	// 			longestCompetitionName[length] = '\0'; // Ensure null-termination
-	// 			a = competitionAddress;
-	// 		}
-	// 	}
-	//
-	// 	LOG_INFO(
-	// 		"Longest Competition Name: %s (%d chars, Address: 0x%" PRIx32 ")",
-	// 		longestCompetitionName,
-	// 		longestCompetitionNameLength,
-	// 		a
-	// 	);
-	// }
 }
 
 static inline void updateWhileConnected(void) {
@@ -281,8 +225,7 @@ void renderPlayerInfoWindow(WindowContext context, const Player *player) {
 	float attr_weights[ATTRIBUTE_COUNT];
 	float pers_weights[8];
 	float totalWeight = 1.0f;
-	// TODO: this position should not be hardcoded
-	getWeightsForPosition(POSITION_GROUPED_ST, attr_weights, pers_weights, &totalWeight);
+	getWeightsForPosition(player->ratings[0].position, attr_weights, pers_weights, &totalWeight);
 	float max = 0;
 	for (int i = 0; i < ATTRIBUTE_COUNT; ++i) {
 		if (attr_weights[i] > max) {
@@ -308,13 +251,24 @@ void renderPlayerInfoWindow(WindowContext context, const Player *player) {
 		}																																										\
 	}
 
+	// Ability scores
+	{
+		GtkLabel *caLabel = GTK_LABEL(GTK_WIDGET(gtk_builder_get_object(context.builder, "label:ca")));
+		GtkLabel *paLabel = GTK_LABEL(GTK_WIDGET(gtk_builder_get_object(context.builder, "label:pa")));
+		char ability[4] = {0};
+		snprintf(ability, 4, "%d", player->ca);
+		gtk_label_set_label(caLabel, ability);
+		snprintf(ability, 4, "%d", player->pa);
+		gtk_label_set_label(paLabel, ability);
+	}
+
 	// Attributes
-	// TODO: GK attributes
-	// Technical
+	GtkWidget *boxGoalkeeper = GTK_WIDGET(gtk_builder_get_object(context.builder, "box:attribute:goalkeeper"));
 	GtkWidget *boxTechnical = GTK_WIDGET(gtk_builder_get_object(context.builder, "box:attribute:technical"));
+
 	if (player->positions[0] < 12) {
 		gtk_widget_set_visible(boxTechnical, true);
-		// TODO: hide GK box
+		gtk_widget_set_visible(boxGoalkeeper, false);
 
 		setRowTextAndHighlight("attribute:technical:corners", ATTR_COR);
 		setRowTextAndHighlight("attribute:technical:crossing", ATTR_CRO);
@@ -330,6 +284,23 @@ void renderPlayerInfoWindow(WindowContext context, const Player *player) {
 		setRowTextAndHighlight("attribute:technical:penalty-taking", ATTR_PEN);
 		setRowTextAndHighlight("attribute:technical:tackling", ATTR_TCK);
 		setRowTextAndHighlight("attribute:technical:technique", ATTR_TEC);
+	} else {
+		gtk_widget_set_visible(boxGoalkeeper, true);
+		gtk_widget_set_visible(boxTechnical, false);
+
+		setRowTextAndHighlight("attribute:goalkeeper:aerial-reach", ATTR_AER);
+		setRowTextAndHighlight("attribute:goalkeeper:command-of-area", ATTR_CMD);
+		setRowTextAndHighlight("attribute:goalkeeper:communication", ATTR_COM);
+		setRowTextAndHighlight("attribute:goalkeeper:eccentricity", ATTR_ECC);
+		setRowTextAndHighlight("attribute:goalkeeper:first-touch", ATTR_FIR);
+		setRowTextAndHighlight("attribute:goalkeeper:handling", ATTR_HAN);
+		setRowTextAndHighlight("attribute:goalkeeper:kicking", ATTR_HEA);
+		setRowTextAndHighlight("attribute:goalkeeper:one-on-ones", ATTR_ONE);
+		setRowTextAndHighlight("attribute:goalkeeper:passing", ATTR_PAS);
+		setRowTextAndHighlight("attribute:goalkeeper:punching-tendency", ATTR_TTP);
+		setRowTextAndHighlight("attribute:goalkeeper:reflexes", ATTR_REF);
+		setRowTextAndHighlight("attribute:goalkeeper:rushing-out-tendency", ATTR_TRO);
+		setRowTextAndHighlight("attribute:goalkeeper:throwing", ATTR_THR);
 	}
 
 	setRowTextAndHighlight("attribute:mental:aggression", ATTR_COR);
@@ -355,6 +326,20 @@ void renderPlayerInfoWindow(WindowContext context, const Player *player) {
 	setRowTextAndHighlight("attribute:physical:pace", ATTR_PAC);
 	setRowTextAndHighlight("attribute:physical:stamina", ATTR_STA);
 	setRowTextAndHighlight("attribute:physical:strength", ATTR_STR);
+
+	setRowTextAndHighlight("attribute:hidden:adaptability", ATTR_ADA);
+	setRowTextAndHighlight("attribute:hidden:ambition", ATTR_AMB);
+	setRowTextAndHighlight("attribute:hidden:consistency", ATTR_CON);
+	setRowTextAndHighlight("attribute:hidden:controversy", ATTR_CNY);
+	setRowTextAndHighlight("attribute:hidden:dirtiness", ATTR_DIR);
+	setRowTextAndHighlight("attribute:hidden:important-matches", ATTR_IMP);
+	setRowTextAndHighlight("attribute:hidden:injury-proneness", ATTR_INJ);
+	setRowTextAndHighlight("attribute:hidden:loyalty", ATTR_LOY);
+	setRowTextAndHighlight("attribute:hidden:pressure", ATTR_PRE);
+	setRowTextAndHighlight("attribute:hidden:professionalism", ATTR_PRO);
+	setRowTextAndHighlight("attribute:hidden:sportsmanship", ATTR_SPO);
+	setRowTextAndHighlight("attribute:hidden:temperament", ATTR_TEM);
+	setRowTextAndHighlight("attribute:hidden:versatility", ATTR_VER);
 
 	// Ratings
 	{

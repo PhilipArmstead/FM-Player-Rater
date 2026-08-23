@@ -99,7 +99,6 @@ typedef struct {
 	uint8_t age;
 	uint8_t ca;
 	uint8_t pa;
-	uint8_t personality[8];
 	bool canDevelopQuickly;
 	bool isHotProspect;
 } Player;

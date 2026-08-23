@@ -33,13 +33,26 @@ SPDX-License-Identifier: GPL-3.0-or-later -->
 								<property name="valign">1</property>
 								<property name="spacing">4</property>
 								<child>
-									<object class="GtkLabel" id="label:common-name">
-										<property name="label"/>
-										<property name="css-classes">title-1
-											player-name
-										</property>
-										<property name="halign">1</property>
-										<property name="xalign">0</property>
+									<object class="GtkBox">
+										<property name="valign">1</property>
+										<property name="spacing">8</property>
+										<child>
+											<object class="GtkLabel" id="label:common-name">
+												<property name="label"/>
+												<property name="css-classes">title-1
+													player-name
+												</property>
+												<property name="halign">1</property>
+												<property name="xalign">0</property>
+											</object>
+										</child>
+										<child>
+											<object id="label:nationality" class="GtkBox">
+												<property name="halign">2</property>
+												<property name="spacing">4</property>
+												<property name="css-classes">nationality</property>
+											</object>
+										</child>
 									</object>
 								</child>
 								<child>
@@ -66,14 +79,6 @@ SPDX-License-Identifier: GPL-3.0-or-later -->
 										<property name="css-classes">dim-label</property>
 										<property name="halign">2</property>
 										<property name="xalign">1</property>
-									</object>
-								</child>
-								<child>
-									<object id="label:nationality" class="GtkBox">
-										<property name="orientation">0</property>
-										<property name="valign">1</property>
-										<property name="halign">2</property>
-										<property name="spacing">4</property>
 									</object>
 								</child>
 								<child>
@@ -108,17 +113,14 @@ SPDX-License-Identifier: GPL-3.0-or-later -->
 						<property name="css-classes">panel</property>
 						<property name="spacing">12</property>
 						<child>
-							<object class="GtkBox">
-								<property name="orientation">1</property>
+							<object class="GtkGrid">
 								<property name="hexpand">true</property>
-								<property name="spacing">8</property>
 								<child>
 									<object class="GtkBox">
-										<property name="orientation">0</property>
-										<property name="spacing">12</property>
+										<property name="orientation">1</property>
 										<child>
 											<object class="GtkLabel">
-												<property name="label">CURRENT</property>
+												<property name="label">CA</property>
 												<property name="css-classes">caption-heading
 													dim-label
 												</property>
@@ -126,64 +128,18 @@ SPDX-License-Identifier: GPL-3.0-or-later -->
 											</object>
 										</child>
 										<child>
-											<object class="GtkBox">
-												<property name="orientation">0</property>
-												<property name="spacing">2</property>
-												<child>
-													<object class="GtkImage">
-														<property name="icon-name">starred-symbolic</property>
-														<property name="css-classes">star-filled</property>
-													</object>
-												</child>
-												<child>
-													<object class="GtkImage">
-														<property name="icon-name">starred-symbolic</property>
-														<property name="css-classes">star-filled</property>
-													</object>
-												</child>
-												<child>
-													<object class="GtkImage">
-														<property name="icon-name">starred-symbolic</property>
-														<property name="css-classes">star-filled</property>
-													</object>
-												</child>
-												<child>
-													<object class="GtkImage">
-														<property name="icon-name">non-starred-symbolic</property>
-														<property name="css-classes">star-empty</property>
-													</object>
-												</child>
-												<child>
-													<object class="GtkImage">
-														<property name="icon-name">non-starred-symbolic</property>
-														<property name="css-classes">star-empty</property>
-													</object>
-												</child>
-											</object>
-										</child>
-										<child>
-											<object class="GtkLabel">
-												<property name="label">119</property>
-												<property name="css-classes">title-3
-													accent-yellow
-												</property>
-											</object>
-										</child>
-										<child>
-											<object class="GtkLabel">
-												<property name="label">CA</property>
-												<property name="css-classes">dim-label</property>
+											<object class="GtkLabel" id="label:ca">
+												<property name="css-classes">current-ability</property>
 											</object>
 										</child>
 									</object>
 								</child>
 								<child>
 									<object class="GtkBox">
-										<property name="orientation">0</property>
-										<property name="spacing">12</property>
+										<property name="orientation">1</property>
 										<child>
 											<object class="GtkLabel">
-												<property name="label">POTENTIAL</property>
+												<property name="label">PA</property>
 												<property name="css-classes">caption-heading
 													dim-label
 												</property>
@@ -191,83 +147,239 @@ SPDX-License-Identifier: GPL-3.0-or-later -->
 											</object>
 										</child>
 										<child>
-											<object class="GtkBox">
-												<property name="orientation">0</property>
-												<property name="spacing">2</property>
-												<child>
-													<object class="GtkImage">
-														<property name="icon-name">starred-symbolic</property>
-														<property name="css-classes">star-filled</property>
-													</object>
-												</child>
-												<child>
-													<object class="GtkImage">
-														<property name="icon-name">starred-symbolic</property>
-														<property name="css-classes">star-filled</property>
-													</object>
-												</child>
-												<child>
-													<object class="GtkImage">
-														<property name="icon-name">starred-symbolic</property>
-														<property name="css-classes">star-filled</property>
-													</object>
-												</child>
-												<child>
-													<object class="GtkImage">
-														<property name="icon-name">starred-symbolic</property>
-														<property name="css-classes">star-filled</property>
-													</object>
-												</child>
-												<child>
-													<object class="GtkImage">
-														<property name="icon-name">semi-starred-symbolic</property>
-														<property name="css-classes">star-half</property>
-													</object>
-												</child>
-											</object>
-										</child>
-										<child>
-											<object class="GtkLabel">
-												<property name="label">186</property>
-												<property name="css-classes">title-3
-													accent-yellow
-												</property>
-											</object>
-										</child>
-										<child>
-											<object class="GtkLabel">
-												<property name="label">PA</property>
-												<property name="css-classes">dim-label</property>
+											<object class="GtkLabel" id="label:pa">
+												<property name="css-classes">potential-ability</property>
 											</object>
 										</child>
 									</object>
 								</child>
 							</object>
 						</child>
+					</object>
+				</child>
+				<child>
+					<object class="GtkBox">
+						<property name="orientation">1</property>
+						<property name="spacing">6</property>
 						<child>
-							<object class="GtkBox">
-								<property name="valign">3</property>
-								<property name="halign">2</property>
-								<property name="css-classes">hexagon-badge</property>
+							<object class="GtkLabel">
+								<property name="label">HIDDEN</property>
+								<property name="css-classes">caption-heading
+									section-heading
+								</property>
+								<property name="halign">1</property>
+							</object>
+						</child>
+						<child>
+							<object class="GtkSeparator">
+								<property name="css-classes">accent-rule</property>
+							</object>
+						</child>
+						<child>
+							<object class="GtkFlowBox">
+								<property name="max-children-per-line">3</property>
+								<property name="css-classes">attribute-list</property>
+								<property name="selection-mode">0</property>
 								<child>
-									<object class="GtkBox">
-										<property name="orientation">1</property>
-										<property name="valign">3</property>
-										<property name="halign">3</property>
+									<object class="GtkBox" id="row:attribute:hidden:adaptability">
+										<property name="css-classes">attr-row</property>
 										<child>
 											<object class="GtkLabel">
-												<property name="label">11.6</property>
-												<property name="css-classes">title-2</property>
-												<property name="halign">3</property>
+												<property name="label">Adaptability</property>
+												<property name="hexpand">true</property>
+												<property name="xalign">0</property>
 											</object>
 										</child>
 										<child>
+											<object id="label:attribute:hidden:adaptability" class="GtkLabel">
+												<property name="label"/>
+											</object>
+										</child>
+									</object>
+								</child>
+								<child>
+									<object class="GtkBox" id="row:attribute:hidden:ambition">
+										<property name="css-classes">attr-row</property>
+										<child>
 											<object class="GtkLabel">
-												<property name="label">META</property>
-												<property name="css-classes">caption
-													dim-label
-												</property>
-												<property name="halign">3</property>
+												<property name="label">Ambition</property>
+												<property name="hexpand">true</property>
+												<property name="xalign">0</property>
+											</object>
+										</child>
+										<child>
+											<object id="label:attribute:hidden:ambition" class="GtkLabel">
+												<property name="label"/>
+											</object>
+										</child>
+									</object>
+								</child>
+								<child>
+									<object class="GtkBox" id="row:attribute:hidden:consistency">
+										<property name="css-classes">attr-row</property>
+										<child>
+											<object class="GtkLabel">
+												<property name="label">Consistency</property>
+												<property name="hexpand">true</property>
+												<property name="xalign">0</property>
+											</object>
+										</child>
+										<child>
+											<object id="label:attribute:hidden:consistency" class="GtkLabel">
+												<property name="label"/>
+											</object>
+										</child>
+									</object>
+								</child>
+								<child>
+									<object class="GtkBox" id="row:attribute:hidden:controversy">
+										<property name="css-classes">attr-row</property>
+										<child>
+											<object class="GtkLabel">
+												<property name="label">Controversy</property>
+												<property name="hexpand">true</property>
+												<property name="xalign">0</property>
+											</object>
+										</child>
+										<child>
+											<object id="label:attribute:hidden:controversy" class="GtkLabel">
+												<property name="label"/>
+											</object>
+										</child>
+									</object>
+								</child>
+								<child>
+									<object class="GtkBox" id="row:attribute:hidden:dirtiness">
+										<property name="css-classes">attr-row</property>
+										<child>
+											<object class="GtkLabel">
+												<property name="label">Dirtiness</property>
+												<property name="hexpand">true</property>
+												<property name="xalign">0</property>
+											</object>
+										</child>
+										<child>
+											<object id="label:attribute:hidden:dirtiness" class="GtkLabel">
+												<property name="label"/>
+											</object>
+										</child>
+									</object>
+								</child>
+								<child>
+									<object class="GtkBox" id="row:attribute:hidden:important-matches">
+										<property name="css-classes">attr-row</property>
+										<child>
+											<object class="GtkLabel">
+												<property name="label">Important Matches</property>
+												<property name="hexpand">true</property>
+												<property name="xalign">0</property>
+											</object>
+										</child>
+										<child>
+											<object id="label:attribute:hidden:important-matches" class="GtkLabel">
+												<property name="label"/>
+											</object>
+										</child>
+									</object>
+								</child>
+								<child>
+									<object class="GtkBox" id="row:attribute:hidden:loyalty">
+										<property name="css-classes">attr-row</property>
+										<child>
+											<object class="GtkLabel">
+												<property name="label">Loyalty</property>
+												<property name="hexpand">true</property>
+												<property name="xalign">0</property>
+											</object>
+										</child>
+										<child>
+											<object id="label:attribute:hidden:loyalty" class="GtkLabel">
+												<property name="label"/>
+											</object>
+										</child>
+									</object>
+								</child>
+								<child>
+									<object class="GtkBox" id="row:attribute:hidden:pressure">
+										<property name="css-classes">attr-row</property>
+										<child>
+											<object class="GtkLabel">
+												<property name="label">Pressure</property>
+												<property name="hexpand">true</property>
+												<property name="xalign">0</property>
+											</object>
+										</child>
+										<child>
+											<object id="label:attribute:hidden:pressure" class="GtkLabel">
+												<property name="label"/>
+											</object>
+										</child>
+									</object>
+								</child>
+								<child>
+									<object class="GtkBox" id="row:attribute:hidden:professionalism">
+										<property name="css-classes">attr-row</property>
+										<child>
+											<object class="GtkLabel">
+												<property name="label">Professionalism</property>
+												<property name="hexpand">true</property>
+												<property name="xalign">0</property>
+											</object>
+										</child>
+										<child>
+											<object id="label:attribute:hidden:professionalism" class="GtkLabel">
+												<property name="label"/>
+											</object>
+										</child>
+									</object>
+								</child>
+								<child>
+									<object class="GtkBox" id="row:attribute:hidden:sportsmanship">
+										<property name="css-classes">attr-row</property>
+										<child>
+											<object class="GtkLabel">
+												<property name="label">Sportsmanship</property>
+												<property name="hexpand">true</property>
+												<property name="xalign">0</property>
+											</object>
+										</child>
+										<child>
+											<object id="label:attribute:hidden:sportsmanship" class="GtkLabel">
+												<property name="label"/>
+											</object>
+										</child>
+									</object>
+								</child>
+								<child>
+									<object class="GtkBox" id="row:attribute:hidden:temperament">
+										<property name="css-classes">attr-row</property>
+										<child>
+											<object class="GtkLabel">
+												<property name="label">Temperament</property>
+												<property name="hexpand">true</property>
+												<property name="xalign">0</property>
+											</object>
+										</child>
+										<child>
+											<object id="label:attribute:hidden:temperament" class="GtkLabel">
+												<property name="label"/>
+											</object>
+										</child>
+									</object>
+								</child>
+								<child>
+									<object class="GtkBox" id="row:attribute:hidden:versatility">
+										<property name="css-classes">attr-row</property>
+										<child>
+											<object class="GtkLabel">
+												<property name="label">Versatility</property>
+												<property name="hexpand">true</property>
+												<property name="xalign">0</property>
+											</object>
+										</child>
+										<child>
+											<object id="label:attribute:hidden:versatility" class="GtkLabel">
+												<property name="label"/>
 											</object>
 										</child>
 									</object>
@@ -536,6 +648,253 @@ SPDX-License-Identifier: GPL-3.0-or-later -->
 												</child>
 												<child>
 													<object id="label:attribute:technical:technique" class="GtkLabel">
+														<property name="label"/>
+													</object>
+												</child>
+											</object>
+										</child>
+									</object>
+								</child>
+							</object>
+						</child>
+						<child>
+							<object id="box:attribute:goalkeeper" class="GtkBox">
+								<property name="orientation">1</property>
+								<property name="spacing">6</property>
+								<child>
+									<object class="GtkLabel">
+										<property name="label">GOALKEEPER</property>
+										<property name="css-classes">caption-heading
+											section-heading
+										</property>
+										<property name="halign">1</property>
+									</object>
+								</child>
+								<child>
+									<object class="GtkSeparator">
+										<property name="css-classes">accent-rule</property>
+									</object>
+								</child>
+								<child>
+									<object class="GtkListBox">
+										<property name="css-classes">attribute-list</property>
+										<property name="selection-mode">0</property>
+										<child>
+											<object class="GtkBox" id="row:attribute:goalkeeper:aerial-reach">
+												<property name="css-classes">attr-row</property>
+												<child>
+													<object class="GtkLabel">
+														<property name="label">Aerial Reach</property>
+														<property name="hexpand">true</property>
+														<property name="xalign">0</property>
+													</object>
+												</child>
+												<child>
+													<object id="label:attribute:goalkeeper:aerial-reach" class="GtkLabel">
+														<property name="label"/>
+													</object>
+												</child>
+											</object>
+										</child>
+										<child>
+											<object class="GtkBox" id="row:attribute:goalkeeper:command-of-area">
+												<property name="css-classes">attr-row</property>
+												<child>
+													<object class="GtkLabel">
+														<property name="label">Command of Area</property>
+														<property name="hexpand">true</property>
+														<property name="xalign">0</property>
+													</object>
+												</child>
+												<child>
+													<object id="label:attribute:goalkeeper:command-of-area" class="GtkLabel">
+														<property name="label"/>
+													</object>
+												</child>
+											</object>
+										</child>
+										<child>
+											<object class="GtkBox" id="row:attribute:goalkeeper:communication">
+												<property name="css-classes">attr-row</property>
+												<child>
+													<object class="GtkLabel">
+														<property name="label">Communication</property>
+														<property name="hexpand">true</property>
+														<property name="xalign">0</property>
+													</object>
+												</child>
+												<child>
+													<object id="label:attribute:goalkeeper:communication" class="GtkLabel">
+														<property name="label"/>
+													</object>
+												</child>
+											</object>
+										</child>
+										<child>
+											<object class="GtkBox" id="row:attribute:goalkeeper:eccentricity">
+												<property name="css-classes">attr-row</property>
+												<child>
+													<object class="GtkLabel">
+														<property name="label">Eccentricity</property>
+														<property name="hexpand">true</property>
+														<property name="xalign">0</property>
+													</object>
+												</child>
+												<child>
+													<object id="label:attribute:goalkeeper:eccentricity" class="GtkLabel">
+														<property name="label"/>
+													</object>
+												</child>
+											</object>
+										</child>
+										<child>
+											<object class="GtkBox" id="row:attribute:goalkeeper:first-touch">
+												<property name="css-classes">attr-row</property>
+												<child>
+													<object class="GtkLabel">
+														<property name="label">First Touch</property>
+														<property name="hexpand">true</property>
+														<property name="xalign">0</property>
+													</object>
+												</child>
+												<child>
+													<object id="label:attribute:goalkeeper:first-touch" class="GtkLabel">
+														<property name="label"/>
+													</object>
+												</child>
+											</object>
+										</child>
+										<child>
+											<object class="GtkBox" id="row:attribute:goalkeeper:handling">
+												<property name="css-classes">attr-row</property>
+												<child>
+													<object class="GtkLabel">
+														<property name="label">Handling</property>
+														<property name="hexpand">true</property>
+														<property name="xalign">0</property>
+													</object>
+												</child>
+												<child>
+													<object id="label:attribute:goalkeeper:handling" class="GtkLabel">
+														<property name="label"/>
+													</object>
+												</child>
+											</object>
+										</child>
+										<child>
+											<object class="GtkBox" id="row:attribute:goalkeeper:kicking">
+												<property name="css-classes">attr-row</property>
+												<child>
+													<object class="GtkLabel">
+														<property name="label">Kicking</property>
+														<property name="hexpand">true</property>
+														<property name="xalign">0</property>
+													</object>
+												</child>
+												<child>
+													<object id="label:attribute:goalkeeper:kicking" class="GtkLabel">
+														<property name="label"/>
+													</object>
+												</child>
+											</object>
+										</child>
+										<child>
+											<object class="GtkBox" id="row:attribute:goalkeeper:one-on-ones">
+												<property name="css-classes">attr-row</property>
+												<child>
+													<object class="GtkLabel">
+														<property name="label">One on Ones</property>
+														<property name="hexpand">true</property>
+														<property name="xalign">0</property>
+													</object>
+												</child>
+												<child>
+													<object id="label:attribute:goalkeeper:one-on-ones" class="GtkLabel">
+														<property name="label"/>
+													</object>
+												</child>
+											</object>
+										</child>
+										<child>
+											<object class="GtkBox" id="row:attribute:goalkeeper:passing">
+												<property name="css-classes">attr-row</property>
+												<child>
+													<object class="GtkLabel">
+														<property name="label">Passing</property>
+														<property name="hexpand">true</property>
+														<property name="xalign">0</property>
+													</object>
+												</child>
+												<child>
+													<object id="label:attribute:goalkeeper:passing" class="GtkLabel">
+														<property name="label"/>
+													</object>
+												</child>
+											</object>
+										</child>
+										<child>
+											<object class="GtkBox" id="row:attribute:goalkeeper:punching-tendency">
+												<property name="css-classes">attr-row</property>
+												<child>
+													<object class="GtkLabel">
+														<property name="label">Tendency to punch</property>
+														<property name="hexpand">true</property>
+														<property name="xalign">0</property>
+													</object>
+												</child>
+												<child>
+													<object id="label:attribute:goalkeeper:punching-tendency" class="GtkLabel">
+														<property name="label"/>
+													</object>
+												</child>
+											</object>
+										</child>
+										<child>
+											<object class="GtkBox" id="row:attribute:goalkeeper:reflexes">
+												<property name="css-classes">attr-row</property>
+												<child>
+													<object class="GtkLabel">
+														<property name="label">Reflexes</property>
+														<property name="hexpand">true</property>
+														<property name="xalign">0</property>
+													</object>
+												</child>
+												<child>
+													<object id="label:attribute:goalkeeper:reflexes" class="GtkLabel">
+														<property name="label"/>
+													</object>
+												</child>
+											</object>
+										</child>
+										<child>
+											<object class="GtkBox" id="row:attribute:goalkeeper:rushing-out-tendency">
+												<property name="css-classes">attr-row</property>
+												<child>
+													<object class="GtkLabel">
+														<property name="label">Tendency to Rush Out</property>
+														<property name="hexpand">true</property>
+														<property name="xalign">0</property>
+													</object>
+												</child>
+												<child>
+													<object id="label:attribute:goalkeeper:rushing-out-tendency" class="GtkLabel">
+														<property name="label"/>
+													</object>
+												</child>
+											</object>
+										</child>
+										<child>
+											<object class="GtkBox" id="row:attribute:goalkeeper:throwing">
+												<property name="css-classes">attr-row</property>
+												<child>
+													<object class="GtkLabel">
+														<property name="label">Throwing</property>
+														<property name="hexpand">true</property>
+														<property name="xalign">0</property>
+													</object>
+												</child>
+												<child>
+													<object id="label:attribute:goalkeeper:throwing" class="GtkLabel">
 														<property name="label"/>
 													</object>
 												</child>
@@ -877,6 +1236,23 @@ SPDX-License-Identifier: GPL-3.0-or-later -->
 												</child>
 												<child>
 													<object id="label:attribute:physical:balance" class="GtkLabel">
+														<property name="label"/>
+													</object>
+												</child>
+											</object>
+										</child>
+										<child>
+											<object class="GtkBox" id="row:attribute:hidden:injury-proneness">
+												<property name="css-classes">attr-row</property>
+												<child>
+													<object class="GtkLabel">
+														<property name="label">Injury Proneness</property>
+														<property name="hexpand">true</property>
+														<property name="xalign">0</property>
+													</object>
+												</child>
+												<child>
+													<object id="label:attribute:hidden:injury-proneness" class="GtkLabel">
 														<property name="label"/>
 													</object>
 												</child>

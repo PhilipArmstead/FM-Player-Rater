@@ -4,7 +4,6 @@
 #pragma once
 
 #define MINIMUM_POSITIONAL_PROFICIENCY 15
-#define ATTRIBUTE_COUNT 54
 
 // All *_PTR_BASE values are relative to the base address of the module (fm.exe)
 
@@ -284,16 +283,17 @@
 #define ATTR_DET 51
 #define ATTR_CMP 52 /* Composure */
 #define ATTR_CNT 53 /* Concentration */
-#define ATTRIBUTE_COUNT 54
-
-#define PERSONALITY_ADAPTABILITY 0
-#define PERSONALITY_AMBITION 1
-#define PERSONALITY_LOYALTY 2
-#define PERSONALITY_PRESSURE 3
-#define PERSONALITY_PROFESSIONALISM 4
-#define PERSONALITY_SPORTSMANSHIP 5
-#define PERSONALITY_TEMPERAMENT 6
-#define PERSONALITY_CONTROVERSY 7
+#define ATTR_ADA 54 /* Adaptability */
+#define ATTR_AMB 55 /* Ambition */
+#define ATTR_LOY 56 /* Loyalty */
+#define ATTR_PRE 57 /* Pressure */
+#define ATTR_PRO 58 /* Professionalism */
+#define ATTR_SPO 59 /* Sportsmanship */
+#define ATTR_TEM 60 /* Temperament */
+#define ATTR_CNY 61 /* Controversy */
+#define ATTRIBUTE_COUNT (ATTR_CNY + 1)
+#define PERSONALITY_COUNT 8
+#define TRUE_ATTRIBUTE_COUNT (ATTRIBUTE_COUNT - PERSONALITY_COUNT)
 
 #define ABILITY_CA 0
 #define ABILITY_PA 2

@@ -2,7 +2,9 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 
 #include "data.h"
+#include "app/config.h"
 #include "app/maths.h"
+#include "app/mocks.h"
 #include "app/player.h"
 #include "core/logger.h"
 #include "platform/platform.h"
@@ -93,6 +95,7 @@ void clearCaches(void) {
 void cacheNations(void) {
 	const int64_t timeStart = platform_getMicroseconds();
 
+	#ifndef MOCKS_MODE
 	uint8_t bytes[4];
 	readFromMemory(processContext.handle, processContext.moduleBaseAddress + NATION_LIST_PTR_BASE, 4, bytes);
 	readFromMemory(processContext.handle, hexBytesToInt(bytes, 4) + NATION_LIST_PTR_BASE_OFFSET, 4, bytes);
@@ -124,6 +127,13 @@ void cacheNations(void) {
 			(uint8_t*)gameContext.nations[i].code
 		);
 	}
+	#else
+	const uint8_t nationCount = 251;
+	gameContext.nationCount = nationCount;
+	gameContext.nations = malloc(nationCount * sizeof(Nation));
+	gameContext.nations[189] = PLAYER_BY_ID_NATION_1;
+	gameContext.nations[170] = PLAYER_BY_ID_NATION_2;
+	#endif
 
 	const int64_t timeEnd = platform_getMicroseconds();
 	LOG_INFO("Cached %d nations in %llu microseconds", nationCount, timeEnd - timeStart);
@@ -132,6 +142,7 @@ void cacheNations(void) {
 void cacheClubs(void) {
 	const int64_t timeStart = platform_getMicroseconds();
 
+	#ifndef MOCKS_MODE
 	uint8_t bytes[4];
 	readFromMemory(processContext.handle, processContext.moduleBaseAddress + CLUB_LIST_PTR_BASE, 4, bytes);
 	readFromMemory(processContext.handle, hexBytesToInt(bytes, 4) + CLUB_LIST_PTR_BASE_OFFSET, 4, bytes);
@@ -162,6 +173,12 @@ void cacheClubs(void) {
 	}
 
 	gameContext.clubCount -= missed;
+	#else
+	const uint32_t clubCount = 36289;
+	gameContext.clubCount = clubCount;
+	gameContext.clubs = malloc(clubCount * sizeof(Club));
+	gameContext.clubs[1125] = PLAYER_BY_ID_CLUB;
+	#endif
 
 	const int64_t timeEnd = platform_getMicroseconds();
 	LOG_INFO("Cached %d clubs in %llu microseconds", gameContext.clubCount, timeEnd - timeStart);
@@ -170,6 +187,7 @@ void cacheClubs(void) {
 void cachePlayers(uint8_t half) {
 	const int64_t timeStart = platform_getMicroseconds();
 
+	#ifndef MOCKS_MODE
 	const uint64_t halfCount = (gameContext.playerCount - 1) / 2;
 	const uint64_t start = half ? halfCount + 1 : 0;
 	const uint64_t end = half ? gameContext.playerCount : halfCount + 1;
@@ -184,6 +202,10 @@ void cachePlayers(uint8_t half) {
 		Player player = getPlayer(processContext.handle, true, personAddress, playerAddress);
 		memcpy(&gameContext.players[i], &player, sizeof(Player));
 	}
+	#else
+	const uint16_t end = 900;
+	const uint16_t start = 900;
+	#endif
 
 	const int64_t timeEnd = platform_getMicroseconds();
 	LOG_INFO("Cached %d players in %llu microseconds", end - start, timeEnd - timeStart);
@@ -191,9 +213,14 @@ void cachePlayers(uint8_t half) {
 
 void runMultiThreadedCache(void) {
 	// Prepare player array for multithreaded writing
+	#ifndef MOCKS_MODE
 	uint8_t bytes[4];
 	readFromMemory(processContext.handle, processContext.moduleBaseAddress + PLAYER_COUNT_PTR_BASE, 4, bytes);
 	const uint64_t playerCount = hexBytesToInt(bytes, 4);
+	#else
+	const uint64_t playerCount = 900;
+	#endif
+
 	gameContext.playerCount = playerCount;
 	gameContext.players = malloc(playerCount * sizeof(Player));
 
