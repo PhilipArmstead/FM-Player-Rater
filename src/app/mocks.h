@@ -8,33 +8,35 @@
 
 #ifdef MOCKS_MODE
 #define PLAYER_BY_ID ((Player){ \
-	.attributes = {40, 65, 90, 85, 60, 35, 90, 65, 95, 35, 70, 10, 20, 10, 15, 15, 5, 85, 85, 10, 35, 5, 90, 80, 65, 100, 70, 15, 70, 75, 15, 15, 10, 10, 65, 75, 80, 80, 70, 75, 75, 40, 90, 75, 75, 70, 65, 75, 10, 40, 90, 90, 85, 85 }, \
-	.ratings = { { .value = 75.4058762, .position = POSITION_GROUPED_ST } }, \
-	.club = { .name = "Barcelona", .address = 0x5b0eefe0, .teamType = 0 }, \
-	.commonName = "Robert Lewandowski", \
-	.forename = "Robert", \
-	.surname = "Lewandowski", \
-	.nationality = { {.name = "Poland", .code = "POL"} }, \
-	.rowId = 1152, \
-	.rid = 719601, \
-	.uid = 719601, \
-	.personAddress = 0x9a7f2578, \
-	.playerAddress = 0x9a7f2300, \
-	.guideValue = 300000000, \
+	.attributes = { 68, 95, 83, 62, 62, 18, 86, 75, 59, 31, 73, 15, 5, 5, 5, 5, 10, 84, 81, 10, 47, 10, 73, 79, 60, 100, 80, 37, 63, 71, 24, 5, 5, 15, 93, 40, 61, 80, 88, 39, 69, 55, 79, 84, 69, 85, 88, 65, 25, 67, 78, 100, 75, 65, 15, 17, 12, 9, 14, 8, 4, 18 }, \
+	.ratings = { { .value = 81.530304, .position = POSITION_GROUPED_W }, { .value = 76.6908493, .position = POSITION_GROUPED_ST } }, \
+	.commonName = "Vinícius Júnior", \
+	.forename = "Vinícius José", \
+	.surname = "Paixão de Oliveira Júnior", \
+	.nationality = { 189, 170, 255, 255 }, \
+	.rowId = 23442, \
+	.rid = 19302146, \
+	.uid = 19302146, \
+	.personAddress = 0xa06cf440, \
+	.playerAddress = 0xa06cf1c8, \
+	.guideValue = 252086992, \
 	.annualWage = 0, \
-	.sharpness = 5950, \
-	.fatigue = -125, \
-	.condition = 10000, \
-	.homeReputation = 9100, \
-	.currentReputation = 8900, \
-	.worldReputation = 8600, \
-	.positions = {1, 1, 1, 1, 1, 1, 1, 1, 1, 10, 12, 8, 20, 1, 1 }, \
-	.age = 34, \
-	.ca = 178, \
+	.clubIndex = 1125, \
+	.sharpness = 10000, \
+	.fatigue = 13, \
+	.condition = 8737, \
+	.homeReputation = 8550, \
+	.currentReputation = 9541, \
+	.worldReputation = 10000, \
+	.positions = {1, 1, 1, 1, 1, 1, 16, 1, 10, 20, 1, 15, 19, 1, 1 }, \
+	.age = 24, \
+	.ca = 190, \
 	.pa = 190, \
-	.personality = {15, 18, 10, 16, 18, 10, 11, 12 }, \
 	.canDevelopQuickly = false, \
 	.isHotProspect = false, \
 	})
-// todo fix club
+
+#define PLAYER_BY_ID_CLUB (Club){.name = "Real Madrid Club de Fútbol", .address = 1, .teamType = 19}
+#define PLAYER_BY_ID_NATION_1 (Nation){.code = "BRA", .name = "Brazil"}
+#define PLAYER_BY_ID_NATION_2 (Nation){.code = "ESP", .name = "Spain"}
 #endif

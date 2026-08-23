@@ -81,18 +81,17 @@
 	padding: 3px 8px;
 }
 
-.wonderkid-text {
-	color: #f0b23c;
-	font-size: 12px;
-	font-weight: 800;
+.current-ability, .potential-ability {
+	font-size: 28px;
+	font-weight: bold
 }
 
-.hexagon-badge {
-	background-color: alpha(#000, 0.3);
-	border: 2px solid #d9a441;
-	border-radius: 50%;
-	min-height: 90px;
-	min-width: 90px;
+.current-ability {
+	color: #66b5e5;
+}
+
+.potential-ability {
+	color: #66cb93;
 }
 
 .role-bar, .role-bar progress {
@@ -128,4 +127,8 @@
 
 .role-value {
 	margin-left: 12px;
+}
+
+.nationality {
+	margin-top: 8px;
 }

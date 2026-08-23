@@ -167,11 +167,21 @@ Player getPlayer(void *handle, bool skipIsValidCheck, uint32_t personAddress, ui
 		snprintf(player.commonName, sizeof(player.commonName), "%s %s", player.forename, player.surname);
 	}
 
-	readFromMemory(handle, personAddress + PERSON_OFFSET_PERSONALITY, 8, player.personality);
-	readFromMemory(handle, playerAddress + PLAYER_OFFSET_ATTRIBUTES, ATTRIBUTE_COUNT, player.attributes);
+	readFromMemory(
+		handle,
+		personAddress + PERSON_OFFSET_PERSONALITY,
+		PERSONALITY_COUNT,
+		player.attributes + TRUE_ATTRIBUTE_COUNT
+	);
+	readFromMemory(handle, playerAddress + PLAYER_OFFSET_ATTRIBUTES, TRUE_ATTRIBUTE_COUNT, player.attributes);
 	readFromMemory(handle, playerAddress + PLAYER_OFFSET_POSITIONS, 15, player.positions);
 	player.clubIndex = getClubIndexFromPerson(handle, personAddress);
 	getSortedPositionRatings(&player);
+
+	// Normalise personality
+	for (uint8_t i = TRUE_ATTRIBUTE_COUNT; i < ATTRIBUTE_COUNT; ++i) {
+		player.attributes[i] *= 5;
+	}
 
 	// Sharpness, fatigue, condition
 	readFromMemory(handle, playerAddress + PLAYER_OFFSET_SHARPNESS, 6, bytes);
@@ -219,8 +229,8 @@ Player getPlayer(void *handle, bool skipIsValidCheck, uint32_t personAddress, ui
 	// Extra
 	player.canDevelopQuickly = player.age <= 23 &&
 		player.attributes[ATTR_INJ] < 70 &&
-		player.personality[PERSONALITY_AMBITION] > 10 &&
-		player.personality[PERSONALITY_PROFESSIONALISM] > 10 &&
+		player.attributes[ATTR_AMB] > 10 &&
+		player.attributes[ATTR_PRO] > 10 &&
 		player.attributes[ATTR_DET] > 50;
 	if (player.age >= 15 && player.age <= 19) {
 		player.isHotProspect = player.ca >= 80 + 5 * (player.age - 15);
@@ -759,19 +769,12 @@ static float getRatingPerPosition(const Player *player, PositionGrouped position
 	}
 	// LOG_INFO("%s can play	%d", player->forename, position);
 	float rating = 0.0f;
-	/* attribute contributions */
 	for (int i = 0; i < ATTRIBUTE_COUNT; ++i) {
 		if (attr_weights[i] != 0.f) {
 			const float value = (float)player->attributes[i] / 100.f;
 			rating += attr_weights[i] * value;
 			// LOG_INFO("Attr %d: %f * %f = %f (new rating: %f)", i, value, attr_weights[i], attr_weights[i] * value, rating);
 		}
-	}
-	/* personality contributions */
-	for (int i = 0; i < 8; ++i) {
-		const float value = (float)player->personality[i] / 20.f;
-		rating += pers_weights[i] * value;
-		// LOG_INFO("Pers %d: %f * %f = %f (new rating: %f)", i, value, pers_weights[i], pers_weights[i] * value, rating);
 	}
 
 	if (totalWeight != 0.f) {

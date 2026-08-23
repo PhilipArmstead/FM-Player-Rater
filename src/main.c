@@ -3,6 +3,8 @@
 
 #include <gtk/gtk.h>
 
+#include "app/config.h"
+#include "app/data.h"
 #include "app/ui.h"
 #include "core/logger.h"
 
@@ -27,6 +29,10 @@ static void activate(GtkApplication *app) {
 	builder = context.builder;
 	gtk_window_set_application(GTK_WINDOW(context.window), GTK_APPLICATION(app));
 
+	#ifdef MOCKS_MODE
+	runMultiThreadedCache();
+	#endif
+
 	// Periodic callbacks
 	g_timeout_add(1000, update, NULL);
 	update(NULL);
@@ -44,6 +50,3 @@ int main(const int argc, char **argv) {
 
 	return status;
 }
-
-// TODO: print player ratings, positions, condition
-// TODO: pop out player details in to new window? even for current player?
