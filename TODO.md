@@ -2,4 +2,10 @@ TODO
 ===
 
 - Port `platform_openProcess` to Linux
-- Port `platform_openProcess` to macOS
+- To player-info
+	- ⭐ Add footedness
+	- Add height/weight
+	- Add contract details
+	- Add condition
+	- Add happiness
+	- Auto-refresh

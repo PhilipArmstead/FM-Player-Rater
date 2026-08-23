@@ -4,6 +4,7 @@
 #pragma once
 
 #include <stdint.h>
+#include <gtk/gtk.h>
 
 #include "app/constants.h"
 
@@ -29,7 +30,7 @@ typedef struct {
 } ProcessContext;
 
 // Application
-typedef enum {
+typedef enum PositionGrouped {
 	POSITION_GROUPED_GK = 0,
 	POSITION_GROUPED_FB,
 	POSITION_GROUPED_CB,
@@ -48,7 +49,7 @@ typedef enum {
 
 typedef struct {
 	char name[CLUB_NAME_LENGTH];
-	uint64_t address;
+	uint32_t address;
 	uint8_t teamType;
 } Club;
 
@@ -57,11 +58,12 @@ typedef struct {
 
 typedef struct {
 	char name[MAX_NATION_STRING_LENGTH];
+	char code[4];
 } Nation;
 
 typedef struct {
 	float value;
-	char position[2];
+	PositionGrouped position;
 } Rating;
 
 // TODO: note I only tested players, not all people
@@ -78,6 +80,7 @@ typedef struct {
 	char forename[PERSON_FORENAME_LENGTH];
 	char surname[PERSON_SURNAME_LENGTH];
 	char commonName[PERSON_COMMON_NAME_LENGTH];
+	uint8_t nationality[4];
 	uint32_t rowId;
 	uint32_t rid;
 	uint32_t uid;
@@ -87,7 +90,7 @@ typedef struct {
 	uint32_t annualWage;
 	int32_t clubIndex; // -1 means unemployed
 	uint16_t sharpness;
-	uint16_t fatigue;
+	int16_t fatigue;
 	uint16_t condition;
 	uint16_t homeReputation;
 	uint16_t currentReputation;
@@ -96,8 +99,6 @@ typedef struct {
 	uint8_t age;
 	uint8_t ca;
 	uint8_t pa;
-	uint8_t personality[8];
-	uint8_t nationIndex;
 	bool canDevelopQuickly;
 	bool isHotProspect;
 } Player;
@@ -126,7 +127,6 @@ typedef struct {
 #define GAME_STATUS_STRING_BUFFER_SIZE 32
 
 typedef struct {
-	PartialPlayer currentlyViewedPlayer;
 	char gameVersion[GAME_STATUS_STRING_BUFFER_SIZE];
 	DayMonthYear currentDate;
 	Club *clubs;

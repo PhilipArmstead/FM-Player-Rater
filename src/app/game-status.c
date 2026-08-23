@@ -2,12 +2,12 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 
 #include "game-status.h"
+#include "app/config.h"
 #include "app/constants.h"
 #include "app/maths.h"
 #include "app/types.h"
 #include "platform/platform.h"
 
-#include <stdio.h>
 #include <string.h>
 
 
@@ -61,6 +61,7 @@ Date getDate(const ProcessContext *context) {
 
 // Assumes valid ProcessContext
 DayMonthYear getDayMonthYear(const ProcessContext *context) {
+	#ifndef MOCKS_MODE
 	const Date date = getDate(context);
 
 	static const struct {
@@ -91,12 +92,16 @@ DayMonthYear getDayMonthYear(const ProcessContext *context) {
 			break;
 		}
 	}
+	#else
+	const DayMonthYear dayMonthYear = {.day = 11, .month = "August", .year = 2026};
+	#endif
 
 	return dayMonthYear;
 }
 
 // Assumes valid ProcessContext
 void getGameVersion(const ProcessContext *context, char *versionBuffer, const uint8_t bufferSize) {
+	#ifndef MOCKS_MODE
 	uint8_t bytes[4];
 	void *handle = context->handle;
 	readFromMemory(handle, context->moduleBaseAddress + GAME_VERSION_PTR_BASE, 4, bytes);
@@ -108,4 +113,7 @@ void getGameVersion(const ProcessContext *context, char *versionBuffer, const ui
 		(uint8_t*)versionBuffer
 	);
 	versionBuffer[bufferSize - 1] = '\0';
+	#else
+	strncpy(versionBuffer, "24.4.2+2081827 (m.e v24.2.0.0)", bufferSize - 1);
+	#endif
 }

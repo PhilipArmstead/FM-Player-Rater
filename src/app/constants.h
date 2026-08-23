@@ -4,7 +4,6 @@
 #pragma once
 
 #define MINIMUM_POSITIONAL_PROFICIENCY 15
-#define ATTRIBUTE_COUNT 54
 
 // All *_PTR_BASE values are relative to the base address of the module (fm.exe)
 
@@ -75,6 +74,26 @@
 #define PEOPLE_LIST_PTR_OFFSET_3 0x08
 // Jump to PEOPLE_LIST_PTR_OFFSET_3 * index to get the person address
 
+#define TEAM_LIST_PTR_BASE 0x0642ED68
+#define TEAM_LIST_PTR_OFFSET_1 0x80
+#define TEAM_LIST_PTR_OFFSET_2 0x00
+#define TEAM_LIST_PTR_OFFSET_3 0x08
+// Jump to TEAM_LIST_PTR_OFFSET_3 * index to get the team address
+
+#define CLUB_LIST_PTR_BASE 0x0642ECE0
+#define CLUB_LIST_PTR_OFFSET_1 0x80
+#define CLUB_LIST_PTR_OFFSET_2 0x00
+#define CLUB_LIST_PTR_OFFSET_3 0x08
+// Jump to CLUB_LIST_PTR_OFFSET_3 * index to get the club address
+// Longest club name: Club de FÃºtbol Lobos de la BenemÃ©rita Universidad AutÃ³noma de Puebla, 71 chars
+// Longest club short name: Persatuan Sepakbola Indonesia Karawang, 38 chars
+
+#define COMPETITION_LIST_PTR_BASE 0x0642ECE8
+#define COMPETITION_LIST_PTR_OFFSET_1 0x80
+#define COMPETITION_LIST_PTR_OFFSET_2 0x00
+#define COMPETITION_LIST_PTR_OFFSET_3 0x08
+// Jump to COMPETITION_LIST_PTR_OFFSET_3 * index to get the competition address
+
 // Day is represented with 1 byte and a 1 bit in the following byte to represent values > 255
 // Time is represented as 1 byte (even bits only) determining the number of 15 minute periods since 6AM
 // (plus 1 because 0 is midnight)
@@ -92,10 +111,13 @@
 // 2 bytes for day of the year, 2 bytes for year
 #define PERSON_OFFSET_DOB 0x44
 // (+0x04 from here)
+// Longest common name: 23 chars, Valentín Mariano José
 #define PERSON_OFFSET_FORENAME 0x58
 // (+0x04 from here)
+// Longest common name: 32 chars, Aparecido Leite de Souza Júnior
 #define PERSON_OFFSET_SURNAME 0x60
 // (+0x04 from here)
+// Longest common name: 30 chars, Steinþór Freyr Þorsteinsson
 #define PERSON_OFFSET_COMMON_NAME 0x68
 #define PERSON_OFFSET_NATIONALITY 0x70
 #define PERSON_OFFSET_PERSONALITY 0x78
@@ -261,16 +283,17 @@
 #define ATTR_DET 51
 #define ATTR_CMP 52 /* Composure */
 #define ATTR_CNT 53 /* Concentration */
-#define ATTRIBUTE_COUNT 54
-
-#define PERSONALITY_ADAPTABILITY 0
-#define PERSONALITY_AMBITION 1
-#define PERSONALITY_LOYALTY 2
-#define PERSONALITY_PRESSURE 3
-#define PERSONALITY_PROFESSIONALISM 4
-#define PERSONALITY_SPORTSMANSHIP 5
-#define PERSONALITY_TEMPERAMENT 6
-#define PERSONALITY_CONTROVERSY 7
+#define ATTR_ADA 54 /* Adaptability */
+#define ATTR_AMB 55 /* Ambition */
+#define ATTR_LOY 56 /* Loyalty */
+#define ATTR_PRE 57 /* Pressure */
+#define ATTR_PRO 58 /* Professionalism */
+#define ATTR_SPO 59 /* Sportsmanship */
+#define ATTR_TEM 60 /* Temperament */
+#define ATTR_CNY 61 /* Controversy */
+#define ATTRIBUTE_COUNT (ATTR_CNY + 1)
+#define PERSONALITY_COUNT 8
+#define TRUE_ATTRIBUTE_COUNT (ATTRIBUTE_COUNT - PERSONALITY_COUNT)
 
 #define ABILITY_CA 0
 #define ABILITY_PA 2
@@ -342,20 +365,50 @@
 #define CLUB_OFFSET_NATION 0xD8
 
 /** Team */
+// 0xB0 size
 #define TEAM_OFFSET_ROW_ID 0x08
 #define TEAM_OFFSET_UNIQUE_ID 0x0C
 #define TEAM_OFFSET_RANDOM_ID 0x10
 // 0 for first team, 1 for reserves, 0x0C for U18, 0x16 for youth intake
 #define TEAM_OFFSET_TEAM_TYPE 0x28
-// 0x29, 0 for senior, else always 1?
+#define TEAM_OFFSET_TEAM_IS_NOT_SENIOR 0x29
 #define TEAM_OFFSET_CLUB 0x30
 #define TEAM_OFFSET_PLAYER_START 0x38
 #define TEAM_OFFSET_PLAYER_END 0x40
-#define TEAM_OFFSET_REPUTATION 0xA8
-#define TEAM_OFFSET_LONG_NAME_ADDRESS 0xC0
-// (+0x04 from here)
-#define TEAM_OFFSET_SHORT_NAME_ADDRESS 0xC8
+#define TEAM_OFFSET_COMPETITION 0x50
 
+/** Competition */
+// 0x1B0 size
+#define COMPETITION_OFFSET_ROW_ID 0x08
+#define COMPETITION_OFFSET_UNIQUE_ID 0x0C
+#define COMPETITION_OFFSET_RANDOM_ID 0x10
+// Longest name: The Emperor's Cup JFA All-Japan Soccer Championship Tournament, 62 chars
+#define COMPETITION_OFFSET_LONG_NAME_ADDRESS 0x40
+// (+0x04 from here)
+// Longest name: Liga Profesional de Primera División Apertura, 46 chars
+#define COMPETITION_OFFSET_SHORT_NAME_ADDRESS 0x48
+#define COMPETITION_OFFSET_CONTINENT_ADDRESS 0x58
+#define COMPETITION_OFFSET_NATION_ADDRESS 0x60
+
+/** Continent */
+#define CONTINENT_OFFSET_ROW_ID 0x08
+#define CONTINENT_OFFSET_UNIQUE_ID 0x0C
+#define CONTINENT_OFFSET_RANDOM_ID 0x10
+#define CONTINENT_OFFSET_NAME_ADDRESS 0x18
+// (+0x04 from here)
+#define CONTINENT_OFFSET_DEMONYM_ADDRESS 0x28
+#define CONTINENT_OFFSET_GOVERNING_BODY_NAME_ADDRESS 0x30
+
+/** Nation */
+#define NATION_OFFSET_ROW_ID 0x08
+#define NATION_OFFSET_UNIQUE_ID 0x0C
+#define NATION_OFFSET_RANDOM_ID 0x10
+#define NATION_OFFSET_LONG_NAME_ADDRESS 0x18
+// (+0x04 from here)
+#define NATION_OFFSET_SHORT_NAME_ADDRESS 0x20
+#define NATION_OFFSET_DEMONYM_ADDRESS 0x30
+#define NATION_OFFSET_LANGUAGE_START 0x48
+#define NATION_OFFSET_LANGUAGE_END 0x50
 
 /** City */
 

@@ -3,20 +3,20 @@
 
 #include <gtk/gtk.h>
 
-#include "app/callbacks.h"
+#include "app/config.h"
+#include "app/data.h"
 #include "app/ui.h"
 #include "core/logger.h"
 
 
 ProcessContext processContext = {0};
 GameContext gameContext = {0};
-GtkBuilder *builder;
-
+GtkBuilder *builder = {0};
 
 static void activate(GtkApplication *app) {
 	char pathToStylesheet[256] = {0};
 	GtkCssProvider *css_provider = gtk_css_provider_new();
-	snprintf(pathToStylesheet, sizeof(pathToStylesheet), "%s/app.css", REPO_ROOT_DIR);
+	snprintf(pathToStylesheet, sizeof(pathToStylesheet), "%s/show-players.css", LAYOUTS_DIR);
 	gtk_css_provider_load_from_path(css_provider, pathToStylesheet);
 	gtk_style_context_add_provider_for_display(
 		gdk_display_get_default(),
@@ -25,12 +25,17 @@ static void activate(GtkApplication *app) {
 	);
 	g_object_unref(css_provider);
 
+	const WindowContext context = openWindow("show-players", "window:show-players");
+	builder = context.builder;
+	gtk_window_set_application(GTK_WINDOW(context.window), GTK_APPLICATION(app));
+
+	#ifdef MOCKS_MODE
+	runMultiThreadedCache();
+	#endif
+
 	// Periodic callbacks
 	g_timeout_add(1000, update, NULL);
 	update(NULL);
-
-	GtkWidget *window = openWindow("app", "window");
-	gtk_window_set_application(GTK_WINDOW(window), GTK_APPLICATION(app));
 }
 
 int main(const int argc, char **argv) {
@@ -45,7 +50,3 @@ int main(const int argc, char **argv) {
 
 	return status;
 }
-
-// TODO: print player name + age in UI
-// TODO: print player attributes, ratings, positions, condition
-// TODO: pop out player details in to new window? even for current player?

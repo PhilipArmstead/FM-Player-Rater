@@ -2,33 +2,111 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 
 #include "ui.h"
-#include "app/types.h"
+#include "app/config.h"
+#include "app/data.h"
+#include "app/game-status.h"
+#include "app/maths.h"
+#include "app/player.h"
 #include "app/helpers/date.h"
+#include "core/logger.h"
+#include "platform/platform.h"
 
 #include <gtk/gtk.h>
 
 
 extern ProcessContext processContext;
-extern GtkBuilder *builder;
 extern GameContext gameContext;
+extern GtkBuilder *builder;
+
+static void handleDisconnect(void);
+static void handleConnect(void);
+static inline void updateWhileConnected(void);
+static inline void updateWhileDisconnected(void);
+
+void connectToProcess(void) {
+	clearCaches();
+	platform_openProcess(&processContext);
+
+	if (processContext.handle != NULL) {
+		handleConnect();
+	}
+}
+
+gboolean update(gpointer userData) {
+	#ifndef MOCKS_MODE
+	if (processContext.handle != NULL) {
+		updateWhileConnected();
+	} else {
+		updateWhileDisconnected();
+	}
+	#else
+	updateWhileConnected();
+	#endif
+
+	return G_SOURCE_CONTINUE;
+}
 
 void updateUi(void) {
 	updateGameStatus();
 }
 
-void updateInGameDate(void) {
-	GtkLabel *dateLabel = GTK_LABEL(GTK_WIDGET(gtk_builder_get_object(builder, "footer:label:date")));
+static inline void updateWhileConnected(void) {
+	// Get the current time/date
+	DayMonthYear dayMonthYear = getDayMonthYear(&processContext);
 
+	// Bail if the date is invalid and assume we're no longer connected
+	if (dayMonthYear.day == 0 || dayMonthYear.year == 0) {
+		handleDisconnect();
+		return;
+	}
+
+	// Cache the new date if it's different from the last one we saw
+	if (
+		dayMonthYear.day != gameContext.currentDate.day ||
+		dayMonthYear.year != gameContext.currentDate.year ||
+		strncmp(dayMonthYear.month, gameContext.currentDate.month, MONTH_NAME_LENGTH) != 0
+	) {
+		gameContext.currentDate = dayMonthYear;
+		LOG_INFO(
+			"Current Date: %s %d, %d",
+			dayMonthYear.month,
+			dayMonthYear.day,
+			dayMonthYear.year
+		);
+
+		updateInGameDate();
+	}
+
+	// Update the game version if it's different from the last one we saw
+	char versionBuffer[GAME_STATUS_STRING_BUFFER_SIZE] = {0};
+	getGameVersion(&processContext, versionBuffer, GAME_STATUS_STRING_BUFFER_SIZE);
+	if (strncmp(versionBuffer, gameContext.gameVersion, GAME_STATUS_STRING_BUFFER_SIZE) != 0) {
+		strncpy(gameContext.gameVersion, versionBuffer, GAME_STATUS_STRING_BUFFER_SIZE);
+		LOG_INFO("Game Version: %s", versionBuffer);
+
+		updateGameStatus();
+	}
+}
+
+static inline void updateWhileDisconnected(void) {
+	connectToProcess();
+}
+
+void updateInGameDate(void) {
+	GtkLabel *dateLabel = GTK_LABEL(GTK_WIDGET(gtk_builder_get_object(builder, "label:date")));
+
+	#ifndef MOCKS_MODE
 	if (processContext.handle == NULL || gameContext.currentDate.year <= 1970) {
 		gtk_label_set_text(dateLabel, "\0");
 		return;
 	}
+	#endif
 
 	char buffer[64] = {0};
 	snprintf(
 		buffer,
 		64,
-		"Date: %s %d%s, %d",
+		"📅 %s %d%s, %d",
 		gameContext.currentDate.month,
 		gameContext.currentDate.day,
 		getOrdinal(gameContext.currentDate.day),
@@ -38,12 +116,14 @@ void updateInGameDate(void) {
 }
 
 void updateGameStatus(void) {
-	GtkLabel *versionLabel = GTK_LABEL(GTK_WIDGET(gtk_builder_get_object(builder, "footer:label:status")));
+	GtkLabel *versionLabel = GTK_LABEL(GTK_WIDGET(gtk_builder_get_object(builder, "label:status")));
 
+	#ifndef MOCKS_MODE
 	if (processContext.handle == NULL) {
 		gtk_label_set_text(versionLabel, "Not connected");
 		return;
 	}
+	#endif
 
 	if (gameContext.gameVersion[0] == '\0') {
 		gtk_label_set_text(versionLabel, "\0");
@@ -51,44 +131,280 @@ void updateGameStatus(void) {
 	}
 
 	char buffer[64] = {0};
-	snprintf(buffer, 64, "Game version %s", gameContext.gameVersion);
+	snprintf(buffer, 64, "📝 %s", gameContext.gameVersion);
 	gtk_label_set_text(versionLabel, buffer);
 }
 
-void updateShowCurrentPlayerButton(void) {
-	const PartialPlayer currentPlayer = gameContext.currentlyViewedPlayer;
-	GtkWidget *buttonWidget = GTK_WIDGET(gtk_builder_get_object(builder, "buttonShowCurrentPlayer"));
-	GtkLabel *label = GTK_LABEL(GTK_WIDGET(gtk_builder_get_object(builder, "labelShowCurrentPlayer")));
-	if (currentPlayer.uid != 0) {
-		#define PLAYER_NAME_SIZE 64
-		char playerName[PLAYER_NAME_SIZE] = {0};
-		if (currentPlayer.commonName[0] != '\0') {
-			snprintf(playerName, PLAYER_NAME_SIZE, "%s", currentPlayer.commonName);
-		} else {
-			snprintf(playerName, PLAYER_NAME_SIZE, "%s %s", currentPlayer.forename, currentPlayer.surname);
-		}
-		char buffer[128] = {0};
+WindowContext openWindow(const char *layoutName, const char *windowName) {
+	char pathToAppLayout[256] = {0};
+	snprintf(pathToAppLayout, sizeof(pathToAppLayout), "%s/%s.ui", LAYOUTS_DIR, layoutName);
+
+	WindowContext context = {};
+	context.builder = gtk_builder_new_from_file(pathToAppLayout);
+	context.window = GTK_WIDGET(gtk_builder_get_object(context.builder, windowName));
+	gtk_window_present(GTK_WINDOW(context.window));
+	return context;
+}
+
+WindowContext createPlayerInfoWindow(const Player *player) {
+	const WindowContext context = openWindow("player-info", "window:player-info");
+	gtk_window_set_default_size(GTK_WINDOW(context.window), 420, 900);
+
+	char pathToStylesheet[256] = {0};
+	GtkCssProvider *css_provider = gtk_css_provider_new();
+	snprintf(pathToStylesheet, sizeof(pathToStylesheet), "%s/player-info.css", LAYOUTS_DIR);
+	gtk_css_provider_load_from_path(css_provider, pathToStylesheet);
+	gtk_style_context_add_provider_for_display(
+		gdk_display_get_default(),
+		GTK_STYLE_PROVIDER(css_provider),
+		GTK_STYLE_PROVIDER_PRIORITY_APPLICATION
+	);
+	g_object_unref(css_provider);
+
+	LOG_INFO(
+		"Found Player: %s (Age: %d, Ability: %d, Potential: %d, Row ID: %d, Address: 0x%08X)",
+		player->commonName,
+		player->age,
+		player->ca,
+		player->pa,
+		player->rowId,
+		player->personAddress
+	);
+
+	return context;
+}
+
+void renderPlayerInfoWindow(WindowContext context, const Player *player) {
+	// Player name
+	GtkLabel *commonNameLabel = GTK_LABEL(GTK_WIDGET(gtk_builder_get_object(context.builder, "label:common-name")));
+	gtk_label_set_text(commonNameLabel, player->commonName);
+
+	// Player age
+	{
+		char buffer[8];
+		snprintf(buffer, 8, "%d yrs", player->age);
+		GtkLabel *ageLabel = GTK_LABEL(GTK_WIDGET(gtk_builder_get_object(context.builder, "label:age")));
+		gtk_label_set_text(ageLabel, buffer);
+	}
+
+	// Player status
+	GtkWidget *isFastLearner = GTK_WIDGET(gtk_builder_get_object(context.builder, "widget:is-fast-learner"));
+	gtk_widget_set_visible(isFastLearner, player->canDevelopQuickly);
+	GtkWidget *isHotProspect = GTK_WIDGET(gtk_builder_get_object(context.builder, "widget:is-hot-prospect"));
+	gtk_widget_set_visible(isHotProspect, player->isHotProspect);
+
+
+	// Player nationalities
+	uint8_t nationalityIndex = 0;
+	while (nationalityIndex < 4 && player->nationality[nationalityIndex] != 0xFF) {
+		GtkBox *nationalityBox = GTK_BOX(GTK_WIDGET(gtk_builder_get_object(context.builder, "label:nationality")));
+		char pathToFlag[256] = {0};
+		const Nation nation = gameContext.nations[player->nationality[nationalityIndex]];
 		snprintf(
-			buffer,
-			sizeof(buffer),
-			"%s\n(%s, ID: %u)",
-			"Show current player",
-			playerName,
-			currentPlayer.uid
+			pathToFlag,
+			sizeof(pathToFlag),
+			"%s/assets/flags/%s.png",
+			REPO_ROOT_DIR,
+			nation.code
 		);
-		gtk_label_set_text(label, buffer);
-		gtk_widget_set_sensitive(buttonWidget, true);
+		GtkWidget *flagImage = gtk_image_new_from_file(pathToFlag);
+		gtk_box_append(nationalityBox, flagImage);
+		gtk_widget_set_tooltip_text(flagImage, nation.name);
+		nationalityIndex++;
+	}
+
+	// Club name
+	GtkLabel *clubNameLabel = GTK_LABEL(GTK_WIDGET(gtk_builder_get_object(context.builder, "label:club-name")));
+	if (player->clubIndex == -1) {
+		gtk_label_set_text(clubNameLabel, "Free agent");
 	} else {
-		gtk_label_set_text(label, "Show current player");
-		gtk_widget_set_sensitive(buttonWidget, false);
+		const Club club = gameContext.clubs[player->clubIndex];
+		gtk_label_set_text(clubNameLabel, club.name);
+	}
+
+	float attr_weights[ATTRIBUTE_COUNT];
+	float pers_weights[8];
+	float totalWeight = 1.0f;
+	getWeightsForPosition(player->ratings[0].position, attr_weights, pers_weights, &totalWeight);
+	float max = 0;
+	for (int i = 0; i < ATTRIBUTE_COUNT; ++i) {
+		if (attr_weights[i] > max) {
+			max = attr_weights[i];
+		}
+	}
+
+	char buffer[8] = {0};
+	char widgetId[64];
+	GtkLabel *label;
+	GtkWidget *widget;
+	#define setRowTextAndHighlight(id, attributeIndex) {																	\
+		snprintf(buffer, 8, "%d", convertTo20Scale(player->attributes[attributeIndex]));		\
+		snprintf(widgetId, 64, "label:%s", id);																							\
+		label = GTK_LABEL(GTK_WIDGET(gtk_builder_get_object(context.builder, widgetId)));		\
+		gtk_label_set_text(label, buffer);																									\
+		snprintf(widgetId, 64, "row:%s", id);																								\
+		widget = GTK_WIDGET(gtk_builder_get_object(context.builder, widgetId));							\
+		if (attr_weights[attributeIndex] > max * 0.5f) {																		\
+			gtk_widget_add_css_class(widget, "attribute-row--high");													\
+		} else if (attr_weights[attributeIndex] > max * 0.15f) {														\
+			gtk_widget_add_css_class(widget, "attribute-row--mid");														\
+		}																																										\
+	}
+
+	// Ability scores
+	{
+		GtkLabel *caLabel = GTK_LABEL(GTK_WIDGET(gtk_builder_get_object(context.builder, "label:ca")));
+		GtkLabel *paLabel = GTK_LABEL(GTK_WIDGET(gtk_builder_get_object(context.builder, "label:pa")));
+		char ability[4] = {0};
+		snprintf(ability, 4, "%d", player->ca);
+		gtk_label_set_label(caLabel, ability);
+		snprintf(ability, 4, "%d", player->pa);
+		gtk_label_set_label(paLabel, ability);
+	}
+
+	// Attributes
+	GtkWidget *boxGoalkeeper = GTK_WIDGET(gtk_builder_get_object(context.builder, "box:attribute:goalkeeper"));
+	GtkWidget *boxTechnical = GTK_WIDGET(gtk_builder_get_object(context.builder, "box:attribute:technical"));
+
+	if (player->positions[0] < 12) {
+		gtk_widget_set_visible(boxTechnical, true);
+		gtk_widget_set_visible(boxGoalkeeper, false);
+
+		setRowTextAndHighlight("attribute:technical:corners", ATTR_COR);
+		setRowTextAndHighlight("attribute:technical:crossing", ATTR_CRO);
+		setRowTextAndHighlight("attribute:technical:dribbling", ATTR_DRI);
+		setRowTextAndHighlight("attribute:technical:finishing", ATTR_FIN);
+		setRowTextAndHighlight("attribute:technical:first-touch", ATTR_FIR);
+		setRowTextAndHighlight("attribute:technical:free-kicks", ATTR_FRE);
+		setRowTextAndHighlight("attribute:technical:heading", ATTR_HEA);
+		setRowTextAndHighlight("attribute:technical:long-shots", ATTR_LON);
+		setRowTextAndHighlight("attribute:technical:long-throws", ATTR_LTH);
+		setRowTextAndHighlight("attribute:technical:marking", ATTR_MAR);
+		setRowTextAndHighlight("attribute:technical:passing", ATTR_PAS);
+		setRowTextAndHighlight("attribute:technical:penalty-taking", ATTR_PEN);
+		setRowTextAndHighlight("attribute:technical:tackling", ATTR_TCK);
+		setRowTextAndHighlight("attribute:technical:technique", ATTR_TEC);
+	} else {
+		gtk_widget_set_visible(boxGoalkeeper, true);
+		gtk_widget_set_visible(boxTechnical, false);
+
+		setRowTextAndHighlight("attribute:goalkeeper:aerial-reach", ATTR_AER);
+		setRowTextAndHighlight("attribute:goalkeeper:command-of-area", ATTR_CMD);
+		setRowTextAndHighlight("attribute:goalkeeper:communication", ATTR_COM);
+		setRowTextAndHighlight("attribute:goalkeeper:eccentricity", ATTR_ECC);
+		setRowTextAndHighlight("attribute:goalkeeper:first-touch", ATTR_FIR);
+		setRowTextAndHighlight("attribute:goalkeeper:handling", ATTR_HAN);
+		setRowTextAndHighlight("attribute:goalkeeper:kicking", ATTR_HEA);
+		setRowTextAndHighlight("attribute:goalkeeper:one-on-ones", ATTR_ONE);
+		setRowTextAndHighlight("attribute:goalkeeper:passing", ATTR_PAS);
+		setRowTextAndHighlight("attribute:goalkeeper:punching-tendency", ATTR_TTP);
+		setRowTextAndHighlight("attribute:goalkeeper:reflexes", ATTR_REF);
+		setRowTextAndHighlight("attribute:goalkeeper:rushing-out-tendency", ATTR_TRO);
+		setRowTextAndHighlight("attribute:goalkeeper:throwing", ATTR_THR);
+	}
+
+	setRowTextAndHighlight("attribute:mental:aggression", ATTR_COR);
+	setRowTextAndHighlight("attribute:mental:anticipation", ATTR_ANT);
+	setRowTextAndHighlight("attribute:mental:bravery", ATTR_BRA);
+	setRowTextAndHighlight("attribute:mental:concentration", ATTR_CNT);
+	setRowTextAndHighlight("attribute:mental:composure", ATTR_CMP);
+	setRowTextAndHighlight("attribute:mental:decisions", ATTR_DEC);
+	setRowTextAndHighlight("attribute:mental:determination", ATTR_DET);
+	setRowTextAndHighlight("attribute:mental:flair", ATTR_FLA);
+	setRowTextAndHighlight("attribute:mental:leadership", ATTR_LDR);
+	setRowTextAndHighlight("attribute:mental:off-the-ball", ATTR_OTB);
+	setRowTextAndHighlight("attribute:mental:positioning", ATTR_POS);
+	setRowTextAndHighlight("attribute:mental:teamwork", ATTR_TEA);
+	setRowTextAndHighlight("attribute:mental:vision", ATTR_VIS);
+	setRowTextAndHighlight("attribute:mental:work-rate", ATTR_WOR);
+
+	setRowTextAndHighlight("attribute:physical:acceleration", ATTR_ACC);
+	setRowTextAndHighlight("attribute:physical:agility", ATTR_AGI);
+	setRowTextAndHighlight("attribute:physical:balance", ATTR_BAL);
+	setRowTextAndHighlight("attribute:physical:jumping-reach", ATTR_JUM);
+	setRowTextAndHighlight("attribute:physical:natural-fitness", ATTR_NAT);
+	setRowTextAndHighlight("attribute:physical:pace", ATTR_PAC);
+	setRowTextAndHighlight("attribute:physical:stamina", ATTR_STA);
+	setRowTextAndHighlight("attribute:physical:strength", ATTR_STR);
+
+	setRowTextAndHighlight("attribute:hidden:adaptability", ATTR_ADA);
+	setRowTextAndHighlight("attribute:hidden:ambition", ATTR_AMB);
+	setRowTextAndHighlight("attribute:hidden:consistency", ATTR_CON);
+	setRowTextAndHighlight("attribute:hidden:controversy", ATTR_CNY);
+	setRowTextAndHighlight("attribute:hidden:dirtiness", ATTR_DIR);
+	setRowTextAndHighlight("attribute:hidden:important-matches", ATTR_IMP);
+	setRowTextAndHighlight("attribute:hidden:injury-proneness", ATTR_INJ);
+	setRowTextAndHighlight("attribute:hidden:loyalty", ATTR_LOY);
+	setRowTextAndHighlight("attribute:hidden:pressure", ATTR_PRE);
+	setRowTextAndHighlight("attribute:hidden:professionalism", ATTR_PRO);
+	setRowTextAndHighlight("attribute:hidden:sportsmanship", ATTR_SPO);
+	setRowTextAndHighlight("attribute:hidden:temperament", ATTR_TEM);
+	setRowTextAndHighlight("attribute:hidden:versatility", ATTR_VER);
+
+	// Ratings
+	{
+		static const char *labels[POSITION_GROUPED_COUNT] = {
+			"Goalkeeper",
+			"Full back",
+			"Centre back",
+			"Wing back",
+			"Defensive midfielder",
+			"Midfielder",
+			"Winger",
+			"Attacking midfielder",
+			"Striker"
+		};
+		GtkBox *boxRoles = GTK_BOX(GTK_WIDGET(gtk_builder_get_object(context.builder, "box:top-roles")));
+		uint8_t i = 0;
+		while (i < POSITION_GROUPED_COUNT && player->ratings[i].value > 0.f) {
+			GtkWidget *parent = gtk_box_new(GTK_ORIENTATION_VERTICAL, 2);
+			gtk_box_append(boxRoles, parent);
+
+			GtkWidget *labelContainer = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 0);
+			GtkWidget *roleLabel = gtk_label_new(labels[player->ratings[i].position]);
+			gtk_label_set_xalign(GTK_LABEL(roleLabel), 0);
+			gtk_widget_add_css_class(roleLabel, "heading");
+			gtk_widget_set_hexpand(roleLabel, true);
+			gtk_box_append(GTK_BOX(labelContainer), roleLabel);
+
+			char valueBuffer[8] = {0};
+			snprintf(valueBuffer, 8, "%.1f", player->ratings[i].value);
+			GtkWidget *roleValue = gtk_label_new(valueBuffer);
+			gtk_widget_add_css_class(roleValue, "heading");
+			gtk_widget_add_css_class(roleValue, "accent-orange");
+			gtk_widget_add_css_class(roleValue, "role-value");
+			gtk_box_append(GTK_BOX(labelContainer), roleValue);
+
+			GtkWidget *progressBar = gtk_progress_bar_new();
+			gtk_progress_bar_set_fraction(GTK_PROGRESS_BAR(progressBar), player->ratings[i].value / 100.0f);
+			gtk_widget_add_css_class(progressBar, "role-bar");
+
+			gtk_box_append(GTK_BOX(parent), labelContainer);
+			gtk_box_append(GTK_BOX(parent), progressBar);
+
+			i++;
+		}
 	}
 }
 
-GtkWidget *openWindow(const char *layoutName, const char *windowName) {
-	char pathToAppLayout[256] = {0};
-	snprintf(pathToAppLayout, sizeof(pathToAppLayout), "%s/%s.ui", REPO_ROOT_DIR, layoutName);
-	builder = gtk_builder_new_from_file(pathToAppLayout);
-	GtkWidget *window = GTK_WIDGET(gtk_builder_get_object(builder, windowName));
-	gtk_window_present(GTK_WINDOW(window));
-	return window;
+
+static void handleDisconnect(void) {
+	processContext.handle = NULL;
+
+	gameContext.gameVersion[0] = '\0';
+	gameContext.currentDate = (DayMonthYear){0};
+
+	updateUi();
+}
+
+static void handleConnect(void) {
+	LOG_INFO(
+		"Process opened with PID: %u (base module address of %p)",
+		processContext.pid,
+		(void*)processContext.moduleBaseAddress
+	);
+	updateUi();
+	update(NULL);
+
+	runMultiThreadedCache();
 }

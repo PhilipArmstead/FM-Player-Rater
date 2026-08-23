@@ -1,0 +1,134 @@
+.card {
+	background-color: #1b2430;
+	padding: 24px;
+}
+
+.card-border {
+	border: 2px solid #d9a441;
+	outline: 4px solid alpha(#d9a441, 0.35);
+	outline-offset: -8px;
+}
+
+.panel {
+	background-color: alpha(#000, 0.25);
+	border-radius: 10px;
+	padding: 14px 18px;
+}
+
+.player-name {
+	color: #f2f2f2;
+	font-weight: 900;
+}
+
+.club-name {
+	color: #f2f2f2;
+}
+
+.section-heading {
+	color: #8fa0b3;
+	letter-spacing: 1px;
+}
+
+.caption-heading {
+	font-size: 11px;
+	letter-spacing: 1px;
+}
+
+.accent-rule {
+	background-color: #d9a441;
+	margin-bottom: 4px;
+	min-height: 2px;
+}
+
+.accent-yellow {
+	color: #f0b23c;
+	font-weight: 800;
+}
+
+.accent-orange {
+	color: #e08a2c;
+	font-weight: 800;
+}
+
+.attribute-list {
+	background: transparent;
+}
+
+.attr-row {
+	color: #d7dde5;
+	padding: 3px 4px;
+}
+
+.attr-row label:last-child {
+	font-weight: 700;
+}
+
+.pill-fast-learner {
+	background-color: #2b3a5c;
+	border: 1px solid #3182ce;
+	border-radius: 999px;
+	color: #90cdf4;
+	font-weight: 600;
+	padding: 3px 8px;
+}
+
+.pill-hot-prospect {
+	background-color: #3d2112;
+	border: 1px solid #dd6b20;
+	border-radius: 999px;
+	color: #fbd38d;
+	font-weight: 600;
+	padding: 3px 8px;
+}
+
+.current-ability, .potential-ability {
+	font-size: 28px;
+	font-weight: bold
+}
+
+.current-ability {
+	color: #66b5e5;
+}
+
+.potential-ability {
+	color: #66cb93;
+}
+
+.role-bar, .role-bar progress {
+	border: 0;
+	padding: 0;
+}
+
+.role-bar trough {
+	border: none;
+	border-radius: 0;
+}
+
+.brand-label {
+	color: #f2f2f2;
+	font-weight: 900;
+}
+
+.brand-hex {
+	color: #d9a441;
+}
+
+.dim-label {
+	color: #8fa0b3;
+}
+
+.attribute-row--high {
+	background: rgb(51, 64, 9);
+}
+
+.attribute-row--mid {
+	background: rgb(68, 57, 17);
+}
+
+.role-value {
+	margin-left: 12px;
+}
+
+.nationality {
+	margin-top: 8px;
+}

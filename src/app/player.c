@@ -5,6 +5,7 @@
 #include "app/constants.h"
 #include "app/game-status.h"
 #include "app/maths.h"
+#include "app/mocks.h"
 #include "core/logger.h"
 #include "platform/platform.h"
 
@@ -31,6 +32,7 @@ static float getRatingPerPosition(const Player *player, PositionGrouped position
 
 // Assumes valid ProcessContext
 uint32_t getCurrentPersonUniqueId(const ProcessContext *processContext) {
+	#ifndef PLAYER_BY_ID
 	uint8_t bytes[4];
 	void *handle = processContext->handle;
 	readFromMemory(handle, processContext->moduleBaseAddress + CURRENT_SCREEN_PLAYER_ID_PTR_BASE, 4, bytes);
@@ -43,6 +45,10 @@ uint32_t getCurrentPersonUniqueId(const ProcessContext *processContext) {
 	readFromMemory(handle, hexBytesToInt(bytes, 4) + CURRENT_SCREEN_PLAYER_ID_PTR_BASE_OFFSET_7, 4, bytes);
 	readFromMemory(handle, hexBytesToInt(bytes, 4) + CURRENT_SCREEN_PLAYER_ID_PTR_BASE_OFFSET_8, 4, bytes);
 	return (uint32_t)hexBytesToInt(bytes, 4);
+	#else
+	const Player player = PLAYER_BY_ID;
+	return player.uid;
+	#endif
 }
 
 // Assumes valid ProcessContext
@@ -70,6 +76,7 @@ PartialPlayer getPlayerByIdPartial(const ProcessContext *processContext, uint32_
 }
 
 static PartialPlayer getPartialPlayer(void *handle, uint32_t personAddress) {
+	#ifndef PLAYER_BY_ID
 	const uint32_t playerAddress = personAddress + PLAYER_OFFSET_FROM_PERSON;
 
 	uint8_t ability[3];
@@ -86,6 +93,16 @@ static PartialPlayer getPartialPlayer(void *handle, uint32_t personAddress) {
 	getPersonForename(handle, personAddress, player.forename);
 	getPersonSurname(handle, personAddress, player.surname);
 	getPersonCommonName(handle, personAddress, player.commonName);
+	#else
+	const Player p = PLAYER_BY_ID;
+	PartialPlayer player = {
+		.personAddress = personAddress,
+		.uid = p.uid,
+	};
+	strncpy(player.forename, p.forename, sizeof(player.forename));
+	strncpy(player.surname, p.surname, sizeof(player.surname));
+	strncpy(player.commonName, p.commonName, sizeof(player.commonName));
+	#endif
 
 	if (player.commonName[0] == '\0') {
 		snprintf(player.commonName, sizeof(player.commonName), "%s %s", player.forename, player.surname);
@@ -110,8 +127,9 @@ uint32_t getPersonAddressFromPlayerAddress(void *handle, uint32_t playerAddress)
 	return playerAddress - offset;
 }
 
-Player getPlayer(void *handle, bool skipValidCheck, uint32_t personAddress, uint32_t playerAddress) {
-	if (!skipValidCheck && !isPlayerValid(handle, personAddress)) {
+Player getPlayer(void *handle, bool skipIsValidCheck, uint32_t personAddress, uint32_t playerAddress) {
+	#ifndef PLAYER_BY_ID
+	if (!skipIsValidCheck && !isPlayerValid(handle, personAddress)) {
 		return (Player){0};
 	}
 
@@ -139,6 +157,7 @@ Player getPlayer(void *handle, bool skipValidCheck, uint32_t personAddress, uint
 		.rid = rid,
 		.uid = uid,
 		.rowId = rowId,
+		.nationality = {0xFF, 0xFF, 0xFF, 0xFF}
 	};
 	getPersonForename(handle, personAddress, player.forename);
 	getPersonSurname(handle, personAddress, player.surname);
@@ -148,23 +167,54 @@ Player getPlayer(void *handle, bool skipValidCheck, uint32_t personAddress, uint
 		snprintf(player.commonName, sizeof(player.commonName), "%s %s", player.forename, player.surname);
 	}
 
-	readFromMemory(handle, personAddress + PERSON_OFFSET_PERSONALITY, 8, player.personality);
-	readFromMemory(handle, playerAddress + PLAYER_OFFSET_ATTRIBUTES, ATTRIBUTE_COUNT, player.attributes);
+	readFromMemory(
+		handle,
+		personAddress + PERSON_OFFSET_PERSONALITY,
+		PERSONALITY_COUNT,
+		player.attributes + TRUE_ATTRIBUTE_COUNT
+	);
+	readFromMemory(handle, playerAddress + PLAYER_OFFSET_ATTRIBUTES, TRUE_ATTRIBUTE_COUNT, player.attributes);
 	readFromMemory(handle, playerAddress + PLAYER_OFFSET_POSITIONS, 15, player.positions);
 	player.clubIndex = getClubIndexFromPerson(handle, personAddress);
 	getSortedPositionRatings(&player);
 
+	// Normalise personality
+	for (uint8_t i = TRUE_ATTRIBUTE_COUNT; i < ATTRIBUTE_COUNT; ++i) {
+		player.attributes[i] *= 5;
+	}
+
 	// Sharpness, fatigue, condition
 	readFromMemory(handle, playerAddress + PLAYER_OFFSET_SHARPNESS, 6, bytes);
 	player.sharpness = (uint16_t)hexBytesToInt(bytes, 2);
-	player.fatigue = (uint16_t)hexBytesToInt(bytes + 2, 2);
+	player.fatigue = (int16_t)hexBytesToInt(bytes + 2, 2);
 	player.condition = (uint16_t)hexBytesToInt(bytes + 4, 2);
 
 	// Nationality
 	readFromMemory(handle, personAddress + PERSON_OFFSET_NATIONALITY, 4, bytes);
 	const uint32_t country = (uint32_t)hexBytesToInt(bytes, 4);
 	readFromMemory(handle, country + NATION_OFFSET_ROW_ID, 4, bytes);
-	player.nationIndex = (uint8_t)hexBytesToInt(bytes, 4);
+	player.nationality[0] = (uint8_t)hexBytesToInt(bytes, 4);
+
+	uint8_t nationalityIndex = 1;
+	readFromMemory(handle, personAddress + PERSON_OFFSET_RELATIONSHIPS, 4, bytes);
+	const uint32_t relationships = (uint32_t)hexBytesToInt(bytes, 4);
+	readFromMemory(handle, relationships, 4, bytes);
+	uint32_t relationshipStart = (uint32_t)hexBytesToInt(bytes, 4);
+	readFromMemory(handle, relationships + 0x08, 4, bytes);
+	const uint32_t relationshipEnd = (uint32_t)hexBytesToInt(bytes, 4);
+	while (relationshipStart < relationshipEnd && nationalityIndex < 4) {
+		readFromMemory(handle, relationshipStart + RELATIONSHIP_OFFSET_TYPE, 2, bytes);
+		const uint16_t type = (uint16_t)hexBytesToInt(bytes, 2);
+		if (type == 0x0908) {
+			readFromMemory(handle, relationshipStart + RELATIONSHIP_OFFSET_TARGET_ADDRESS, 4, bytes);
+			const uint32_t nationality = (uint32_t)hexBytesToInt(bytes, 4);
+			readFromMemory(handle, nationality + NATION_OFFSET_ROW_ID, 4, bytes);
+			player.nationality[nationalityIndex] = (uint8_t)hexBytesToInt(bytes, 4);
+
+			nationalityIndex++;
+		}
+		relationshipStart += 0x10;
+	}
 
 	// Reputation
 	readFromMemory(handle, playerAddress + PLAYER_OFFSET_HOME_REPUTATION, 6, bytes);
@@ -179,8 +229,8 @@ Player getPlayer(void *handle, bool skipValidCheck, uint32_t personAddress, uint
 	// Extra
 	player.canDevelopQuickly = player.age <= 23 &&
 		player.attributes[ATTR_INJ] < 70 &&
-		player.personality[PERSONALITY_AMBITION] > 10 &&
-		player.personality[PERSONALITY_PROFESSIONALISM] > 10 &&
+		player.attributes[ATTR_AMB] > 10 &&
+		player.attributes[ATTR_PRO] > 10 &&
 		player.attributes[ATTR_DET] > 50;
 	if (player.age >= 15 && player.age <= 19) {
 		player.isHotProspect = player.ca >= 80 + 5 * (player.age - 15);
@@ -189,6 +239,9 @@ Player getPlayer(void *handle, bool skipValidCheck, uint32_t personAddress, uint
 	} else {
 		player.isHotProspect = false;
 	}
+	#else
+	const Player player = PLAYER_BY_ID;
+	#endif
 
 	return player;
 }
@@ -207,6 +260,7 @@ static bool isPersonAlsoStaff(void *handle, uint32_t personAddress) {
 }
 
 static bool isPlayerValid(void *handle, uint32_t personAddress) {
+	#ifndef MOCKS_MODE
 	const uint32_t playerAddress = personAddress + PLAYER_OFFSET_FROM_PERSON;
 	for (uint8_t i = 0; i < 5; ++i) {
 		const uint8_t attribute = readByte(handle, playerAddress + PLAYER_OFFSET_HIDDEN_ATTRIBUTES + i);
@@ -216,15 +270,20 @@ static bool isPlayerValid(void *handle, uint32_t personAddress) {
 	}
 
 	return isPersonValid(handle, personAddress);
+	#else
+	return true;
+	#endif
 }
 
 static bool isPersonValid(void *handle, uint32_t personAddress) {
+	#ifndef MOCKS_MODE
 	for (uint8_t i = 0; i < 8; ++i) {
 		const uint8_t attribute = readByte(handle, personAddress + PERSON_OFFSET_PERSONALITY + i);
 		if (!attribute || attribute > 20) {
 			return false;
 		}
 	}
+	#endif
 
 	return true;
 }
@@ -679,7 +738,16 @@ static inline int position_group_to_indices(PositionGrouped p, int out_indices[5
 	return n;
 }
 
-float getRatingPerPosition(const Player *player, PositionGrouped position) {
+void getWeightsForPosition(
+	PositionGrouped position,
+	float out_attr[ATTRIBUTE_COUNT],
+	float out_personality[8],
+	float *out_weight
+) {
+	fill_weights_for_position(position, out_attr, out_personality, out_weight);
+}
+
+static float getRatingPerPosition(const Player *player, PositionGrouped position) {
 	float attr_weights[ATTRIBUTE_COUNT];
 	float pers_weights[8];
 	float totalWeight = 1.0f;
@@ -701,19 +769,12 @@ float getRatingPerPosition(const Player *player, PositionGrouped position) {
 	}
 	// LOG_INFO("%s can play	%d", player->forename, position);
 	float rating = 0.0f;
-	/* attribute contributions */
 	for (int i = 0; i < ATTRIBUTE_COUNT; ++i) {
 		if (attr_weights[i] != 0.f) {
 			const float value = (float)player->attributes[i] / 100.f;
 			rating += attr_weights[i] * value;
 			// LOG_INFO("Attr %d: %f * %f = %f (new rating: %f)", i, value, attr_weights[i], attr_weights[i] * value, rating);
 		}
-	}
-	/* personality contributions */
-	for (int i = 0; i < 8; ++i) {
-		const float value = (float)player->personality[i] / 20.f;
-		rating += pers_weights[i] * value;
-		// LOG_INFO("Pers %d: %f * %f = %f (new rating: %f)", i, value, pers_weights[i], pers_weights[i] * value, rating);
 	}
 
 	if (totalWeight != 0.f) {
@@ -724,19 +785,26 @@ float getRatingPerPosition(const Player *player, PositionGrouped position) {
 	return rating;
 }
 
-void getSortedPositionRatings(Player *player) {
-	const char *labels[POSITION_GROUPED_COUNT] = {"GK", "FB", "CB", "WB", "DM", "MC", "W", "AM", "ST"};
-	for (int i = 0; i < POSITION_GROUPED_COUNT; ++i) {
-		player->ratings[i].value = getRatingPerPosition(player, (PositionGrouped)i);
-		player->ratings[i].position[0] = labels[i][0];
-		player->ratings[i].position[1] = labels[i][1] ? labels[i][1] : '\0';
+static void getSortedPositionRatings(Player *player) {
+	uint8_t i = 0;
+	uint8_t j = 0;
+	while (i < POSITION_GROUPED_COUNT) {
+		const float value = getRatingPerPosition(player, (PositionGrouped)i);
+		if (value >= 0.f) {
+			player->ratings[j].value = value;
+			player->ratings[j].position = i;
+			++j;
+		}
+		++i;
 	}
 
 	/* simple selection sort descending */
-	for (int i = 0; i < POSITION_GROUPED_COUNT; ++i) {
-		int best = i;
-		for (int j = i + 1; j < POSITION_GROUPED_COUNT; ++j) {
-			if (player->ratings[j].value > player->ratings[best].value) best = j;
+	for (i = 0; i < POSITION_GROUPED_COUNT; ++i) {
+		uint8_t best = i;
+		for (j = i + 1; j < POSITION_GROUPED_COUNT; ++j) {
+			if (player->ratings[j].value > player->ratings[best].value) {
+				best = j;
+			}
 		}
 		if (best != i) {
 			const Rating tmp = player->ratings[i];
@@ -747,6 +815,7 @@ void getSortedPositionRatings(Player *player) {
 }
 
 static uint32_t getPersonAddressFromUid(const ProcessContext *processContext, uint32_t uid) {
+	#ifndef PLAYER_BY_ID
 	// Iterate over all players to find one with the matching UID
 	uint8_t bytes[4];
 	readFromMemory(processContext->handle, processContext->moduleBaseAddress + PLAYER_COUNT_PTR_BASE, 4, bytes);
@@ -777,4 +846,7 @@ static uint32_t getPersonAddressFromUid(const ProcessContext *processContext, ui
 	}
 
 	return 0;
+	#else
+	return 0x5E18008;
+	#endif
 }

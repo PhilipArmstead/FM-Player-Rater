@@ -1,0 +1,42 @@
+// SPDX-FileCopyrightText: © 2026 Phil Armstead <philarmstead@mailbox.org>
+// SPDX-License-Identifier: GPL-3.0-or-later
+
+#pragma once
+
+#include "app/config.h"
+
+
+#ifdef MOCKS_MODE
+#define PLAYER_BY_ID ((Player){ \
+	.attributes = { 68, 95, 83, 62, 62, 18, 86, 75, 59, 31, 73, 15, 5, 5, 5, 5, 10, 84, 81, 10, 47, 10, 73, 79, 60, 100, 80, 37, 63, 71, 24, 5, 5, 15, 93, 40, 61, 80, 88, 39, 69, 55, 79, 84, 69, 85, 88, 65, 25, 67, 78, 100, 75, 65, 15, 17, 12, 9, 14, 8, 4, 18 }, \
+	.ratings = { { .value = 81.530304, .position = POSITION_GROUPED_W }, { .value = 76.6908493, .position = POSITION_GROUPED_ST } }, \
+	.commonName = "Vinícius Júnior", \
+	.forename = "Vinícius José", \
+	.surname = "Paixão de Oliveira Júnior", \
+	.nationality = { 189, 170, 255, 255 }, \
+	.rowId = 23442, \
+	.rid = 19302146, \
+	.uid = 19302146, \
+	.personAddress = 0xa06cf440, \
+	.playerAddress = 0xa06cf1c8, \
+	.guideValue = 252086992, \
+	.annualWage = 0, \
+	.clubIndex = 1125, \
+	.sharpness = 10000, \
+	.fatigue = 13, \
+	.condition = 8737, \
+	.homeReputation = 8550, \
+	.currentReputation = 9541, \
+	.worldReputation = 10000, \
+	.positions = {1, 1, 1, 1, 1, 1, 16, 1, 10, 20, 1, 15, 19, 1, 1 }, \
+	.age = 24, \
+	.ca = 190, \
+	.pa = 190, \
+	.canDevelopQuickly = false, \
+	.isHotProspect = false, \
+	})
+
+#define PLAYER_BY_ID_CLUB (Club){.name = "Real Madrid Club de Fútbol", .address = 1, .teamType = 19}
+#define PLAYER_BY_ID_NATION_1 (Nation){.code = "BRA", .name = "Brazil"}
+#define PLAYER_BY_ID_NATION_2 (Nation){.code = "ESP", .name = "Spain"}
+#endif
