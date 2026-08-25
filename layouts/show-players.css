@@ -22,26 +22,6 @@ headerbar .title {
 	padding: 6px 10px;
 }
 
-.brand {
-	color: #fff;
-	font-weight: bold;
-	margin: 0 6px;
-}
-
-.icon-btn {
-	background: transparent;
-	border: none;
-	box-shadow: none;
-	color: #9aa4ad;
-	min-height: 22px;
-	min-width: 22px;
-	padding: 2px;
-}
-
-.icon-btn:hover {
-	color: #fff;
-}
-
 .nav-tab {
 	background: transparent;
 	border: none;
@@ -64,24 +44,6 @@ headerbar .title {
 	color: #9aa4ad;
 }
 
-.new-data-btn {
-	background-color: #1f9d55;
-	border: none;
-	border-radius: 4px;
-	color: #fff;
-	font-weight: bold;
-	padding: 4px 12px;
-}
-
-.new-data-btn:hover {
-	background-color: #24b062;
-}
-
-.avatar {
-	color: #d24d57;
-}
-
-/* ---- filter chips bar ---- */
 .filterbar {
 	background-color: #10141a;
 	border-bottom: 1px solid #232a31;
@@ -116,7 +78,6 @@ headerbar .title {
 	padding: 2px 6px;
 }
 
-/* ---- sidebar ---- */
 .sidebar {
 	background-color: #10141a;
 	border-right: 1px solid #232a31;
@@ -170,10 +131,6 @@ headerbar .title {
 
 .section-chevron {
 	color: #7f8a93;
-}
-
-.section-title.quality {
-	color: #4a90e2;
 }
 
 .quality-body {
@@ -241,13 +198,11 @@ headerbar .title {
 	color: #4a90e2;
 }
 
-/* CA / PA numbers are green in the reference */
 .tca, .tpa {
 	color: #4caf6d;
 	font-weight: 600;
 }
 
-/* interest pills */
 .pill {
 	border-radius: 3px;
 	color: #fff;
@@ -269,11 +224,6 @@ headerbar .title {
 .pill-high {
 	background-color: #1f6b3a;
 	color: #a8f0c4;
-}
-
-.pill-low {
-	background-color: #6b3a1f;
-	color: #ffc9a8;
 }
 
 .pill-unknown {
