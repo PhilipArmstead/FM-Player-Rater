@@ -21,6 +21,7 @@ add_executable(fm_player_rater
 	src/app/data.c
 	src/app/game-status.c
 	src/app/helpers/date.c
+	src/app/helpers/formatter.c
 	src/app/player.c
 	src/app/ui.c
 	src/core/logger.c
