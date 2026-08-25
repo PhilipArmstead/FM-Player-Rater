@@ -107,6 +107,8 @@
 #define PERSON_OFFSET_ROW_ID 0x08
 #define PERSON_OFFSET_UNIQUE_ID 0x0C
 #define PERSON_OFFSET_RANDOM_ID 0x10
+// One byte: 0x02 = male, 0x12 = female
+#define PERSON_OFFSET_GENDER 0x19
 // 0x40 B8 1A E7 07 Some sort of date?
 // 2 bytes for day of the year, 2 bytes for year
 #define PERSON_OFFSET_DOB 0x44
@@ -310,6 +312,12 @@
 #define CONTRACTS_OFFSET_END_DATE 0x40
 // 0 is part-time, 1 is full time, 2 is amateur, 3 is youth, 4 is non-contract
 #define CONTRACTS_OFFSET_CONTRACT_TYPE 0xB4
+// todo
+// public const int CON_WEEKLY_WAGE = 0x20;  // u32 GBP p/w
+// public const int CON_EXPIRY = 0x48;       // u32 FM-datum
+// public const int CON_SQUAD_NUMBER = 0x5D; // byte
+// public const int CON_STATUS_FLAGS = 0x57; // byte bitfield (transferstatus)
+//   bit0 = Listed, bit3 = Listed by Request, bit4 = Not for Sale, bit5 = Set for Release
 
 /** Continent */
 // (+0x04 from here)

@@ -45,10 +45,12 @@ typedef enum PositionGrouped {
 
 // Longest club name: Club de Fútbol Lobos de la Benemérita Universidad Autónoma de Puebla, 71 chars
 // Longest club short name: Persatuan Sepakbola Indonesia Karawang, 38 chars
-#define CLUB_NAME_LENGTH 40
+#define CLUB_LONG_NAME_LENGTH 72
+#define CLUB_SHORT_NAME_LENGTH 40
 
 typedef struct {
-	char name[CLUB_NAME_LENGTH];
+	char name[CLUB_LONG_NAME_LENGTH];
+	char shortName[CLUB_SHORT_NAME_LENGTH];
 	uint32_t address;
 	uint8_t teamType;
 } Club;
@@ -95,6 +97,7 @@ typedef struct {
 	uint16_t homeReputation;
 	uint16_t currentReputation;
 	uint16_t worldReputation;
+	uint8_t selectedRatingIndex;
 	uint8_t positions[15];
 	uint8_t age;
 	uint8_t ca;
@@ -127,8 +130,16 @@ typedef struct {
 #define GAME_STATUS_STRING_BUFFER_SIZE 32
 
 typedef struct {
+	GtkSearchEntry *entry;
+	GtkPopover *popover;
+	GtkListBox *listBox;
+} SearchDatalist;
+
+typedef struct {
 	char gameVersion[GAME_STATUS_STRING_BUFFER_SIZE];
 	DayMonthYear currentDate;
+	GtkBuilder *builder;
+	GtkColumnView *table;
 	Club *clubs;
 	Nation *nations;
 	Player *players;

@@ -16,7 +16,6 @@
 
 extern ProcessContext processContext;
 extern GameContext gameContext;
-extern GtkBuilder *builder;
 
 static void handleDisconnect(void);
 static void handleConnect(void);
@@ -42,7 +41,6 @@ gboolean update(gpointer userData) {
 	#else
 	updateWhileConnected();
 	#endif
-
 	return G_SOURCE_CONTINUE;
 }
 
@@ -93,7 +91,7 @@ static inline void updateWhileDisconnected(void) {
 }
 
 void updateInGameDate(void) {
-	GtkLabel *dateLabel = GTK_LABEL(GTK_WIDGET(gtk_builder_get_object(builder, "label:date")));
+	GtkLabel *dateLabel = GTK_LABEL(GTK_WIDGET(gtk_builder_get_object(gameContext.builder, "label:date")));
 
 	#ifndef MOCKS_MODE
 	if (processContext.handle == NULL || gameContext.currentDate.year <= 1970) {
@@ -116,7 +114,7 @@ void updateInGameDate(void) {
 }
 
 void updateGameStatus(void) {
-	GtkLabel *versionLabel = GTK_LABEL(GTK_WIDGET(gtk_builder_get_object(builder, "label:status")));
+	GtkLabel *versionLabel = GTK_LABEL(GTK_WIDGET(gtk_builder_get_object(gameContext.builder, "label:status")));
 
 	#ifndef MOCKS_MODE
 	if (processContext.handle == NULL) {
@@ -407,4 +405,26 @@ static void handleConnect(void) {
 	update(NULL);
 
 	runMultiThreadedCache();
+}
+
+// Recursive function to find all GtkEntry widgets under a given parent
+static void ui_findEntries(GtkWidget *widget, GPtrArray *entries) {
+	// Check if the current widget is a GtkEntry
+	if (GTK_IS_ENTRY(widget)) {
+		g_ptr_array_add(entries, widget);
+	}
+
+	// Iterate over all children
+	GtkWidget *child = gtk_widget_get_first_child(widget);
+	while (child) {
+		ui_findEntries(child, entries);
+		child = gtk_widget_get_next_sibling(child);
+	}
+}
+
+// Helper function to get all GtkEntry widgets under a parent
+GPtrArray *ui_getAllEntries(GtkWidget *parent) {
+	GPtrArray *entries = g_ptr_array_new();
+	ui_findEntries(parent, entries);
+	return entries;
 }

@@ -23,3 +23,5 @@ WindowContext openWindow(const char *layoutName, const char *windowName);
 
 WindowContext createPlayerInfoWindow(const Player *player);
 void renderPlayerInfoWindow(WindowContext context, const Player *player);
+
+GPtrArray *ui_getAllEntries(GtkWidget *parent);

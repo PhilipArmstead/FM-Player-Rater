@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 
 #include "data.h"
+#include "app/callbacks.h"
 #include "app/config.h"
 #include "app/maths.h"
 #include "app/mocks.h"
@@ -164,15 +165,25 @@ void cacheClubs(void) {
 		uint8_t clubBuffer[4];
 		readFromMemory(processContext.handle, clubStart + i * CLUB_LIST_STRIDE, 4, clubBuffer);
 		readFromMemory(processContext.handle, hexBytesToInt(clubBuffer, 4) + CLUB_OFFSET_NAME, 4, bytes);
-		const uint32_t namePointer = (uint32_t)hexBytesToInt(bytes, 4);
+		uint32_t namePointer = (uint32_t)hexBytesToInt(bytes, 4);
 		if (!namePointer || !readFromMemory(
 			processContext.handle,
 			hexBytesToInt(bytes, 4) + STRING_OFFSET_VALUE,
-			64,
+			CLUB_LONG_NAME_LENGTH,
 			(uint8_t*)gameContext.clubs[i - missed].name
 		)) {
 			missed++;
+			continue;
 		}
+
+		readFromMemory(processContext.handle, hexBytesToInt(clubBuffer, 4) + CLUB_OFFSET_NAME_SHORT, 4, bytes);
+		namePointer = (uint32_t)hexBytesToInt(bytes, 4);
+		readFromMemory(
+			processContext.handle,
+			hexBytesToInt(bytes, 4) + STRING_OFFSET_VALUE,
+			CLUB_SHORT_NAME_LENGTH,
+			(uint8_t*)gameContext.clubs[i - missed].shortName
+		);
 	}
 
 	gameContext.clubCount -= missed;
@@ -258,4 +269,32 @@ void runMultiThreadedCache(void) {
 		}
 	}
 	#endif
+}
+
+void clubDataListCreate(void) {
+	SearchDatalist *dataList = g_new0(SearchDatalist, 1);
+
+	dataList->entry = GTK_SEARCH_ENTRY(gtk_search_entry_new());
+	dataList->popover = GTK_POPOVER(gtk_popover_new());
+	dataList->listBox = GTK_LIST_BOX(gtk_list_box_new());
+
+	gtk_search_entry_set_placeholder_text(dataList->entry, "Search club");
+	gtk_widget_add_css_class(GTK_WIDGET(dataList->entry), "sidebar-search");
+
+	gtk_popover_set_child(dataList->popover, GTK_WIDGET(dataList->listBox));
+	gtk_widget_set_parent(GTK_WIDGET(dataList->popover), GTK_WIDGET(dataList->entry));
+
+	gtk_popover_set_pointing_to(dataList->popover, &(GdkRectangle){102, 27, 1, 1});
+	gtk_popover_set_position(dataList->popover, GTK_POS_BOTTOM);
+
+	gtk_popover_set_autohide(dataList->popover, FALSE);
+	gtk_widget_set_can_focus(GTK_WIDGET(dataList->popover), FALSE);
+	gtk_widget_set_can_focus(GTK_WIDGET(dataList->listBox), FALSE);
+	gtk_list_box_set_selection_mode(dataList->listBox, GTK_SELECTION_NONE);
+
+	g_signal_connect(dataList->entry, "changed", G_CALLBACK(callbackOnClubNameChange), dataList);
+	g_signal_connect(dataList->listBox, "row-activated", G_CALLBACK(callbackOnClubNameSelected), dataList);
+
+	GtkBox *container = GTK_BOX(gtk_builder_get_object(gameContext.builder, "box:club-search-container"));
+	gtk_box_append(container, GTK_WIDGET(dataList->entry));
 }

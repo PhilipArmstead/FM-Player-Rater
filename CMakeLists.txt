@@ -20,10 +20,12 @@ add_executable(fm_player_rater
 	src/app/callbacks.c
 	src/app/data.c
 	src/app/game-status.c
+	src/app/player-table.c
+	src/app/player.c
+	src/app/search.c
+	src/app/ui.c
 	src/app/helpers/date.c
 	src/app/helpers/formatter.c
-	src/app/player.c
-	src/app/ui.c
 	src/core/logger.c
 	src/platform/linux.c
 	src/platform/windows.c

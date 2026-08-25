@@ -3,15 +3,16 @@
 
 #include <gtk/gtk.h>
 
+#include "app/callbacks.h"
 #include "app/config.h"
 #include "app/data.h"
+#include "app/player-table.h"
 #include "app/ui.h"
 #include "core/logger.h"
 
 
 ProcessContext processContext = {0};
 GameContext gameContext = {0};
-GtkBuilder *builder = {0};
 
 static void activate(GtkApplication *app) {
 	char pathToStylesheet[256] = {0};
@@ -26,8 +27,23 @@ static void activate(GtkApplication *app) {
 	g_object_unref(css_provider);
 
 	const WindowContext context = openWindow("show-players", "window:show-players");
-	builder = context.builder;
+	gameContext.builder = context.builder;
 	gtk_window_set_application(GTK_WINDOW(context.window), GTK_APPLICATION(app));
+
+	gameContext.table = GTK_COLUMN_VIEW(GTK_WIDGET(gtk_builder_get_object(gameContext.builder, "table:player-list")));
+	playerTable_populate(gameContext.table, NULL);
+
+	clubDataListCreate();
+
+	// Capture keypresses within sidebar to trigger search
+	{
+		GtkEventControllerKey *controllerKey = GTK_EVENT_CONTROLLER_KEY(gtk_event_controller_key_new());
+		g_signal_connect(controllerKey, "key-released", G_CALLBACK(callbackFilterKeypress), NULL);
+		gtk_event_controller_set_propagation_phase(GTK_EVENT_CONTROLLER(controllerKey), GTK_PHASE_BUBBLE);
+
+		GtkWidget *sidebar = GTK_WIDGET(gtk_builder_get_object(gameContext.builder, "sidebar"));
+		gtk_widget_add_controller(sidebar, GTK_EVENT_CONTROLLER(controllerKey));
+	}
 
 	#ifdef MOCKS_MODE
 	runMultiThreadedCache();

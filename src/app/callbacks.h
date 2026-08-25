@@ -5,6 +5,21 @@
 
 #include <gtk/gtk.h>
 
+#include "app/types.h"
 
-G_MODULE_EXPORT void callbackSearchByUid(void);
+
+G_MODULE_EXPORT void callbackOnClubNameChange(GtkEditable *editable, const SearchDatalist *dataList);
+G_MODULE_EXPORT void callbackOnClubNameSelected(
+	GtkListBox *box,
+	GtkListBoxRow *row,
+	const SearchDatalist *dataList
+);
 G_MODULE_EXPORT void callbackShowCurrentPlayer(void);
+G_MODULE_EXPORT void callbackClearFilters(void);
+G_MODULE_EXPORT gboolean callbackFilterKeypress(
+	GtkEventControllerKey *controller,
+	guint keyval,
+	guint keycode,
+	GdkModifierType state,
+	gpointer user_data
+);

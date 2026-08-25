@@ -19,3 +19,5 @@ DWORD WINAPI threadFunction(LPVOID arg);
 #else
 void *threadFunction(void *arg);
 #endif
+
+void clubDataListCreate(void);
