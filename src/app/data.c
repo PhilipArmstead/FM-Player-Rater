@@ -226,6 +226,8 @@ void cachePlayers(uint8_t half) {
 	const uint16_t start = 900;
 	#endif
 
+	gameContext.playerCount -= missed;
+
 	const int64_t timeEnd = platform_getMicroseconds();
 	LOG_INFO("Cached %d players in %llu microseconds", end - start - missed, timeEnd - timeStart);
 }

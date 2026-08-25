@@ -213,7 +213,6 @@ headerbar .title {
 .table row {
 	border-bottom: 1px solid #171d24;
 	color: var(--colour-primary);
-	padding: 8px 0;
 }
 
 .table row:nth-child(even) {
@@ -231,11 +230,6 @@ headerbar .title {
 
 .sidebar-search {
 	min-width: 200px;
-}
-
-.popover {
-	/*background: #fff;*/
-	/*color: #000;*/
 }
 
 .popover > * {

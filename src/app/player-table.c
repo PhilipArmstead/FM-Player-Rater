@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 
 #include "player-table.h"
+#include "app/ui.h"
 #include "app/helpers/formatter.h"
 #include "app/helpers/vector.h"
 
@@ -79,18 +80,44 @@ static void search_player_row_class_init(SearchPlayerRowClass *klass) {
 	g_object_class_install_properties(object_class, N_PROPS, properties);
 }
 
+static void onRowClicked(GtkGestureClick *gesture, uint8_t clickCount, double x, double y, gpointer data) {
+	(void)gesture;
+	(void)x;
+	(void)y;
+
+	GtkListItem *listItem = GTK_LIST_ITEM(data);
+	const SearchPlayerRow *row = gtk_list_item_get_item(listItem);
+
+	if (row != NULL && row->player != NULL && clickCount == 2) {
+		const WindowContext context = createPlayerInfoWindow(row->player);
+		renderPlayerInfoWindow(context, row->player);
+	}
+}
+
+static void bindClickHandler(GtkWidget *widget, GtkListItem *item) {
+	GtkGestureClick *gesture = GTK_GESTURE_CLICK(gtk_gesture_click_new());
+	gtk_widget_add_controller(widget, GTK_EVENT_CONTROLLER(gesture));
+	g_signal_connect(gesture, "pressed", G_CALLBACK(onRowClicked), item);
+}
+
 static void setupTextLabel(GtkSignalListItemFactory *factory, GtkListItem *item, gpointer data) {
 	(void)factory;
 	(void)data;
 
-	gtk_list_item_set_child(item, gtk_label_new(""));
+	GtkWidget *label = gtk_label_new("");
+	gtk_list_item_set_child(item, label);
+
+	bindClickHandler(label, item);
 }
 
 static void setupBox(GtkSignalListItemFactory *factory, GtkListItem *item, gpointer data) {
 	(void)factory;
 	(void)data;
 
-	gtk_list_item_set_child(item, gtk_box_new(0, 2));
+	GtkWidget *box = gtk_box_new(0, 2);
+	gtk_list_item_set_child(item, box);
+
+	bindClickHandler(box, item);
 }
 
 static void printNumeric(GtkWidget *label, int64_t value) {
