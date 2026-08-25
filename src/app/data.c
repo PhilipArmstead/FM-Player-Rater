@@ -209,12 +209,17 @@ void cachePlayers(uint8_t half) {
 	uint8_t bytes[4];
 	readFromMemory(processContext.handle, processContext.moduleBaseAddress + PLAYER_LIST_PTR_BASE, 4, bytes);
 	const uint64_t playerStart = hexBytesToInt(bytes, 4);
+	uint64_t missed = 0;
 	for (uint64_t i = start; i < end; i++) {
 		readFromMemory(processContext.handle, playerStart + i * PLAYER_LIST_STRIDE, 4, bytes);
 		const uint32_t playerAddress = (uint32_t)hexBytesToInt(bytes, 4);
 		const uint32_t personAddress = getPersonAddressFromPlayerAddress(processContext.handle, playerAddress);
 		Player player = getPlayer(processContext.handle, true, personAddress, playerAddress);
-		memcpy(&gameContext.players[i], &player, sizeof(Player));
+		if (!player.uid) {
+			++missed;
+			continue;
+		}
+		memcpy(&gameContext.players[i - missed], &player, sizeof(Player));
 	}
 	#else
 	const uint16_t end = 900;
@@ -222,7 +227,7 @@ void cachePlayers(uint8_t half) {
 	#endif
 
 	const int64_t timeEnd = platform_getMicroseconds();
-	LOG_INFO("Cached %d players in %llu microseconds", end - start, timeEnd - timeStart);
+	LOG_INFO("Cached %d players in %llu microseconds", end - start - missed, timeEnd - timeStart);
 }
 
 void runMultiThreadedCache(void) {

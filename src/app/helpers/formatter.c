@@ -13,7 +13,6 @@
  * Ensure the string is writable and there are enough spaces in
  * the string buffer to add them.
  */
-// TODO: replace with a series of memmoves?
 void formatter_printNumber(char *outString) {
 	if (outString == NULL) {
 		return;

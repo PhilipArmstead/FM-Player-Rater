@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 
 #include "player-table.h"
+#include "app/helpers/formatter.h"
 #include "app/helpers/vector.h"
 
 
@@ -95,6 +96,9 @@ static void setupBox(GtkSignalListItemFactory *factory, GtkListItem *item, gpoin
 static void printNumeric(GtkWidget *label, int64_t value) {
 	gchar buffer[32];
 	g_snprintf(buffer, sizeof(buffer), "%llu", value);
+	if (value > 999) {
+		formatter_printNumber(buffer);
+	}
 	gtk_label_set_text(GTK_LABEL(label), buffer);
 }
 
@@ -251,7 +255,10 @@ void playerTable_populate(GtkColumnView *table, const uint32_t *playerIds) {
 		GTK_WIDGET(gtk_builder_get_object(gameContext.builder, "label:results-count"))
 	);
 	char resultCountString[16] = {0};
-	snprintf(resultCountString, 16, "%llu result%c", playerCount, playerCount != 1 ? 's' : '\0');
+	char formattedResults[12] = {0};
+	snprintf(formattedResults, 12, "%llu", playerCount);
+	formatter_printNumber(formattedResults);
+	snprintf(resultCountString, 16, "%s result%c", formattedResults, playerCount != 1 ? 's' : '\0');
 	gtk_label_set_text(resultsCountLabel, resultCountString);
 
 	if (hasCreatedTable) {

@@ -21,10 +21,10 @@ static bool isPersonValid(void *handle, uint32_t personAddress);
 static uint32_t getPlayerAddressFromPersonAddress(void *handle, uint32_t personAddress);
 static PartialPlayer getPartialPlayer(void *handle, uint32_t personAddress);
 static inline void getPersonName(void *handle, uint8_t pointer[4], char str[32]);
-static inline void getPersonForename(void *handle, uint64_t attributeBase, char str[32]);
-static inline void getPersonSurname(void *handle, uint64_t attributeBase, char str[32]);
-static inline void getPersonCommonName(void *handle, uint64_t attributeBase, char str[64]);
-static uint8_t getAge(void *handle, uint64_t address);
+static inline void getPersonForename(void *handle, uint32_t attributeBase, char str[32]);
+static inline void getPersonSurname(void *handle, uint32_t attributeBase, char str[32]);
+static inline void getPersonCommonName(void *handle, uint32_t attributeBase, char str[64]);
+static uint8_t getAge(void *handle, uint32_t address);
 static int32_t getClubIndexFromPerson(void *handle, uint32_t personAddress);
 static uint32_t getPersonAddressFromUid(const ProcessContext *processContext, uint32_t uid);
 static void getSortedPositionRatings(Player *player);
@@ -137,14 +137,18 @@ Player getPlayer(void *handle, bool skipIsValidCheck, uint32_t personAddress, ui
 		playerAddress = getPlayerAddressFromPersonAddress(handle, personAddress);
 	}
 
+	uint8_t bytes[6];
+	readFromMemory(handle, personAddress + PERSON_OFFSET_UNIQUE_ID, 4, bytes);
+	const uint32_t uid = (uint32_t)hexBytesToInt(bytes, 4);
+	if (!uid) {
+		return (Player){0};
+	}
+
 	uint8_t ability[3];
 	readFromMemory(handle, playerAddress + PLAYER_OFFSET_ABILITY, 3, ability);
 
-	uint8_t bytes[6];
 	readFromMemory(handle, personAddress + PERSON_OFFSET_ROW_ID, 4, bytes);
 	const uint32_t rowId = (uint32_t)hexBytesToInt(bytes, 4);
-	readFromMemory(handle, personAddress + PERSON_OFFSET_UNIQUE_ID, 4, bytes);
-	const uint32_t uid = (uint32_t)hexBytesToInt(bytes, 4);
 	readFromMemory(handle, personAddress + PERSON_OFFSET_RANDOM_ID, 4, bytes);
 	const uint32_t rid = (uint32_t)hexBytesToInt(bytes, 4);
 
@@ -288,7 +292,7 @@ static bool isPersonValid(void *handle, uint32_t personAddress) {
 	return true;
 }
 
-static inline void getPersonName(void *handle, uint8_t pointer[4], char str[32]) {
+static inline void getPersonName(void *handle, uint8_t pointer[4], char str[PERSON_COMMON_NAME_LENGTH]) {
 	uint32_t a = (uint32_t)hexBytesToInt(pointer, 4);
 	if (!a) {
 		str[0] = '\0';
@@ -296,28 +300,28 @@ static inline void getPersonName(void *handle, uint8_t pointer[4], char str[32])
 	}
 	readFromMemory(handle, a, 4, pointer);
 	a = (uint32_t)hexBytesToInt(pointer, 4);
-	readFromMemory(handle, a + 4, 32, (uint8_t*)str);
+	readFromMemory(handle, a + 4, PERSON_COMMON_NAME_LENGTH, (uint8_t*)str);
 }
 
-static inline void getPersonForename(void *handle, uint64_t attributeBase, char str[32]) {
+static inline void getPersonForename(void *handle, uint32_t attributeBase, char str[PERSON_COMMON_NAME_LENGTH]) {
 	uint8_t pointer[4];
 	readFromMemory(handle, attributeBase + PERSON_OFFSET_FORENAME, 4, pointer);
 	getPersonName(handle, pointer, str);
 }
 
-static inline void getPersonSurname(void *handle, uint64_t attributeBase, char str[32]) {
+static inline void getPersonSurname(void *handle, uint32_t attributeBase, char str[PERSON_COMMON_NAME_LENGTH]) {
 	uint8_t pointer[4];
 	readFromMemory(handle, attributeBase + PERSON_OFFSET_SURNAME, 4, pointer);
 	getPersonName(handle, pointer, str);
 }
 
-static inline void getPersonCommonName(void *handle, uint64_t attributeBase, char str[64]) {
+static inline void getPersonCommonName(void *handle, uint32_t attributeBase, char str[PERSON_COMMON_NAME_LENGTH]) {
 	uint8_t pointer[4];
 	readFromMemory(handle, attributeBase + PERSON_OFFSET_COMMON_NAME, 4, pointer);
 	getPersonName(handle, pointer, str);
 }
 
-static uint8_t getAge(void *handle, uint64_t address) {
+static uint8_t getAge(void *handle, uint32_t address) {
 	uint8_t bytes[4];
 	readFromMemory(handle, address + PERSON_OFFSET_DOB, 4, bytes);
 	const uint8_t yearBytes[2] = {bytes[2], bytes[3]};
