@@ -9,6 +9,8 @@ compare players and weigh up future purchases.
 This has only been tested with
 the [Steam version of Football Manager 24](https://store.steampowered.com/app/2252570/Football_Manager_2024/), v24.4.2.
 
+> **Supported platforms:** Linux and Windows only.
+
 ### Features
 
 #### Analyse players
@@ -32,7 +34,7 @@ the [Steam version of Football Manager 24](https://store.steampowered.com/app/22
 
 ### Common Requirements (All Platforms)
 
-- **C Compiler**: GCC 9+, Clang 10+, or MSVC with C99 support
+- **C Compiler**: GCC 9+ or Clang 10+ (Linux), or MinGW-w64 GCC (Windows), with C99 support
 - **Build System**: CMake 3.20+
 - **Package Manager**: pkg-config (for GTK4 detection)
 - **GUI Framework**: GTK4 development libraries
@@ -92,39 +94,6 @@ sudo pacman -S \
 - `pkg-config` - Package configuration helper
 - `gtk4` - GTK4 libraries and headers
 
-### macOS
-
-#### Using Homebrew (Recommended)
-
-```bash
-# Install Homebrew if not already installed
-/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
-
-# Install dependencies
-brew install \
-  gcc \
-  cmake \
-  pkg-config \
-  gtk4
-```
-
-**Packages**:
-
-- `gcc` - GNU C Compiler (or use system Clang via Xcode)
-- `make` - Build automation tool
-- `pkg-config` - Package configuration helper
-- `gtk4` - GTK4 libraries and headers
-
-#### Using MacPorts (Alternative)
-
-```bash
-sudo port install \
-  gcc12 \
-  pkgconfig \
-  cmake \
-  gtk4
-```
-
 ### Windows
 
 #### MSYS2/MinGW64 (Recommended)
@@ -168,7 +137,7 @@ cmake --build build
 cmake -S . -B build-debug -DCMAKE_BUILD_TYPE=Debug
 cmake --build build-debug
 
-# Build Debug on multi-config generators (Visual Studio, Xcode)
+# Build Debug on multi-config generators (Visual Studio)
 cmake --build build --config Debug
 
 # Build with multiple cores
@@ -211,7 +180,6 @@ Most modern distributions include X11. For headless systems or when needed:
   needed.
 - Platform-specific flags are set automatically during build:
 	- Linux: `-DARCH_LINUX`
-	- macOS: `-DARCH_MACOS`
 	- Windows: `-DARCH_WIN`
 - On Windows, ensure you're using the **MinGW64 shell** (not CMD.exe or PowerShell)
 - GTK4 requires a modern C library and platform-specific graphics libraries

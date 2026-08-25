@@ -18,9 +18,14 @@ extern GameContext gameContext;
 #ifdef ARCH_WIN
 typedef HANDLE thread_t;
 typedef HANDLE event_t;
+#else
+typedef pthread_t thread_t;
+typedef sem_t event_t;
+#endif
 
 static thread_t threads[THREAD_COUNT];
 
+#ifdef ARCH_WIN
 DWORD WINAPI threadFunction(const LPVOID arg) {
 	const uint8_t func_num = (uint8_t)(intptr_t)arg;
 
@@ -46,20 +51,18 @@ DWORD WINAPI threadFunction(const LPVOID arg) {
 #include <pthread.h>
 #include <semaphore.h>
 
-typedef pthread_t thread_t;
-typedef sem_t event_t;
 
 void *threadFunction(void *arg) {
 	int func_num = (int)(intptr_t)arg;
 
 	switch (func_num) {
-		case 1: cacheClubs(processContext, &gameContext);
+		case 1: cacheClubs();
 			break;
-		case 2: cacheNations(processContext, &gameContext);
+		case 2: cacheNations();
 			break;
-		case 3: cachePlayers(processContext, &gameContext, 0);
+		case 3: cachePlayers(0);
 			break;
-		default: cachePlayers(processContext, &gameContext, 1);
+		default: cachePlayers(1);
 			break;
 	}
 
