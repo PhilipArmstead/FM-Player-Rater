@@ -16,6 +16,6 @@ void runMultiThreadedCache(void);
 #ifdef ARCH_WIN
 #include <windows.h>
 DWORD WINAPI threadFunction(LPVOID arg);
-#elif
+#else
 void *threadFunction(void *arg);
 #endif
