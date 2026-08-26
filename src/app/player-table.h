@@ -16,5 +16,6 @@ struct _SearchPlayerRow {
 	Player *player;
 };
 
+void playerTable_init(void);
 void playerTable_clear(const GtkColumnView *table);
 void playerTable_populate(GtkColumnView *table, const uint32_t *playerIds);

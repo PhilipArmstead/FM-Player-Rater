@@ -7,11 +7,14 @@
 #include "app/game-status.h"
 #include "app/maths.h"
 #include "app/player.h"
+#include "app/search-handler.h"
 #include "app/helpers/date.h"
 #include "core/logger.h"
 #include "platform/platform.h"
 
 #include <gtk/gtk.h>
+
+#include "player-table.h"
 
 
 extern ProcessContext processContext;
@@ -21,7 +24,51 @@ static void handleDisconnect(void);
 static void handleConnect(void);
 static inline void updateWhileConnected(void);
 static inline void updateWhileDisconnected(void);
-static void onFilterTagClick(GtkWidget *self, gpointer data);
+static void onFilterTagClick(GtkWidget *self, GtkEntryBuffer *buffer);
+
+void ui_init(GtkApplication *app) {
+	// Load main CSS
+	char pathToStylesheet[256] = {0};
+	GtkCssProvider *css_provider = gtk_css_provider_new();
+	snprintf(pathToStylesheet, sizeof(pathToStylesheet), "%s/show-players.css", LAYOUTS_DIR);
+	gtk_css_provider_load_from_path(css_provider, pathToStylesheet);
+	gtk_style_context_add_provider_for_display(
+		gdk_display_get_default(),
+		GTK_STYLE_PROVIDER(css_provider),
+		GTK_STYLE_PROVIDER_PRIORITY_APPLICATION
+	);
+	g_object_unref(css_provider);
+
+	// Show main window
+	const WindowContext context = openWindow("show-players", "window:show-players");
+	gameContext.builder = context.builder;
+	gtk_window_set_application(GTK_WINDOW(context.window), GTK_APPLICATION(app));
+
+	// Cache table
+	gameContext.table = GTK_COLUMN_VIEW(GTK_WIDGET(gtk_builder_get_object(gameContext.builder, "table:player-list")));
+
+	clubDataListCreate();
+
+	#ifdef MOCKS_MODE
+	runMultiThreadedCache();
+	#endif
+
+	// Periodic callbacks
+	g_timeout_add(1000, update, NULL);
+	update(NULL);
+
+	GtkBuilder *b = gameContext.builder;
+	FilterBuffer *buf = &gameContext.filterBuffer;
+	buf->minAge = gtk_entry_get_buffer(GTK_ENTRY(gtk_builder_get_object(b, "entry:age:min")));
+	buf->maxAge = gtk_entry_get_buffer(GTK_ENTRY(gtk_builder_get_object(b, "entry:age:max")));
+	buf->minCA = gtk_entry_get_buffer(GTK_ENTRY(gtk_builder_get_object(b, "entry:ca:min")));
+	buf->maxCA = gtk_entry_get_buffer(GTK_ENTRY(gtk_builder_get_object(b, "entry:ca:max")));
+	buf->minPA = gtk_entry_get_buffer(GTK_ENTRY(gtk_builder_get_object(b, "entry:pa:min")));
+	buf->maxPA = gtk_entry_get_buffer(GTK_ENTRY(gtk_builder_get_object(b, "entry:pa:max")));
+	buf->minRating = gtk_entry_get_buffer(GTK_ENTRY(gtk_builder_get_object(b, "entry:rating:min")));
+	buf->maxRating = gtk_entry_get_buffer(GTK_ENTRY(gtk_builder_get_object(b, "entry:rating:max")));
+	buf->clubSearch = gtk_entry_get_buffer(GTK_ENTRY(gtk_builder_get_object(b, "entry:club-name")));
+}
 
 void connectToProcess(void) {
 	clearCaches();
@@ -33,6 +80,8 @@ void connectToProcess(void) {
 }
 
 gboolean update(gpointer userData) {
+	(void)userData;
+
 	#ifndef MOCKS_MODE
 	if (processContext.handle != NULL) {
 		updateWhileConnected();
@@ -408,29 +457,7 @@ static void handleConnect(void) {
 	runMultiThreadedCache();
 }
 
-// Recursive function to find all GtkEntry widgets under a given parent
-static void ui_findEntries(GtkWidget *widget, GPtrArray *entries) {
-	// Check if the current widget is a GtkEntry
-	if (GTK_IS_ENTRY(widget)) {
-		g_ptr_array_add(entries, widget);
-	}
-
-	// Iterate over all children
-	GtkWidget *child = gtk_widget_get_first_child(widget);
-	while (child) {
-		ui_findEntries(child, entries);
-		child = gtk_widget_get_next_sibling(child);
-	}
-}
-
-// Helper function to get all GtkEntry widgets under a parent
-GPtrArray *ui_getAllEntries(GtkWidget *parent) {
-	GPtrArray *entries = g_ptr_array_new();
-	ui_findEntries(parent, entries);
-	return entries;
-}
-
-void ui_createFilterTag(const char *text, GtkEntry *filter) {
+void ui_createFilterTag(const char *text, GtkEntryBuffer *buffer) {
 	GtkWidget *label = gtk_label_new(text);
 	gtk_widget_add_css_class(label, "chip-text");
 
@@ -445,14 +472,22 @@ void ui_createFilterTag(const char *text, GtkEntry *filter) {
 	gtk_box_append(GTK_BOX(box), label);
 	gtk_box_append(GTK_BOX(box), closeButton);
 
-	g_signal_connect(closeButton, "clicked", G_CALLBACK(onFilterTagClick), filter);
+	g_signal_connect(closeButton, "clicked", G_CALLBACK(onFilterTagClick), buffer);
 
 	GtkBox *parent = GTK_BOX(gtk_builder_get_object(gameContext.builder, "box:filter-tags"));
 	gtk_box_append(parent, box);
 }
 
-void onFilterTagClick(GtkWidget *self, gpointer data) {
-	gtk_entry_buffer_set_text(gtk_entry_get_buffer(data), "", 1);
+void ui_clearFilterTags(void) {
+	GtkBox *filterTags = GTK_BOX(gtk_builder_get_object(gameContext.builder, "box:filter-tags"));
+	GtkWidget *child;
+	while ((child = gtk_widget_get_first_child(GTK_WIDGET(filterTags))) != NULL) {
+		gtk_box_remove(filterTags, GTK_WIDGET(child));
+	}
+}
+
+void onFilterTagClick(GtkWidget *self, GtkEntryBuffer *buffer) {
+	gtk_entry_buffer_set_text(buffer, "", 1);
 
 	GtkWidget *box = gtk_widget_get_parent(self);
 	GtkWidget *parent = gtk_widget_get_parent(box);
@@ -463,5 +498,10 @@ void onFilterTagClick(GtkWidget *self, gpointer data) {
 
 	gtk_box_remove(GTK_BOX(parent), box);
 
-	// TODO: re-run search
+	searchHandler_cacheFilters();
+	if (gameContext.filterOptions.filterMask) {
+		searchHandler_doSearch(false);
+	} else {
+		playerTable_populate(gameContext.table, NULL);
+	}
 }

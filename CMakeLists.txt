@@ -15,7 +15,7 @@ pkg_check_modules(GTK4 REQUIRED IMPORTED_TARGET gtk4)
 
 set(REPO_ROOT "${CMAKE_CURRENT_SOURCE_DIR}")
 
-add_executable(fm_player_rater
+add_executable(fm_player_rater WIN32
 	src/main.c
 	src/app/callbacks.c
 	src/app/data.c
@@ -23,6 +23,7 @@ add_executable(fm_player_rater
 	src/app/player-table.c
 	src/app/player.c
 	src/app/search.c
+	src/app/search-handler.c
 	src/app/ui.c
 	src/app/helpers/date.c
 	src/app/helpers/formatter.c

@@ -3,7 +3,10 @@
 
 #pragma once
 
-#include "app/types.h"
-
-
-uint32_t *search_findPlayers(void);
+typedef enum LogLevel {
+	LogLevelFatal,
+	LogLevelError,
+	LogLevelWarn,
+	LogLevelInfo,
+	LogLevelCount
+} LogLevel;

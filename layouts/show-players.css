@@ -95,6 +95,7 @@ headerbar .title {
 	background-color: #1c2530;
 	border: 1px solid var(--border-colour-primary-lighter);
 	border-radius: 12px;
+	margin-right: 4px;
 	padding: 2px 8px;
 }
 
@@ -104,6 +105,12 @@ headerbar .title {
 
 .chip-x {
 	color: var(--colour-primary-darker);
+}
+
+.chip-button {
+	background: none;
+	border: none;
+	padding: 2px;
 }
 
 .link-btn {

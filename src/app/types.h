@@ -6,136 +6,65 @@
 #include <stdint.h>
 #include <gtk/gtk.h>
 
-#include "app/constants.h"
+#include "types/common.h"
+#include "types/entities.h"
+#include "types/logger.h"
+#include "types/process.h"
+#include "types/ui.h"
 
+#define FILTER_HAS_MIN_RATING (1 << 0)
+#define FILTER_HAS_MAX_RATING (1 << 1)
+#define FILTER_HAS_MIN_VALUE (1 << 2)
+#define FILTER_HAS_MAX_VALUE (1 << 3)
+#define FILTER_HAS_CLUB (1 << 4)
+#define FILTER_HAS_MIN_CA (1 << 5)
+#define FILTER_HAS_MAX_CA (1 << 6)
+#define FILTER_HAS_MIN_PA (1 << 7)
+#define FILTER_HAS_MAX_PA (1 << 8)
+#define FILTER_HAS_MIN_HOME_REPUTATION (1 << 9)
+#define FILTER_HAS_MAX_HOME_REPUTATION (1 << 10)
+#define FILTER_HAS_MIN_CURRENT_REPUTATION (1 << 11)
+#define FILTER_HAS_MAX_CURRENT_REPUTATION (1 << 12)
+#define FILTER_HAS_MIN_WORLD_REPUTATION (1 << 13)
+#define FILTER_HAS_MAX_WORLD_REPUTATION (1 << 14)
+#define FILTER_HAS_MIN_AGE (1 << 15)
+#define FILTER_HAS_MAX_AGE (1 << 16)
 
-#define bool _Bool
-#define false 0
-#define true 1
-
-// Logger
-typedef enum LogLevel {
-	LogLevelFatal,
-	LogLevelError,
-	LogLevelWarn,
-	LogLevelInfo,
-	LogLevelCount
-} LogLevel;
-
-// Process
-typedef struct {
-	void *handle; // Platform-specific process handle
-	uintptr_t moduleBaseAddress;
-	uint32_t pid;
-} ProcessContext;
-
-// Application
-typedef enum PositionGrouped {
-	POSITION_GROUPED_GK = 0,
-	POSITION_GROUPED_FB,
-	POSITION_GROUPED_CB,
-	POSITION_GROUPED_WB,
-	POSITION_GROUPED_DM,
-	POSITION_GROUPED_MC,
-	POSITION_GROUPED_W,
-	POSITION_GROUPED_AM,
-	POSITION_GROUPED_ST,
-	POSITION_GROUPED_COUNT,
-} PositionGrouped;
-
-// Longest club name: Club de Fútbol Lobos de la Benemérita Universidad Autónoma de Puebla, 71 chars
-// Longest club short name: Persatuan Sepakbola Indonesia Karawang, 38 chars
-#define CLUB_LONG_NAME_LENGTH 72
-#define CLUB_SHORT_NAME_LENGTH 40
+#define POSITION_MASK_GK (1 << 0),
+#define POSITION_MASK_FB (1 << 1),
+#define POSITION_MASK_CB (1 << 2),
+#define POSITION_MASK_WB (1 << 3),
+#define POSITION_MASK_DM (1 << 4),
+#define POSITION_MASK_MC (1 << 5),
+#define POSITION_MASK_W (1 << 6),
+#define POSITION_MASK_AM (1 << 7),
+#define POSITION_MASK_ST (1 << 8),
 
 typedef struct {
-	char name[CLUB_LONG_NAME_LENGTH];
-	char shortName[CLUB_SHORT_NAME_LENGTH];
-	uint32_t address;
-	uint8_t teamType;
-} Club;
-
-// "Saint Vincent and the Grenadines" is the longest at 32 bytes
-#define MAX_NATION_STRING_LENGTH 32
-
-typedef struct {
-	char name[MAX_NATION_STRING_LENGTH];
-	char code[4];
-} Nation;
-
-typedef struct {
-	float value;
-	PositionGrouped position;
-} Rating;
-
-// TODO: note I only tested players, not all people
-// Longest person forename: Kenji Syed Rusydi Al-Asyraf, 27 chars
-// Longest person surname: Conceição Benevenuto Malaquias, 32 chars
-// Longest person common name: Yamanalage Lakshitha Jayathunga, 31 chars
-#define PERSON_FORENAME_LENGTH 32
-#define PERSON_SURNAME_LENGTH 32
-#define PERSON_COMMON_NAME_LENGTH 32
+	uint64_t clubIndex;
+	uint32_t filterMask; // 1 bit to represent the presence of each filter
+	float minRating;
+	float maxRating;
+	uint32_t minValue;
+	uint32_t maxValue;
+	uint16_t positions; // Masked, one bit per position
+	// uint16_t minHomeReputation;
+	// uint16_t maxHomeReputation;
+	// uint16_t minCurrentReputation;
+	// uint16_t maxCurrentReputation;
+	// uint16_t minWorldReputation;
+	// uint16_t maxWorldReputation;
+	uint8_t minAge;
+	uint8_t maxAge;
+	uint8_t minCA;
+	uint8_t maxCA;
+	uint8_t minPA;
+	uint8_t maxPA;
+} FilterOptions;
 
 typedef struct {
-	uint8_t attributes[ATTRIBUTE_COUNT];
-	Rating ratings[POSITION_GROUPED_COUNT];
-	char forename[PERSON_FORENAME_LENGTH];
-	char surname[PERSON_SURNAME_LENGTH];
-	char commonName[PERSON_COMMON_NAME_LENGTH];
-	uint8_t nationality[4];
-	uint32_t rowId;
-	uint32_t rid;
-	uint32_t uid;
-	uint32_t personAddress;
-	uint32_t playerAddress;
-	uint32_t guideValue;
-	uint32_t annualWage;
-	int32_t clubIndex; // -1 means unemployed
-	uint16_t sharpness;
-	int16_t fatigue;
-	uint16_t condition;
-	uint16_t homeReputation;
-	uint16_t currentReputation;
-	uint16_t worldReputation;
-	uint8_t selectedRatingIndex;
-	uint8_t positions[15];
-	uint8_t age;
-	uint8_t ca;
-	uint8_t pa;
-	bool canDevelopQuickly;
-	bool isHotProspect;
-} Player;
-
-typedef struct {
-	char forename[PERSON_FORENAME_LENGTH];
-	char surname[PERSON_SURNAME_LENGTH];
-	char commonName[PERSON_COMMON_NAME_LENGTH];
-	uint32_t uid;
-	uint32_t personAddress;
-} PartialPlayer;
-
-typedef struct {
-	uint16_t days;
-	uint16_t year;
-} Date;
-
-#define MONTH_NAME_LENGTH 12
-
-typedef struct {
-	char month[MONTH_NAME_LENGTH];
-	uint16_t year;
-	uint16_t day;
-} DayMonthYear;
-
-#define GAME_STATUS_STRING_BUFFER_SIZE 32
-
-typedef struct {
-	GtkSearchEntry *entry;
-	GtkPopover *popover;
-	GtkListBox *listBox;
-} SearchDatalist;
-
-typedef struct {
+	FilterBuffer filterBuffer;
+	FilterOptions filterOptions;
 	char gameVersion[GAME_STATUS_STRING_BUFFER_SIZE];
 	DayMonthYear currentDate;
 	GtkBuilder *builder;

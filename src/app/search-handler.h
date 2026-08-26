@@ -3,7 +3,6 @@
 
 #pragma once
 
-#include "app/types.h"
-
-
-uint32_t *search_findPlayers(void);
+void searchHandler_doSearch(bool refreshFilterCache);
+void searchHandler_clearFilters(void);
+void searchHandler_cacheFilters(void);

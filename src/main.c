@@ -15,43 +15,9 @@ ProcessContext processContext = {0};
 GameContext gameContext = {0};
 
 static void activate(GtkApplication *app) {
-	char pathToStylesheet[256] = {0};
-	GtkCssProvider *css_provider = gtk_css_provider_new();
-	snprintf(pathToStylesheet, sizeof(pathToStylesheet), "%s/show-players.css", LAYOUTS_DIR);
-	gtk_css_provider_load_from_path(css_provider, pathToStylesheet);
-	gtk_style_context_add_provider_for_display(
-		gdk_display_get_default(),
-		GTK_STYLE_PROVIDER(css_provider),
-		GTK_STYLE_PROVIDER_PRIORITY_APPLICATION
-	);
-	g_object_unref(css_provider);
-
-	const WindowContext context = openWindow("show-players", "window:show-players");
-	gameContext.builder = context.builder;
-	gtk_window_set_application(GTK_WINDOW(context.window), GTK_APPLICATION(app));
-
-	gameContext.table = GTK_COLUMN_VIEW(GTK_WIDGET(gtk_builder_get_object(gameContext.builder, "table:player-list")));
-	playerTable_populate(gameContext.table, NULL);
-
-	clubDataListCreate();
-
-	// Capture keypresses within sidebar to trigger search
-	{
-		GtkEventControllerKey *controllerKey = GTK_EVENT_CONTROLLER_KEY(gtk_event_controller_key_new());
-		g_signal_connect(controllerKey, "key-released", G_CALLBACK(callbackFilterKeypress), NULL);
-		gtk_event_controller_set_propagation_phase(GTK_EVENT_CONTROLLER(controllerKey), GTK_PHASE_BUBBLE);
-
-		GtkWidget *sidebar = GTK_WIDGET(gtk_builder_get_object(gameContext.builder, "sidebar"));
-		gtk_widget_add_controller(sidebar, GTK_EVENT_CONTROLLER(controllerKey));
-	}
-
-	#ifdef MOCKS_MODE
-	runMultiThreadedCache();
-	#endif
-
-	// Periodic callbacks
-	g_timeout_add(1000, update, NULL);
-	update(NULL);
+	ui_init(app);
+	callbacks_init();
+	playerTable_init();
 }
 
 int main(const int argc, char **argv) {

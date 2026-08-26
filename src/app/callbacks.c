@@ -2,11 +2,12 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 
 #include "callbacks.h"
+
 #include "app/data.h"
 #include "app/mocks.h"
 #include "app/player-table.h"
 #include "app/player.h"
-#include "app/search.h"
+#include "app/search-handler.h"
 #include "app/ui.h"
 #include "core/logger.h"
 #include "platform/platform.h"
@@ -16,6 +17,16 @@ extern ProcessContext processContext;
 extern GameContext gameContext;
 
 static void showPlayerById(uint32_t uniqueId);
+
+void callbacks_init() {
+	// Capture keypresses within sidebar to trigger search
+	GtkEventControllerKey *controllerKey = GTK_EVENT_CONTROLLER_KEY(gtk_event_controller_key_new());
+	g_signal_connect(controllerKey, "key-released", G_CALLBACK(callbackFilterKeypress), NULL);
+	gtk_event_controller_set_propagation_phase(GTK_EVENT_CONTROLLER(controllerKey), GTK_PHASE_BUBBLE);
+
+	GtkWidget *sidebar = GTK_WIDGET(gtk_builder_get_object(gameContext.builder, "sidebar"));
+	gtk_widget_add_controller(sidebar, GTK_EVENT_CONTROLLER(controllerKey));
+}
 
 // TODO: this is slow as fuck
 // TODO: sort by reputation?
@@ -79,68 +90,78 @@ G_MODULE_EXPORT void callbackOnClubNameSelected(
 	gtk_popover_popdown(dataList->popover);
 }
 
-#define GET_ENTRY_BUFFER(field) \
-	gtk_entry_get_buffer(field)
-#define GET_ENTRY_TEXT(field) \
-	gtk_entry_buffer_get_text(GET_ENTRY_BUFFER(field))
+#define GET_ENTRY_TEXT(buffer) \
+	gtk_entry_buffer_get_text(buffer)
 
 G_MODULE_EXPORT gboolean callbackFilterKeypress(
 	GtkEventControllerKey *controller,
 	guint keyval,
 	guint keycode,
 	GdkModifierType state,
-	gpointer user_data
+	gpointer data
 ) {
+	(void)controller;
+	(void)keycode;
+	(void)state;
+	(void)data;
+
 	if (keyval == GDK_KEY_Return) {
-		SearchOptions options = search_createContext();
-		GtkBuilder *b = gameContext.builder;
-		GtkEntry *fieldMinAge = GTK_ENTRY(gtk_builder_get_object(b, "entry:age:min"));
-		GtkEntry *fieldMaxAge = GTK_ENTRY(gtk_builder_get_object(b, "entry:age:max"));
-		GtkEntry *fieldMinCA = GTK_ENTRY(gtk_builder_get_object(b, "entry:ca:min"));
-		GtkEntry *fieldMaxCA = GTK_ENTRY(gtk_builder_get_object(b, "entry:ca:max"));
-		GtkEntry *fieldMinPA = GTK_ENTRY(gtk_builder_get_object(b, "entry:pa:min"));
-		GtkEntry *fieldMaxPA = GTK_ENTRY(gtk_builder_get_object(b, "entry:pa:max"));
-		GtkEntry *fieldMinRating = GTK_ENTRY(gtk_builder_get_object(b, "entry:rating:min"));
-		GtkEntry *fieldMaxRating = GTK_ENTRY(gtk_builder_get_object(b, "entry:rating:max"));
-		const gchar *minAge = GET_ENTRY_TEXT(fieldMinAge);
-		const gchar *maxAge = GET_ENTRY_TEXT(fieldMaxAge);
-		const gchar *minCA = GET_ENTRY_TEXT(fieldMinCA);
-		const gchar *maxCA = GET_ENTRY_TEXT(fieldMaxCA);
-		const gchar *minPA = GET_ENTRY_TEXT(fieldMinPA);
-		const gchar *maxPA = GET_ENTRY_TEXT(fieldMaxPA);
-		const gchar *minRating = GET_ENTRY_TEXT(fieldMinRating);
-		const gchar *maxRating = GET_ENTRY_TEXT(fieldMaxRating);
+		searchHandler_doSearch(true);
+		ui_clearFilterTags();
+
+		const FilterOptions options = gameContext.filterOptions;
+		const FilterBuffer fb = gameContext.filterBuffer;
+
 		char buffer[32] = {0};
-		if (minAge != NULL && *minAge != '\0') {
-			options.minAge = (uint8_t)g_ascii_strtoull(minAge, NULL, 10);
-			snprintf(buffer, 32, "Age ≥ %s", minAge);
-			ui_createFilterTag(buffer, fieldMinAge);
+		if (options.filterMask & FILTER_HAS_MIN_AGE) {
+			snprintf(buffer, 32, "Age ≥ %d", options.minAge);
+			ui_createFilterTag(buffer, fb.minAge);
+		} else {
+			gtk_entry_buffer_set_text(fb.minAge, "", 1);
 		}
-		if (maxAge != NULL && *maxAge != '\0') {
-			options.maxAge = (uint8_t)g_ascii_strtoull(maxAge, NULL, 10);
-			snprintf(buffer, 32, "Age ≤ %s", maxAge);
-			ui_createFilterTag(buffer, fieldMaxAge);
+		if (options.filterMask & FILTER_HAS_MAX_AGE) {
+			snprintf(buffer, 32, "Age ≤ %d", options.maxAge);
+			ui_createFilterTag(buffer, fb.maxAge);
+		} else {
+			gtk_entry_buffer_set_text(fb.maxAge, "", 1);
 		}
-		if (minCA != NULL && *minCA != '\0') {
-			options.minCA = (uint8_t)g_ascii_strtoull(minCA, NULL, 10);
+		if (options.filterMask & FILTER_HAS_MIN_CA) {
+			snprintf(buffer, 32, "CA ≥ %d", options.minCA);
+			ui_createFilterTag(buffer, fb.minCA);
+		} else {
+			gtk_entry_buffer_set_text(fb.minCA, "", 1);
 		}
-		if (maxCA != NULL && *maxCA != '\0') {
-			options.maxCA = (uint8_t)g_ascii_strtoull(maxCA, NULL, 10);
+		if (options.filterMask & FILTER_HAS_MAX_CA) {
+			snprintf(buffer, 32, "CA ≤ %d", options.maxCA);
+			ui_createFilterTag(buffer, fb.maxCA);
+		} else {
+			gtk_entry_buffer_set_text(fb.maxCA, "", 1);
 		}
-		if (minPA != NULL && *minPA != '\0') {
-			options.minPA = (uint8_t)g_ascii_strtoull(minPA, NULL, 10);
+		if (options.filterMask & FILTER_HAS_MIN_PA) {
+			snprintf(buffer, 32, "PA ≥ %d", options.minPA);
+			ui_createFilterTag(buffer, fb.minPA);
+		} else {
+			gtk_entry_buffer_set_text(fb.minPA, "", 1);
 		}
-		if (maxPA != NULL && *maxPA != '\0') {
-			options.maxPA = (uint8_t)g_ascii_strtoull(maxPA, NULL, 10);
+		if (options.filterMask & FILTER_HAS_MAX_PA) {
+			snprintf(buffer, 32, "PA ≤ %d", options.maxPA);
+			ui_createFilterTag(buffer, fb.maxPA);
+		} else {
+			gtk_entry_buffer_set_text(fb.maxPA, "", 1);
 		}
-		if (minRating != NULL && *minRating != '\0') {
-			options.minRating = (uint8_t)g_ascii_strtoull(minRating, NULL, 10);
+		if (options.filterMask & FILTER_HAS_MIN_RATING) {
+			snprintf(buffer, 32, "Rating ≥ %f.2%%", options.minRating);
+			ui_createFilterTag(buffer, fb.minRating);
+		} else {
+			gtk_entry_buffer_set_text(fb.minRating, "", 1);
 		}
-		if (maxRating != NULL && *maxRating != '\0') {
-			options.maxRating = (uint8_t)g_ascii_strtoull(maxRating, NULL, 10);
+		if (options.filterMask & FILTER_HAS_MAX_RATING) {
+			snprintf(buffer, 32, "Rating ≤ %f.2%%", options.maxRating);
+			ui_createFilterTag(buffer, fb.maxRating);
+		} else {
+			gtk_entry_buffer_set_text(fb.maxRating, "", 1);
 		}
-		const uint32_t *playerIds = search_findPlayers(options);
-		playerTable_populate(gameContext.table, playerIds);
+
 		return TRUE;
 	}
 
@@ -183,44 +204,8 @@ static void showPlayerById(uint32_t uniqueId) {
 }
 
 G_MODULE_EXPORT void callbackClearFilters(void) {
-	GtkBuilder *b = gameContext.builder;
+	searchHandler_clearFilters();
 
-	GtkEntry *fieldMinAge = GTK_ENTRY(gtk_builder_get_object(b, "entry:age:min"));
-	GtkEntry *fieldMaxAge = GTK_ENTRY(gtk_builder_get_object(b, "entry:age:max"));
-	GtkEntry *fieldMinCA = GTK_ENTRY(gtk_builder_get_object(b, "entry:ca:min"));
-	GtkEntry *fieldMaxCA = GTK_ENTRY(gtk_builder_get_object(b, "entry:ca:max"));
-	GtkEntry *fieldMinPA = GTK_ENTRY(gtk_builder_get_object(b, "entry:pa:min"));
-	GtkEntry *fieldMaxPA = GTK_ENTRY(gtk_builder_get_object(b, "entry:pa:max"));
-	GtkEntry *fieldMinRating = GTK_ENTRY(gtk_builder_get_object(b, "entry:rating:min"));
-	GtkEntry *fieldMaxRating = GTK_ENTRY(gtk_builder_get_object(b, "entry:rating:max"));
-	GtkEntry *fieldClubSearch = GTK_ENTRY(gtk_builder_get_object(b, "entry:club-name"));
-
-	GtkEntryBuffer *minAge = GET_ENTRY_BUFFER(fieldMinAge);
-	GtkEntryBuffer *maxAge = GET_ENTRY_BUFFER(fieldMaxAge);
-	GtkEntryBuffer *minCA = GET_ENTRY_BUFFER(fieldMinCA);
-	GtkEntryBuffer *maxCA = GET_ENTRY_BUFFER(fieldMaxCA);
-	GtkEntryBuffer *minPA = GET_ENTRY_BUFFER(fieldMinPA);
-	GtkEntryBuffer *maxPA = GET_ENTRY_BUFFER(fieldMaxPA);
-	GtkEntryBuffer *minRating = GET_ENTRY_BUFFER(fieldMinRating);
-	GtkEntryBuffer *maxRating = GET_ENTRY_BUFFER(fieldMaxRating);
-	GtkEntryBuffer *clubSearch = GET_ENTRY_BUFFER(fieldClubSearch);
-
-	gtk_entry_buffer_set_text(minAge, "", 1);
-	gtk_entry_buffer_set_text(maxAge, "", 1);
-	gtk_entry_buffer_set_text(minCA, "", 1);
-	gtk_entry_buffer_set_text(maxCA, "", 1);
-	gtk_entry_buffer_set_text(minPA, "", 1);
-	gtk_entry_buffer_set_text(maxPA, "", 1);
-	gtk_entry_buffer_set_text(minRating, "", 1);
-	gtk_entry_buffer_set_text(maxRating, "", 1);
-	gtk_entry_buffer_set_text(clubSearch, "", 1);
-
-	GtkBox *filterTags = GTK_BOX(gtk_builder_get_object(gameContext.builder, "box:filter-tags"));
-
-	GtkWidget *child;
-	while ((child = gtk_widget_get_first_child(GTK_WIDGET(filterTags))) != NULL) {
-		gtk_box_remove(filterTags, GTK_WIDGET(child));
-	}
-
+	ui_clearFilterTags();
 	playerTable_populate(gameContext.table, NULL);
 }

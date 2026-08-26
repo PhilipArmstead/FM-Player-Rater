@@ -13,6 +13,7 @@ typedef struct {
 	GtkWidget *window;
 } WindowContext;
 
+void ui_init(GtkApplication *app);
 void connectToProcess(void);
 gboolean update(gpointer userData);
 void updateUi(void);
@@ -23,6 +24,5 @@ WindowContext openWindow(const char *layoutName, const char *windowName);
 
 WindowContext createPlayerInfoWindow(const Player *player);
 void renderPlayerInfoWindow(WindowContext context, const Player *player);
-void ui_createFilterTag(const char *text, GtkEntry *filter);
-
-GPtrArray *ui_getAllEntries(GtkWidget *parent);
+void ui_clearFilterTags(void);
+void ui_createFilterTag(const char *text, GtkEntryBuffer *buffer);

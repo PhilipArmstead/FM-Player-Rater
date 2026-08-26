@@ -240,6 +240,27 @@ static GtkColumnViewColumn *createColumn(const char *title, uint8_t columnType) 
 	return column;
 }
 
+void playerTable_init(void) {
+	GtkColumnView *table = gameContext.table;
+	gtk_column_view_append_column(table, createColumn("", COLUMN_NATIONALITIES));
+	gtk_column_view_append_column(table, createColumn("Name", COLUMN_NAME));
+	gtk_column_view_append_column(table, createColumn("Age", COLUMN_AGE));
+	gtk_column_view_append_column(table, createColumn("Positions", COLUMN_POSITIONS));
+	gtk_column_view_append_column(table, createColumn("CA", COLUMN_CA));
+	gtk_column_view_append_column(table, createColumn("PA", COLUMN_PA));
+	gtk_column_view_append_column(table, createColumn("Diff", COLUMN_CA_PA_DELTA));
+	gtk_column_view_append_column(table, createColumn("Status", COLUMN_STATUS));
+	gtk_column_view_append_column(table, createColumn("Rating", COLUMN_RATING));
+	gtk_column_view_append_column(table, createColumn("Value", COLUMN_VALUE));
+	gtk_column_view_append_column(table, createColumn("Club", COLUMN_CLUB));
+	gtk_column_view_append_column(table, createColumn("Home rep", COLUMN_REPUTATION_HOME));
+	gtk_column_view_append_column(table, createColumn("Current rep", COLUMN_REPUTATION_CURRENT));
+	gtk_column_view_append_column(table, createColumn("World rep", COLUMN_REPUTATION_WORLD));
+
+	playerTable_clear(table);
+	playerTable_populate(table, NULL);
+}
+
 GListStore *store = NULL;
 
 void playerTable_clear(const GtkColumnView *table) {
@@ -251,8 +272,6 @@ void playerTable_clear(const GtkColumnView *table) {
 
 	store = g_list_store_new(SEARCH_TYPE_PLAYER_ROW);
 }
-
-static bool hasCreatedTable = false;
 
 void playerTable_populate(GtkColumnView *table, const uint32_t *playerIds) {
 	playerTable_clear(table);
@@ -287,25 +306,4 @@ void playerTable_populate(GtkColumnView *table, const uint32_t *playerIds) {
 	formatter_printNumber(formattedResults);
 	snprintf(resultCountString, 16, "%s result%c", formattedResults, playerCount != 1 ? 's' : '\0');
 	gtk_label_set_text(resultsCountLabel, resultCountString);
-
-	if (hasCreatedTable) {
-		return;
-	}
-
-	hasCreatedTable = true;
-
-	gtk_column_view_append_column(table, createColumn("", COLUMN_NATIONALITIES));
-	gtk_column_view_append_column(table, createColumn("Name", COLUMN_NAME));
-	gtk_column_view_append_column(table, createColumn("Age", COLUMN_AGE));
-	gtk_column_view_append_column(table, createColumn("Positions", COLUMN_POSITIONS));
-	gtk_column_view_append_column(table, createColumn("CA", COLUMN_CA));
-	gtk_column_view_append_column(table, createColumn("PA", COLUMN_PA));
-	gtk_column_view_append_column(table, createColumn("Diff", COLUMN_CA_PA_DELTA));
-	gtk_column_view_append_column(table, createColumn("Status", COLUMN_STATUS));
-	gtk_column_view_append_column(table, createColumn("Rating", COLUMN_RATING));
-	gtk_column_view_append_column(table, createColumn("Value", COLUMN_VALUE));
-	gtk_column_view_append_column(table, createColumn("Club", COLUMN_CLUB));
-	gtk_column_view_append_column(table, createColumn("Home rep", COLUMN_REPUTATION_HOME));
-	gtk_column_view_append_column(table, createColumn("Current rep", COLUMN_REPUTATION_CURRENT));
-	gtk_column_view_append_column(table, createColumn("World rep", COLUMN_REPUTATION_WORLD));
 }

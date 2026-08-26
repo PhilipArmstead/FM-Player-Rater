@@ -3,7 +3,8 @@
 
 #pragma once
 
-#include "app/types.h"
-
-
-uint32_t *search_findPlayers(void);
+typedef struct {
+	void *handle; // Platform-specific process handle
+	uintptr_t moduleBaseAddress;
+	uint32_t pid;
+} ProcessContext;

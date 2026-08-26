@@ -3,7 +3,6 @@
 
 #pragma once
 
-#include "app/types.h"
-
-
-uint32_t *search_findPlayers(void);
+#define bool _Bool
+#define false 0
+#define true 1

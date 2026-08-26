@@ -8,6 +8,7 @@
 #include "app/types.h"
 
 
+void callbacks_init();
 G_MODULE_EXPORT void callbackOnClubNameChange(GtkEditable *editable, const SearchDatalist *dataList);
 G_MODULE_EXPORT void callbackOnClubNameSelected(
 	GtkListBox *box,
@@ -21,5 +22,5 @@ G_MODULE_EXPORT gboolean callbackFilterKeypress(
 	guint keyval,
 	guint keycode,
 	GdkModifierType state,
-	gpointer user_data
+	gpointer data
 );
