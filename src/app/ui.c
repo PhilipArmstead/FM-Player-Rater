@@ -21,6 +21,7 @@ static void handleDisconnect(void);
 static void handleConnect(void);
 static inline void updateWhileConnected(void);
 static inline void updateWhileDisconnected(void);
+static void onFilterTagClick(GtkWidget *self, gpointer data);
 
 void connectToProcess(void) {
 	clearCaches();
@@ -427,4 +428,40 @@ GPtrArray *ui_getAllEntries(GtkWidget *parent) {
 	GPtrArray *entries = g_ptr_array_new();
 	ui_findEntries(parent, entries);
 	return entries;
+}
+
+void ui_createFilterTag(const char *text, GtkEntry *filter) {
+	GtkWidget *label = gtk_label_new(text);
+	gtk_widget_add_css_class(label, "chip-text");
+
+	GtkWidget *close = gtk_label_new("✕");
+	gtk_widget_add_css_class(close, "chip-x");
+	GtkWidget *closeButton = gtk_button_new();
+	gtk_widget_add_css_class(closeButton, "chip-button");
+	gtk_widget_set_parent(close, closeButton);
+
+	GtkWidget *box = gtk_box_new(0, 4);
+	gtk_widget_add_css_class(box, "chip");
+	gtk_box_append(GTK_BOX(box), label);
+	gtk_box_append(GTK_BOX(box), closeButton);
+
+	g_signal_connect(closeButton, "clicked", G_CALLBACK(onFilterTagClick), filter);
+
+	GtkBox *parent = GTK_BOX(gtk_builder_get_object(gameContext.builder, "box:filter-tags"));
+	gtk_box_append(parent, box);
+}
+
+void onFilterTagClick(GtkWidget *self, gpointer data) {
+	gtk_entry_buffer_set_text(gtk_entry_get_buffer(data), "", 1);
+
+	GtkWidget *box = gtk_widget_get_parent(self);
+	GtkWidget *parent = gtk_widget_get_parent(box);
+	GtkWidget *closeLabel = gtk_widget_get_first_child(self);
+	if (closeLabel != NULL) {
+		gtk_widget_unparent(closeLabel);
+	}
+
+	gtk_box_remove(GTK_BOX(parent), box);
+
+	// TODO: re-run search
 }

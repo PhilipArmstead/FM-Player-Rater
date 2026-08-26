@@ -23,5 +23,6 @@ WindowContext openWindow(const char *layoutName, const char *windowName);
 
 WindowContext createPlayerInfoWindow(const Player *player);
 void renderPlayerInfoWindow(WindowContext context, const Player *player);
+void ui_createFilterTag(const char *text, GtkEntry *filter);
 
 GPtrArray *ui_getAllEntries(GtkWidget *parent);

@@ -91,116 +91,18 @@ SPDX-License-Identifier: GPL-3.0-or-later -->
 						</child>
 						<child>
 							<object class="GtkBox" id="box:filter-tags">
-								<child>
-									<object class="GtkBox">
-										<property name="css-classes">chip</property>
-										<property name="spacing">4</property>
-										<child>
-											<object class="GtkLabel">
-												<property name="label">Age …≤21</property>
-												<style>
-													<class name="chip-text"/>
-												</style>
-											</object>
-										</child>
-										<child>
-											<object class="GtkLabel">
-												<property name="label">✕</property>
-												<style>
-													<class name="chip-x"/>
-												</style>
-											</object>
-										</child>
-									</object>
-								</child>
-								<child>
-									<object class="GtkBox">
-										<property name="css-classes">chip</property>
-										<property name="spacing">4</property>
-										<child>
-											<object class="GtkLabel">
-												<property name="label">PA 170…</property>
-												<style>
-													<class name="chip-text"/>
-												</style>
-											</object>
-										</child>
-										<child>
-											<object class="GtkLabel">
-												<property name="label">✕</property>
-												<style>
-													<class name="chip-x"/>
-												</style>
-											</object>
-										</child>
-									</object>
-								</child>
-								<child>
-									<object class="GtkBox">
-										<property name="css-classes">chip</property>
-										<property name="spacing">4</property>
-										<child>
-											<object class="GtkLabel">
-												<property name="label">Ambition ≥ 10</property>
-												<style>
-													<class name="chip-text"/>
-												</style>
-											</object>
-										</child>
-										<child>
-											<object class="GtkLabel">
-												<property name="label">✕</property>
-												<style>
-													<class name="chip-x"/>
-												</style>
-											</object>
-										</child>
-									</object>
-								</child>
-								<child>
-									<object class="GtkBox">
-										<property name="css-classes">chip</property>
-										<property name="spacing">4</property>
-										<child>
-											<object class="GtkLabel">
-												<property name="label">Big matches ≥ 10</property>
-												<style>
-													<class name="chip-text"/>
-												</style>
-											</object>
-										</child>
-										<child>
-											<object class="GtkLabel">
-												<property name="label">✕</property>
-												<style>
-													<class name="chip-x"/>
-												</style>
-											</object>
-										</child>
-									</object>
-								</child>
-								<child>
-									<object class="GtkBox">
-										<property name="css-classes">chip</property>
-										<property name="spacing">4</property>
-										<child>
-											<object class="GtkLabel">
-												<property name="label">Consistency ≥ 10</property>
-												<style>
-													<class name="chip-text"/>
-												</style>
-											</object>
-										</child>
-										<child>
-											<object class="GtkLabel">
-												<property name="label">✕</property>
-												<style>
-													<class name="chip-x"/>
-												</style>
-											</object>
-										</child>
-									</object>
-								</child>
+								<!--								<child>-->
+								<!--									<object class="GtkBox">-->
+								<!--										<child>-->
+								<!--											<object class="GtkLabel">-->
+								<!--												<property name="label">✕</property>-->
+								<!--												<style>-->
+								<!--													<class name="chip-x"/>-->
+								<!--												</style>-->
+								<!--											</object>-->
+								<!--										</child>-->
+								<!--									</object>-->
+								<!--								</child>-->
 							</object>
 						</child>
 						<child>

@@ -34,7 +34,7 @@ SearchOptions search_createContext(void) {
 }
 
 // TODO: multithread this
-uint32_t *search_findPlayers(SearchOptions options) {
+uint32_t *search_findPlayers(const SearchOptions options) {
 	const int64_t timeStart = platform_getMicroseconds();
 
 	const uint8_t minAge = options.minAge;

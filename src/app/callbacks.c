@@ -79,10 +79,10 @@ G_MODULE_EXPORT void callbackOnClubNameSelected(
 	gtk_popover_popdown(dataList->popover);
 }
 
-#define GET_ENTRY_BUFFER(builder, name) \
-	gtk_entry_get_buffer(GTK_ENTRY(gtk_builder_get_object(builder, name)))
-#define GET_ENTRY_TEXT(builder, name) \
-	gtk_entry_buffer_get_text(GET_ENTRY_BUFFER(builder, name))
+#define GET_ENTRY_BUFFER(field) \
+	gtk_entry_get_buffer(field)
+#define GET_ENTRY_TEXT(field) \
+	gtk_entry_buffer_get_text(GET_ENTRY_BUFFER(field))
 
 G_MODULE_EXPORT gboolean callbackFilterKeypress(
 	GtkEventControllerKey *controller,
@@ -94,19 +94,32 @@ G_MODULE_EXPORT gboolean callbackFilterKeypress(
 	if (keyval == GDK_KEY_Return) {
 		SearchOptions options = search_createContext();
 		GtkBuilder *b = gameContext.builder;
-		const gchar *minAge = GET_ENTRY_TEXT(b, "entry:age:min");
-		const gchar *maxAge = GET_ENTRY_TEXT(b, "entry:age:max");
-		const gchar *minCA = GET_ENTRY_TEXT(b, "entry:ca:min");
-		const gchar *maxCA = GET_ENTRY_TEXT(b, "entry:ca:max");
-		const gchar *minPA = GET_ENTRY_TEXT(b, "entry:pa:min");
-		const gchar *maxPA = GET_ENTRY_TEXT(b, "entry:pa:max");
-		const gchar *minRating = GET_ENTRY_TEXT(b, "entry:rating:min");
-		const gchar *maxRating = GET_ENTRY_TEXT(b, "entry:rating:max");
+		GtkEntry *fieldMinAge = GTK_ENTRY(gtk_builder_get_object(b, "entry:age:min"));
+		GtkEntry *fieldMaxAge = GTK_ENTRY(gtk_builder_get_object(b, "entry:age:max"));
+		GtkEntry *fieldMinCA = GTK_ENTRY(gtk_builder_get_object(b, "entry:ca:min"));
+		GtkEntry *fieldMaxCA = GTK_ENTRY(gtk_builder_get_object(b, "entry:ca:max"));
+		GtkEntry *fieldMinPA = GTK_ENTRY(gtk_builder_get_object(b, "entry:pa:min"));
+		GtkEntry *fieldMaxPA = GTK_ENTRY(gtk_builder_get_object(b, "entry:pa:max"));
+		GtkEntry *fieldMinRating = GTK_ENTRY(gtk_builder_get_object(b, "entry:rating:min"));
+		GtkEntry *fieldMaxRating = GTK_ENTRY(gtk_builder_get_object(b, "entry:rating:max"));
+		const gchar *minAge = GET_ENTRY_TEXT(fieldMinAge);
+		const gchar *maxAge = GET_ENTRY_TEXT(fieldMaxAge);
+		const gchar *minCA = GET_ENTRY_TEXT(fieldMinCA);
+		const gchar *maxCA = GET_ENTRY_TEXT(fieldMaxCA);
+		const gchar *minPA = GET_ENTRY_TEXT(fieldMinPA);
+		const gchar *maxPA = GET_ENTRY_TEXT(fieldMaxPA);
+		const gchar *minRating = GET_ENTRY_TEXT(fieldMinRating);
+		const gchar *maxRating = GET_ENTRY_TEXT(fieldMaxRating);
+		char buffer[32] = {0};
 		if (minAge != NULL && *minAge != '\0') {
 			options.minAge = (uint8_t)g_ascii_strtoull(minAge, NULL, 10);
+			snprintf(buffer, 32, "Age ≥ %s", minAge);
+			ui_createFilterTag(buffer, fieldMinAge);
 		}
 		if (maxAge != NULL && *maxAge != '\0') {
 			options.maxAge = (uint8_t)g_ascii_strtoull(maxAge, NULL, 10);
+			snprintf(buffer, 32, "Age ≤ %s", maxAge);
+			ui_createFilterTag(buffer, fieldMaxAge);
 		}
 		if (minCA != NULL && *minCA != '\0') {
 			options.minCA = (uint8_t)g_ascii_strtoull(minCA, NULL, 10);
@@ -171,15 +184,26 @@ static void showPlayerById(uint32_t uniqueId) {
 
 G_MODULE_EXPORT void callbackClearFilters(void) {
 	GtkBuilder *b = gameContext.builder;
-	GtkEntryBuffer *minAge = GET_ENTRY_BUFFER(b, "entry:age:min");
-	GtkEntryBuffer *maxAge = GET_ENTRY_BUFFER(b, "entry:age:max");
-	GtkEntryBuffer *minCA = GET_ENTRY_BUFFER(b, "entry:ca:min");
-	GtkEntryBuffer *maxCA = GET_ENTRY_BUFFER(b, "entry:ca:max");
-	GtkEntryBuffer *minPA = GET_ENTRY_BUFFER(b, "entry:pa:min");
-	GtkEntryBuffer *maxPA = GET_ENTRY_BUFFER(b, "entry:pa:max");
-	GtkEntryBuffer *minRating = GET_ENTRY_BUFFER(b, "entry:rating:min");
-	GtkEntryBuffer *maxRating = GET_ENTRY_BUFFER(b, "entry:rating:max");
-	GtkEntryBuffer *clubSearch = GET_ENTRY_BUFFER(b, "entry:club-name");
+
+	GtkEntry *fieldMinAge = GTK_ENTRY(gtk_builder_get_object(b, "entry:age:min"));
+	GtkEntry *fieldMaxAge = GTK_ENTRY(gtk_builder_get_object(b, "entry:age:max"));
+	GtkEntry *fieldMinCA = GTK_ENTRY(gtk_builder_get_object(b, "entry:ca:min"));
+	GtkEntry *fieldMaxCA = GTK_ENTRY(gtk_builder_get_object(b, "entry:ca:max"));
+	GtkEntry *fieldMinPA = GTK_ENTRY(gtk_builder_get_object(b, "entry:pa:min"));
+	GtkEntry *fieldMaxPA = GTK_ENTRY(gtk_builder_get_object(b, "entry:pa:max"));
+	GtkEntry *fieldMinRating = GTK_ENTRY(gtk_builder_get_object(b, "entry:rating:min"));
+	GtkEntry *fieldMaxRating = GTK_ENTRY(gtk_builder_get_object(b, "entry:rating:max"));
+	GtkEntry *fieldClubSearch = GTK_ENTRY(gtk_builder_get_object(b, "entry:club-name"));
+
+	GtkEntryBuffer *minAge = GET_ENTRY_BUFFER(fieldMinAge);
+	GtkEntryBuffer *maxAge = GET_ENTRY_BUFFER(fieldMaxAge);
+	GtkEntryBuffer *minCA = GET_ENTRY_BUFFER(fieldMinCA);
+	GtkEntryBuffer *maxCA = GET_ENTRY_BUFFER(fieldMaxCA);
+	GtkEntryBuffer *minPA = GET_ENTRY_BUFFER(fieldMinPA);
+	GtkEntryBuffer *maxPA = GET_ENTRY_BUFFER(fieldMaxPA);
+	GtkEntryBuffer *minRating = GET_ENTRY_BUFFER(fieldMinRating);
+	GtkEntryBuffer *maxRating = GET_ENTRY_BUFFER(fieldMaxRating);
+	GtkEntryBuffer *clubSearch = GET_ENTRY_BUFFER(fieldClubSearch);
 
 	gtk_entry_buffer_set_text(minAge, "", 1);
 	gtk_entry_buffer_set_text(maxAge, "", 1);
