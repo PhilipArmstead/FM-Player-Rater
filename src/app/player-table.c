@@ -358,6 +358,34 @@ static void bindCellValue(GtkSignalListItemFactory *factory, GtkListItem *item, 
 	}
 }
 
+static void bindStatusValue(GtkSignalListItemFactory *factory, GtkListItem *item, gpointer data) {
+	(void)factory;
+	(void)data;
+
+	GtkWidget *box = gtk_list_item_get_child(GTK_LIST_ITEM(item));
+	const SearchPlayerRow *row = gtk_list_item_get_item(GTK_LIST_ITEM(item));
+
+	GtkWidget *child;
+	while ((child = gtk_widget_get_first_child(GTK_WIDGET(box))) != NULL) {
+		gtk_box_remove(GTK_BOX(box), child);
+	}
+
+	if (row == NULL || row->player == NULL) {
+		return;
+	}
+
+	if (row->player->canDevelopQuickly) {
+		GtkWidget *label = gtk_label_new("🧠");
+		gtk_box_append(GTK_BOX(box), label);
+		gtk_widget_set_tooltip_text(label, "Can develop quickly");
+	}
+	if (row->player->isHotProspect) {
+		GtkWidget *label = gtk_label_new("🔥");
+		gtk_box_append(GTK_BOX(box), label);
+		gtk_widget_set_tooltip_text(label, "A hot prospect");
+	}
+}
+
 static void bindNationalitiesValue(GtkSignalListItemFactory *factory, GtkListItem *item, gpointer data) {
 	(void)factory;
 	(void)data;
@@ -397,6 +425,9 @@ static GtkColumnViewColumn *createColumn(const char *title, uint8_t columnType) 
 	if (columnType == COLUMN_NATIONALITIES) {
 		g_signal_connect(factory, "setup", G_CALLBACK(setupBox), NULL);
 		g_signal_connect(factory, "bind", G_CALLBACK(bindNationalitiesValue), NULL);
+	} else if (columnType == COLUMN_STATUS) {
+		g_signal_connect(factory, "setup", G_CALLBACK(setupBox), NULL);
+		g_signal_connect(factory, "bind", G_CALLBACK(bindStatusValue), NULL);
 	} else {
 		g_signal_connect(factory, "setup", G_CALLBACK(setupTextLabel), NULL);
 		g_signal_connect(factory, "bind", G_CALLBACK(bindCellValue), (void*)(uint64_t)columnType);
