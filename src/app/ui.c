@@ -25,6 +25,7 @@ static void handleConnect(void);
 static inline void updateWhileConnected(void);
 static inline void updateWhileDisconnected(void);
 static void onFilterTagClick(GtkWidget *self, GtkEntryBuffer *buffer);
+static void onClubFilterTagClick(GtkWidget *self, GtkEditable *buffer);
 
 void ui_init(GtkApplication *app) {
 	// Load main CSS
@@ -457,7 +458,13 @@ static void handleConnect(void) {
 	runMultiThreadedCache();
 }
 
-void ui_createFilterTag(const char *text, GtkEntryBuffer *buffer) {
+typedef struct {
+	GtkWidget *box;
+	GtkWidget *label;
+	GtkWidget *closeButton;
+} FilterTag;
+
+static FilterTag createFilterTag(const char *text) {
 	GtkWidget *label = gtk_label_new(text);
 	gtk_widget_add_css_class(label, "chip-text");
 
@@ -472,10 +479,21 @@ void ui_createFilterTag(const char *text, GtkEntryBuffer *buffer) {
 	gtk_box_append(GTK_BOX(box), label);
 	gtk_box_append(GTK_BOX(box), closeButton);
 
-	g_signal_connect(closeButton, "clicked", G_CALLBACK(onFilterTagClick), buffer);
-
 	GtkBox *parent = GTK_BOX(gtk_builder_get_object(gameContext.builder, "box:filter-tags"));
 	gtk_box_append(parent, box);
+
+	return (FilterTag){.box = box, .label = label, .closeButton = closeButton};
+}
+
+void ui_createFilterTag(const char *text, GtkEntryBuffer *buffer) {
+	const FilterTag tag = createFilterTag(text);
+	g_signal_connect(tag.closeButton, "clicked", G_CALLBACK(onFilterTagClick), buffer);
+}
+
+void ui_createClubFilterTag(const char *text, GtkEditable *buffer) {
+	const FilterTag tag = createFilterTag(text);
+	g_signal_connect(tag.closeButton, "clicked", G_CALLBACK(onClubFilterTagClick), buffer);
+	gtk_widget_set_name(tag.label, "tag:club-name");
 }
 
 void ui_clearFilterTags(void) {
@@ -486,9 +504,7 @@ void ui_clearFilterTags(void) {
 	}
 }
 
-void onFilterTagClick(GtkWidget *self, GtkEntryBuffer *buffer) {
-	gtk_entry_buffer_set_text(buffer, "", 1);
-
+static void onTagClick(GtkWidget *self) {
 	GtkWidget *box = gtk_widget_get_parent(self);
 	GtkWidget *parent = gtk_widget_get_parent(box);
 	GtkWidget *closeLabel = gtk_widget_get_first_child(self);
@@ -504,4 +520,14 @@ void onFilterTagClick(GtkWidget *self, GtkEntryBuffer *buffer) {
 	} else {
 		playerTable_populate(gameContext.table, NULL);
 	}
+}
+
+void onClubFilterTagClick(GtkWidget *self, GtkEditable *buffer) {
+	gtk_editable_set_text(buffer, "");
+	onTagClick(self);
+}
+
+void onFilterTagClick(GtkWidget *self, GtkEntryBuffer *buffer) {
+	gtk_entry_buffer_set_text(buffer, "", 1);
+	onTagClick(self);
 }

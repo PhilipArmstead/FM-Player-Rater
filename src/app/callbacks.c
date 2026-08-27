@@ -42,6 +42,8 @@ G_MODULE_EXPORT void callbackOnClubNameChange(GtkEditable *editable, const Searc
 		}
 	}
 
+	gameContext.filterOptions.filterMask &= ~FILTER_HAS_CLUB;
+
 	const char *searchValue = gtk_editable_get_text(editable);
 	if (strlen(searchValue) < 4) {
 		gtk_popover_popdown(dataList->popover);
@@ -56,6 +58,10 @@ G_MODULE_EXPORT void callbackOnClubNameChange(GtkEditable *editable, const Searc
 			|| g_str_match_string(searchValue, gameContext.clubs[i].shortName,TRUE)
 		) {
 			GtkWidget *label = gtk_label_new(gameContext.clubs[i].shortName);
+
+			// Danger, pointer abuse!
+			g_object_set_data(G_OBJECT(label), "index", GINT_TO_POINTER(i));
+
 			gtk_widget_set_halign(label, GTK_ALIGN_START);
 			gtk_list_box_append(dataList->listBox, label);
 			++count;
@@ -88,6 +94,13 @@ G_MODULE_EXPORT void callbackOnClubNameSelected(
 	const char *text = gtk_label_get_text(GTK_LABEL(child));
 	gtk_editable_set_text(GTK_EDITABLE(dataList->entry), text);
 	gtk_popover_popdown(dataList->popover);
+
+	gameContext.filterOptions.filterMask |= FILTER_HAS_CLUB;
+	gameContext.filterOptions.clubIndex = GPOINTER_TO_INT(g_object_get_data(G_OBJECT(child), "index"));
+	char buffer[48] = {0};
+	snprintf(buffer, 32, "Club: %s", gameContext.clubs[gameContext.filterOptions.clubIndex].shortName);
+	searchHandler_doSearch(true);
+	ui_clearFilterTags();
 }
 
 #define GET_ENTRY_TEXT(buffer) \
@@ -109,6 +122,8 @@ G_MODULE_EXPORT gboolean callbackFilterKeypress(
 		searchHandler_doSearch(true);
 		ui_clearFilterTags();
 
+		// TODO: move this logic somewhere the club selector can use it
+		//  also create club tag
 		const FilterOptions options = gameContext.filterOptions;
 		const FilterBuffer fb = gameContext.filterBuffer;
 

@@ -26,3 +26,4 @@ WindowContext createPlayerInfoWindow(const Player *player);
 void renderPlayerInfoWindow(WindowContext context, const Player *player);
 void ui_clearFilterTags(void);
 void ui_createFilterTag(const char *text, GtkEntryBuffer *buffer);
+void ui_createClubFilterTag(const char *text, GtkEditable *buffer);

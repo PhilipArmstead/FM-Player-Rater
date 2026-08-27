@@ -11,7 +11,7 @@ SPDX-License-Identifier: GPL-3.0-or-later -->
 	<requires lib="gtk" version="4.0"/>
 	<object class="GtkWindow" id="window:show-players">
 		<property name="title">FM Player Rater</property>
-		<property name="default-width">1280</property>
+		<property name="default-width">1255</property>
 		<property name="default-height">690</property>
 		<child>
 			<object class="GtkBox">
@@ -222,7 +222,6 @@ SPDX-License-Identifier: GPL-3.0-or-later -->
 														<property name="max-width-chars">3</property>
 														<property name="width-chars">3</property>
 														<property name="css-classes">quality-entry</property>
-														<property name="text">21</property>
 													</object>
 												</child>
 											</object>

@@ -28,18 +28,25 @@ uint32_t *search_findPlayers(void) {
 		) {
 			continue;
 		}
+
 		if (
 			(options.filterMask & FILTER_HAS_MIN_AGE && player->age < options.minAge) ||
 			(options.filterMask & FILTER_HAS_MAX_AGE && player->age > options.maxAge)
 		) {
 			continue;
 		}
+
 		if (
 			(options.filterMask & FILTER_HAS_MIN_VALUE && player->guideValue < options.minValue) ||
 			(options.filterMask & FILTER_HAS_MAX_VALUE && player->guideValue > options.maxValue)
 		) {
 			continue;
 		}
+
+		if (options.filterMask & FILTER_HAS_CLUB && player->clubIndex != options.clubIndex) {
+			continue;
+		}
+
 		if (options.positions > 0) {
 			#define MINIMUM_POSITIONAL_PROFICIENCY 15
 			bool hasPosition = false;

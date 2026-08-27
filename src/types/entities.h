@@ -59,6 +59,7 @@ typedef struct {
 	char surname[PERSON_SURNAME_LENGTH];
 	char commonName[PERSON_COMMON_NAME_LENGTH];
 	uint8_t nationality[4];
+	int64_t clubIndex; // -1 means unemployed
 	uint32_t rowId;
 	uint32_t rid;
 	uint32_t uid;
@@ -66,7 +67,6 @@ typedef struct {
 	uint32_t playerAddress;
 	uint32_t guideValue;
 	uint32_t annualWage;
-	int32_t clubIndex; // -1 means unemployed
 	uint16_t sharpness;
 	int16_t fatigue;
 	uint16_t condition;

@@ -15,7 +15,7 @@ pkg_check_modules(GTK4 REQUIRED IMPORTED_TARGET gtk4)
 
 set(REPO_ROOT "${CMAKE_CURRENT_SOURCE_DIR}")
 
-add_executable(fm_player_rater WIN32
+add_executable(fm_player_rater
 	src/main.c
 	src/app/callbacks.c
 	src/app/data.c
@@ -31,6 +31,11 @@ add_executable(fm_player_rater WIN32
 	src/platform/linux.c
 	src/platform/windows.c
 )
+
+# Apply -mwindows only in Release mode
+if (WIN32)
+	target_link_options(fm_player_rater PRIVATE $<$<CONFIG:Release>:-mwindows>)
+endif ()
 
 # Allow including headers using absolute paths relative to the project `src/` directory,
 # e.g. #include "platform/platform.h"

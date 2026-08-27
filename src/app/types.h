@@ -41,7 +41,7 @@
 #define POSITION_MASK_ST (1 << 8),
 
 typedef struct {
-	uint64_t clubIndex;
+	int64_t clubIndex;
 	uint32_t filterMask; // 1 bit to represent the presence of each filter
 	float minRating;
 	float maxRating;
