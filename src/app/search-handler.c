@@ -106,5 +106,5 @@ void searchHandler_clearFilters(void) {
 	gtk_entry_buffer_set_text(gameContext.filterBuffer.maxPA, "", 1);
 	gtk_entry_buffer_set_text(gameContext.filterBuffer.minRating, "", 1);
 	gtk_entry_buffer_set_text(gameContext.filterBuffer.maxRating, "", 1);
-	gtk_entry_buffer_set_text(gameContext.filterBuffer.clubSearch, "", 1);
+	gtk_editable_set_text(GTK_EDITABLE(gameContext.dataList->entry), "");
 }

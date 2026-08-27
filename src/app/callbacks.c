@@ -18,7 +18,7 @@ extern GameContext gameContext;
 
 static void showPlayerById(uint32_t uniqueId);
 
-void callbacks_init() {
+void callbacks_init(void) {
 	// Capture keypresses within sidebar to trigger search
 	GtkEventControllerKey *controllerKey = GTK_EVENT_CONTROLLER_KEY(gtk_event_controller_key_new());
 	g_signal_connect(controllerKey, "key-released", G_CALLBACK(callbackFilterKeypress), NULL);
@@ -26,6 +26,11 @@ void callbacks_init() {
 
 	GtkWidget *sidebar = GTK_WIDGET(gtk_builder_get_object(gameContext.builder, "sidebar"));
 	gtk_widget_add_controller(sidebar, GTK_EVENT_CONTROLLER(controllerKey));
+
+	// Attach datalist callbacks
+	SearchDatalist *dataList = gameContext.dataList;
+	g_signal_connect(dataList->entry, "changed", G_CALLBACK(callbackOnClubNameChange), dataList);
+	g_signal_connect(dataList->listBox, "row-activated", G_CALLBACK(callbackOnClubNameSelected), dataList);
 }
 
 // TODO: this is slow as fuck

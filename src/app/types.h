@@ -66,6 +66,7 @@ typedef struct {
 	FilterBuffer filterBuffer;
 	FilterOptions filterOptions;
 	char gameVersion[GAME_STATUS_STRING_BUFFER_SIZE];
+	SearchDatalist *dataList;
 	DayMonthYear currentDate;
 	GtkBuilder *builder;
 	GtkColumnView *table;
