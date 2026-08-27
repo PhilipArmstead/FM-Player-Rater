@@ -3,6 +3,9 @@
 
 #pragma once
 
+#include "app/types.h"
+
+
 void searchHandler_doSearch(bool refreshFilterCache);
 void searchHandler_clearFilters(void);
 void searchHandler_cacheFilters(void);

@@ -48,9 +48,8 @@ void ui_init(GtkApplication *app) {
 	// Cache table
 	gameContext.table = GTK_COLUMN_VIEW(GTK_WIDGET(gtk_builder_get_object(gameContext.builder, "table:player-list")));
 
-	clubDataListCreate();
-
 	#ifdef MOCKS_MODE
+	// In mock mode, we never have the process-connected callback run
 	runMultiThreadedCache();
 	#endif
 
@@ -58,6 +57,33 @@ void ui_init(GtkApplication *app) {
 	g_timeout_add(1000, update, NULL);
 	update(NULL);
 
+	// Create datalist box
+	SearchDatalist *dataList = gameContext.dataList;
+	dataList = g_new0(SearchDatalist, 1);
+
+	dataList->entry = GTK_SEARCH_ENTRY(gtk_search_entry_new());
+	dataList->popover = GTK_POPOVER(gtk_popover_new());
+	dataList->listBox = GTK_LIST_BOX(gtk_list_box_new());
+
+	gtk_search_entry_set_placeholder_text(dataList->entry, "Search club");
+	gtk_widget_add_css_class(GTK_WIDGET(dataList->entry), "sidebar-search");
+
+	gtk_popover_set_child(dataList->popover, GTK_WIDGET(dataList->listBox));
+	gtk_widget_set_parent(GTK_WIDGET(dataList->popover), GTK_WIDGET(dataList->entry));
+
+	gtk_popover_set_pointing_to(dataList->popover, &(GdkRectangle){102, 27, 1, 1});
+	gtk_popover_set_position(dataList->popover, GTK_POS_BOTTOM);
+
+	gtk_popover_set_autohide(dataList->popover, FALSE);
+	gtk_widget_set_can_focus(GTK_WIDGET(dataList->popover), FALSE);
+	gtk_widget_set_can_focus(GTK_WIDGET(dataList->listBox), FALSE);
+	gtk_list_box_set_selection_mode(dataList->listBox, GTK_SELECTION_NONE);
+
+	GtkBox *container = GTK_BOX(gtk_builder_get_object(gameContext.builder, "box:club-search-container"));
+	gtk_box_append(container, GTK_WIDGET(dataList->entry));
+	gameContext.dataList = dataList;
+
+	// Cache field buffers
 	GtkBuilder *b = gameContext.builder;
 	FilterBuffer *buf = &gameContext.filterBuffer;
 	buf->minAge = gtk_entry_get_buffer(GTK_ENTRY(gtk_builder_get_object(b, "entry:age:min")));
@@ -68,7 +94,6 @@ void ui_init(GtkApplication *app) {
 	buf->maxPA = gtk_entry_get_buffer(GTK_ENTRY(gtk_builder_get_object(b, "entry:pa:max")));
 	buf->minRating = gtk_entry_get_buffer(GTK_ENTRY(gtk_builder_get_object(b, "entry:rating:min")));
 	buf->maxRating = gtk_entry_get_buffer(GTK_ENTRY(gtk_builder_get_object(b, "entry:rating:max")));
-	buf->clubSearch = gtk_entry_get_buffer(GTK_ENTRY(gtk_builder_get_object(b, "entry:club-name")));
 }
 
 void connectToProcess(void) {

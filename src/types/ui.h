@@ -12,7 +12,6 @@ typedef struct {
 	GtkEntryBuffer *maxPA;
 	GtkEntryBuffer *minRating;
 	GtkEntryBuffer *maxRating;
-	GtkEditable *clubSearch;
 } FilterBuffer;
 
 typedef struct {

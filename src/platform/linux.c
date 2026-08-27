@@ -27,7 +27,7 @@ void platform_consoleWriteError(const char *message, const LogLevel colour) {
 #include <unistd.h>
 
 
-void readFromMemory(void *handle, uintptr_t address, size_t length, uint8_t *bytes) {
+bool readFromMemory(void *handle, uintptr_t address, size_t length, uint8_t *bytes) {
 	if (pread((int)(intptr_t)handle, bytes, length, (off_t)address) != (ssize_t)length) {
 		memset(bytes, 0, length);
 		platform_consoleWriteError("Failed to read memory\n", LogLevelError);
