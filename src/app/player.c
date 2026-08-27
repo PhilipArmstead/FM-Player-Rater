@@ -15,7 +15,7 @@
 extern GameContext gameContext;
 
 static bool isPlayerAlsoStaff(void *handle, uint32_t playerAddress);
-static bool isPersonAlsoStaff(void *handle, uint32_t playerAddress);
+static bool isPersonAlsoStaff(void *handle, uint32_t personAddress);
 static bool isPlayerValid(void *handle, uint32_t personAddress);
 static bool isPersonValid(void *handle, uint32_t personAddress);
 static uint32_t getPlayerAddressFromPersonAddress(void *handle, uint32_t personAddress);

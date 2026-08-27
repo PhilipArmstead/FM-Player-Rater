@@ -6,6 +6,7 @@
 #include "app/helpers/formatter.h"
 #include "app/helpers/vector.h"
 
+#include <glib.h>
 
 extern GameContext gameContext;
 
@@ -129,6 +130,174 @@ static void printNumeric(GtkWidget *label, int64_t value) {
 	gtk_label_set_text(GTK_LABEL(label), buffer);
 }
 
+static GString *formatPlayerPositions(uint8_t *positions) {
+	GString *str = g_string_new(NULL);
+	bool hasPrevious = false;
+	bool sameRow = false;
+
+	// Goalkeeper
+	if (positions[PLAYER_OFFSET_POSITION_GK - PLAYER_OFFSET_POSITION_GK] >= MINIMUM_POSITIONAL_PROFICIENCY) {
+		g_string_append(str, "GK");
+		hasPrevious = true;
+	}
+
+	// Fullback
+	if (positions[PLAYER_OFFSET_POSITION_DL - PLAYER_OFFSET_POSITION_GK] >= MINIMUM_POSITIONAL_PROFICIENCY) {
+		if (hasPrevious) {
+			g_string_append(str, ", ");
+		}
+		hasPrevious = true;
+		sameRow = true;
+		g_string_append(str, "DL");
+	}
+
+	if (positions[PLAYER_OFFSET_POSITION_DR - PLAYER_OFFSET_POSITION_GK] >= MINIMUM_POSITIONAL_PROFICIENCY) {
+		if (sameRow) {
+			sameRow = false;
+			g_string_append(str, "/R");
+		} else if (hasPrevious) {
+			g_string_append(str, ", ");
+		} else {
+			g_string_append(str, "DR");
+		}
+		hasPrevious = true;
+	}
+
+	// Centre back
+	if (positions[PLAYER_OFFSET_POSITION_DC - PLAYER_OFFSET_POSITION_GK] >= MINIMUM_POSITIONAL_PROFICIENCY) {
+		if (hasPrevious) {
+			g_string_append(str, ", ");
+		}
+		g_string_append(str, "DC");
+		hasPrevious = true;
+	}
+
+
+	// Wingback
+	if (positions[PLAYER_OFFSET_POSITION_WBL - PLAYER_OFFSET_POSITION_GK] >= MINIMUM_POSITIONAL_PROFICIENCY) {
+		if (hasPrevious) {
+			g_string_append(str, ", ");
+		}
+		hasPrevious = true;
+		sameRow = true;
+		g_string_append(str, "WBL");
+	}
+
+	if (positions[PLAYER_OFFSET_POSITION_WBR - PLAYER_OFFSET_POSITION_GK] >= MINIMUM_POSITIONAL_PROFICIENCY) {
+		if (sameRow) {
+			sameRow = false;
+			g_string_append(str, "/R");
+		} else {
+			if (hasPrevious) {
+				g_string_append(str, ", ");
+			}
+
+			g_string_append(str, "WBR");
+		}
+		hasPrevious = true;
+	}
+
+	// Defensive midfielder
+	if (positions[PLAYER_OFFSET_POSITION_DM - PLAYER_OFFSET_POSITION_GK] >= MINIMUM_POSITIONAL_PROFICIENCY) {
+		if (hasPrevious) {
+			g_string_append(str, ", ");
+		}
+		hasPrevious = true;
+		g_string_append(str, "DM");
+	}
+
+	sameRow = false;
+
+	// Winger
+	if (positions[PLAYER_OFFSET_POSITION_ML - PLAYER_OFFSET_POSITION_GK] >= MINIMUM_POSITIONAL_PROFICIENCY) {
+		if (hasPrevious) {
+			g_string_append(str, ", ");
+		}
+		hasPrevious = true;
+		sameRow = true;
+		g_string_append(str, "ML");
+	}
+
+	if (positions[PLAYER_OFFSET_POSITION_MR - PLAYER_OFFSET_POSITION_GK] >= MINIMUM_POSITIONAL_PROFICIENCY) {
+		if (sameRow) {
+			g_string_append(str, "/R");
+		} else {
+			if (hasPrevious) {
+				g_string_append(str, ", ");
+			}
+
+			g_string_append(str, "MR");
+		}
+		hasPrevious = true;
+	}
+
+	sameRow = false;
+
+	// Central midfielder
+	if (positions[PLAYER_OFFSET_POSITION_MC - PLAYER_OFFSET_POSITION_GK] >= MINIMUM_POSITIONAL_PROFICIENCY) {
+		if (hasPrevious) {
+			g_string_append(str, ", ");
+		}
+		hasPrevious = true;
+		g_string_append(str, "MC");
+	}
+
+	// Advanced winger
+	if (positions[PLAYER_OFFSET_POSITION_AML - PLAYER_OFFSET_POSITION_GK] >= MINIMUM_POSITIONAL_PROFICIENCY) {
+		if (hasPrevious) {
+			g_string_append(str, ", ");
+		}
+		hasPrevious = true;
+		sameRow = true;
+		g_string_append(str, "AML");
+	}
+
+	if (positions[PLAYER_OFFSET_POSITION_AMR - PLAYER_OFFSET_POSITION_GK] >= MINIMUM_POSITIONAL_PROFICIENCY) {
+		if (sameRow) {
+			g_string_append(str, "/R");
+		} else {
+			if (hasPrevious) {
+				g_string_append(str, ", ");
+			}
+
+			g_string_append(str, "AMR");
+		}
+		hasPrevious = true;
+	}
+
+	sameRow = false;
+
+	// Attacking midfielder
+	if (positions[PLAYER_OFFSET_POSITION_AMC - PLAYER_OFFSET_POSITION_GK] >= MINIMUM_POSITIONAL_PROFICIENCY) {
+		if (hasPrevious) {
+			g_string_append(str, ", ");
+		}
+		hasPrevious = true;
+		g_string_append(str, "AMC");
+	}
+
+	// Striker
+	if (positions[PLAYER_OFFSET_POSITION_ST - PLAYER_OFFSET_POSITION_GK] >= MINIMUM_POSITIONAL_PROFICIENCY) {
+		if (hasPrevious) {
+			g_string_append(str, ", ");
+		}
+		hasPrevious = true;
+		g_string_append(str, "ST");
+	}
+
+	// // Attacking midfield
+	// if (positions[10] >= MINIMUM_POSITIONAL_PROFICIENCY) {
+	// 	positions.push({label: 'AMC', position: 'AM'})
+	// }
+	//
+	// // Striker
+	// if (positions[12] >= MINIMUM_POSITIONAL_PROFICIENCY) {
+	// 	positions.push({label: 'ST', position: 'ST'})
+	// }
+
+	return str;
+}
+
 static void bindCellValue(GtkSignalListItemFactory *factory, GtkListItem *item, uint8_t columnId) {
 	(void)factory;
 
@@ -149,7 +318,10 @@ static void bindCellValue(GtkSignalListItemFactory *factory, GtkListItem *item, 
 			printNumeric(label, row->player->age);
 			break;
 		case COLUMN_POSITIONS:
-			// TODO getPlayerPositions(player).map(p => p.label).join(', ')
+			GString *str = formatPlayerPositions(row->player->positions);
+			gtk_label_set_text(GTK_LABEL(label), str->str);
+			gtk_label_set_xalign(GTK_LABEL(label), 0);
+			g_string_free(str, TRUE);
 			break;
 		case COLUMN_CA:
 			printNumeric(label, row->player->ca);
@@ -159,12 +331,6 @@ static void bindCellValue(GtkSignalListItemFactory *factory, GtkListItem *item, 
 			break;
 		case COLUMN_CA_PA_DELTA:
 			printNumeric(label, row->player->pa - row->player->ca);
-			break;
-		case COLUMN_STATUS:
-			/** TODO: Status
-	{{ player.canDevelopQuickly ? '🧠' : '' }}
-	{{ player.isHotProspect ? '🔥' : '' }}
-*/
 			break;
 		case COLUMN_RATING:
 			/** TODO: Rating

@@ -48,12 +48,6 @@ typedef struct {
 	uint32_t minValue;
 	uint32_t maxValue;
 	uint16_t positions; // Masked, one bit per position
-	// uint16_t minHomeReputation;
-	// uint16_t maxHomeReputation;
-	// uint16_t minCurrentReputation;
-	// uint16_t maxCurrentReputation;
-	// uint16_t minWorldReputation;
-	// uint16_t maxWorldReputation;
 	uint8_t minAge;
 	uint8_t maxAge;
 	uint8_t minCA;
