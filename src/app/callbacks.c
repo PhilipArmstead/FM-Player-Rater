@@ -17,6 +17,7 @@ extern ProcessContext processContext;
 extern GameContext gameContext;
 
 static void showPlayerById(uint32_t uniqueId);
+static void updateFilterTags(void);
 
 void callbacks_init(void) {
 	// Capture keypresses within sidebar to trigger search
@@ -104,12 +105,12 @@ G_MODULE_EXPORT void callbackOnClubNameSelected(
 	gameContext.filterOptions.clubIndex = GPOINTER_TO_INT(g_object_get_data(G_OBJECT(child), "index"));
 	char buffer[48] = {0};
 	snprintf(buffer, 32, "Club: %s", gameContext.clubs[gameContext.filterOptions.clubIndex].shortName);
-	searchHandler_doSearch(true);
-	ui_clearFilterTags();
-}
+	ui_createClubFilterTag(buffer, GTK_EDITABLE(dataList->entry));
 
-#define GET_ENTRY_TEXT(buffer) \
-	gtk_entry_buffer_get_text(buffer)
+	// NOTE: this is the same as the on-enter handler
+	searchHandler_doSearch(true);
+	updateFilterTags();
+}
 
 G_MODULE_EXPORT gboolean callbackFilterKeypress(
 	GtkEventControllerKey *controller,
@@ -125,62 +126,7 @@ G_MODULE_EXPORT gboolean callbackFilterKeypress(
 
 	if (keyval == GDK_KEY_Return) {
 		searchHandler_doSearch(true);
-		ui_clearFilterTags();
-
-		// TODO: move this logic somewhere the club selector can use it
-		//  also create club tag
-		const FilterOptions options = gameContext.filterOptions;
-		const FilterBuffer fb = gameContext.filterBuffer;
-
-		char buffer[32] = {0};
-		if (options.filterMask & FILTER_HAS_MIN_AGE) {
-			snprintf(buffer, 32, "Age ≥ %d", options.minAge);
-			ui_createFilterTag(buffer, fb.minAge);
-		} else {
-			gtk_entry_buffer_set_text(fb.minAge, "", 1);
-		}
-		if (options.filterMask & FILTER_HAS_MAX_AGE) {
-			snprintf(buffer, 32, "Age ≤ %d", options.maxAge);
-			ui_createFilterTag(buffer, fb.maxAge);
-		} else {
-			gtk_entry_buffer_set_text(fb.maxAge, "", 1);
-		}
-		if (options.filterMask & FILTER_HAS_MIN_CA) {
-			snprintf(buffer, 32, "CA ≥ %d", options.minCA);
-			ui_createFilterTag(buffer, fb.minCA);
-		} else {
-			gtk_entry_buffer_set_text(fb.minCA, "", 1);
-		}
-		if (options.filterMask & FILTER_HAS_MAX_CA) {
-			snprintf(buffer, 32, "CA ≤ %d", options.maxCA);
-			ui_createFilterTag(buffer, fb.maxCA);
-		} else {
-			gtk_entry_buffer_set_text(fb.maxCA, "", 1);
-		}
-		if (options.filterMask & FILTER_HAS_MIN_PA) {
-			snprintf(buffer, 32, "PA ≥ %d", options.minPA);
-			ui_createFilterTag(buffer, fb.minPA);
-		} else {
-			gtk_entry_buffer_set_text(fb.minPA, "", 1);
-		}
-		if (options.filterMask & FILTER_HAS_MAX_PA) {
-			snprintf(buffer, 32, "PA ≤ %d", options.maxPA);
-			ui_createFilterTag(buffer, fb.maxPA);
-		} else {
-			gtk_entry_buffer_set_text(fb.maxPA, "", 1);
-		}
-		if (options.filterMask & FILTER_HAS_MIN_RATING) {
-			snprintf(buffer, 32, "Rating ≥ %f.2%%", options.minRating);
-			ui_createFilterTag(buffer, fb.minRating);
-		} else {
-			gtk_entry_buffer_set_text(fb.minRating, "", 1);
-		}
-		if (options.filterMask & FILTER_HAS_MAX_RATING) {
-			snprintf(buffer, 32, "Rating ≤ %f.2%%", options.maxRating);
-			ui_createFilterTag(buffer, fb.maxRating);
-		} else {
-			gtk_entry_buffer_set_text(fb.maxRating, "", 1);
-		}
+		updateFilterTags();
 
 		return TRUE;
 	}
@@ -228,4 +174,64 @@ G_MODULE_EXPORT void callbackClearFilters(void) {
 
 	ui_clearFilterTags();
 	playerTable_populate(gameContext.table, NULL);
+}
+
+static void updateFilterTags(void) {
+	ui_clearFilterTags();
+
+	const FilterOptions options = gameContext.filterOptions;
+	const FilterBuffer fb = gameContext.filterBuffer;
+
+	char buffer[32] = {0};
+	if (options.filterMask & FILTER_HAS_MIN_AGE) {
+		snprintf(buffer, 32, "Age ≥ %d", options.minAge);
+		ui_createFilterTag(buffer, fb.minAge);
+	} else {
+		gtk_entry_buffer_set_text(fb.minAge, "", 1);
+	}
+	if (options.filterMask & FILTER_HAS_MAX_AGE) {
+		snprintf(buffer, 32, "Age ≤ %d", options.maxAge);
+		ui_createFilterTag(buffer, fb.maxAge);
+	} else {
+		gtk_entry_buffer_set_text(fb.maxAge, "", 1);
+	}
+	if (options.filterMask & FILTER_HAS_MIN_CA) {
+		snprintf(buffer, 32, "CA ≥ %d", options.minCA);
+		ui_createFilterTag(buffer, fb.minCA);
+	} else {
+		gtk_entry_buffer_set_text(fb.minCA, "", 1);
+	}
+	if (options.filterMask & FILTER_HAS_MAX_CA) {
+		snprintf(buffer, 32, "CA ≤ %d", options.maxCA);
+		ui_createFilterTag(buffer, fb.maxCA);
+	} else {
+		gtk_entry_buffer_set_text(fb.maxCA, "", 1);
+	}
+	if (options.filterMask & FILTER_HAS_MIN_PA) {
+		snprintf(buffer, 32, "PA ≥ %d", options.minPA);
+		ui_createFilterTag(buffer, fb.minPA);
+	} else {
+		gtk_entry_buffer_set_text(fb.minPA, "", 1);
+	}
+	if (options.filterMask & FILTER_HAS_MAX_PA) {
+		snprintf(buffer, 32, "PA ≤ %d", options.maxPA);
+		ui_createFilterTag(buffer, fb.maxPA);
+	} else {
+		gtk_entry_buffer_set_text(fb.maxPA, "", 1);
+	}
+	if (options.filterMask & FILTER_HAS_MIN_RATING) {
+		snprintf(buffer, 32, "Rating ≥ %f.2%%", options.minRating);
+		ui_createFilterTag(buffer, fb.minRating);
+	} else {
+		gtk_entry_buffer_set_text(fb.minRating, "", 1);
+	}
+	if (options.filterMask & FILTER_HAS_MAX_RATING) {
+		snprintf(buffer, 32, "Rating ≤ %f.2%%", options.maxRating);
+		ui_createFilterTag(buffer, fb.maxRating);
+	} else {
+		gtk_entry_buffer_set_text(fb.maxRating, "", 1);
+	}
+	if (options.filterMask & FILTER_HAS_CLUB) {
+		ui_createClubFilterTag(gameContext.clubs[options.clubIndex].shortName, GTK_EDITABLE(gameContext.dataList->entry));
+	}
 }
