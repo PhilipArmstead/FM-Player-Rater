@@ -23,7 +23,7 @@ uint32_t *search_findPlayers(void) {
 		if (
 			(options.filterMask & FILTER_HAS_MIN_CA && player->ca < options.minCA) ||
 			(options.filterMask & FILTER_HAS_MAX_CA && player->ca > options.maxCA) ||
-			(options.filterMask & FILTER_HAS_MAX_PA && player->pa < options.minPA) ||
+			(options.filterMask & FILTER_HAS_MIN_PA && player->pa < options.minPA) ||
 			(options.filterMask & FILTER_HAS_MAX_PA && player->pa > options.maxPA)
 		) {
 			continue;
