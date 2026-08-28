@@ -130,7 +130,14 @@ static void printNumeric(GtkWidget *label, int64_t value) {
 	gtk_label_set_text(GTK_LABEL(label), buffer);
 }
 
-static GString *formatPlayerPositions(uint8_t *positions) {
+static void printPercentage(GtkWidget *label, float value) {
+	char buffer[32];
+	// getScaledHSL(getBestRatingForFilteredPositions(player))
+	snprintf(buffer, sizeof(buffer), "%.2f%%", value);
+	gtk_label_set_text(GTK_LABEL(label), buffer);
+}
+
+static GString *formatPlayerPositions(const uint8_t *positions) {
 	GString *str = g_string_new(NULL);
 	bool hasPrevious = false;
 	bool sameRow = false;
@@ -285,16 +292,6 @@ static GString *formatPlayerPositions(uint8_t *positions) {
 		g_string_append(str, "ST");
 	}
 
-	// // Attacking midfield
-	// if (positions[10] >= MINIMUM_POSITIONAL_PROFICIENCY) {
-	// 	positions.push({label: 'AMC', position: 'AM'})
-	// }
-	//
-	// // Striker
-	// if (positions[12] >= MINIMUM_POSITIONAL_PROFICIENCY) {
-	// 	positions.push({label: 'ST', position: 'ST'})
-	// }
-
 	return str;
 }
 
@@ -333,9 +330,7 @@ static void bindCellValue(GtkSignalListItemFactory *factory, GtkListItem *item, 
 			printNumeric(label, row->player->pa - row->player->ca);
 			break;
 		case COLUMN_RATING:
-			/** TODO: Rating
-			 * getScaledHSL(getBestRatingForFilteredPositions(player))
-			*/
+			printPercentage(label, row->player->ratings[0].value);
 			break;
 		case COLUMN_VALUE:
 			// TODO: currency formatted string
