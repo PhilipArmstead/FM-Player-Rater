@@ -131,9 +131,17 @@ static void printNumeric(GtkWidget *label, int64_t value) {
 }
 
 static void printPercentage(GtkWidget *label, float value) {
-	char buffer[32];
+	char buffer[8];
 	// getScaledHSL(getBestRatingForFilteredPositions(player))
 	snprintf(buffer, sizeof(buffer), "%.2f%%", value);
+	gtk_label_set_text(GTK_LABEL(label), buffer);
+}
+
+static void printCurrency(GtkWidget *label, uint64_t value) {
+	gchar buffer[32];
+	g_snprintf(buffer, sizeof(buffer), "%llu", value);
+	formatter_printCurrency(buffer);
+	gtk_label_set_xalign(GTK_LABEL(label), 0);
 	gtk_label_set_text(GTK_LABEL(label), buffer);
 }
 
@@ -333,7 +341,7 @@ static void bindCellValue(GtkSignalListItemFactory *factory, GtkListItem *item, 
 			printPercentage(label, row->player->ratings[0].value);
 			break;
 		case COLUMN_VALUE:
-			// TODO: currency formatted string
+			printCurrency(label, row->player->guideValue);
 			break;
 		case COLUMN_CLUB:
 			gtk_label_set_text(GTK_LABEL(label), gameContext.clubs[row->player->clubIndex].shortName);
