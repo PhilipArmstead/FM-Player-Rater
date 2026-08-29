@@ -10,6 +10,7 @@
 #include "types/entities.h"
 #include "types/logger.h"
 #include "types/process.h"
+#include "types/search.h"
 #include "types/ui.h"
 
 #define FILTER_HAS_MIN_RATING (1 << 0)

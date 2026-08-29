@@ -33,7 +33,7 @@ SPDX-License-Identifier: GPL-3.0-or-later -->
 						<child>
 							<object class="GtkButton">
 								<property name="label">Current player</property>
-								<signal name="clicked" handler="callbackShowCurrentPlayer"/>
+								<signal name="clicked" handler="callbacks_onShowCurrentPlayer"/>
 								<style>
 									<class name="nav-tab"/>
 								</style>
@@ -95,7 +95,7 @@ SPDX-License-Identifier: GPL-3.0-or-later -->
 						<child>
 							<object class="GtkButton" id="button:clear-all">
 								<property name="label">clear all</property>
-								<signal name="clicked" handler="callbackClearFilters"/>
+								<signal name="clicked" handler="callbacks_onFiltersClear"/>
 								<style>
 									<class name="link-btn"/>
 								</style>
@@ -416,7 +416,7 @@ SPDX-License-Identifier: GPL-3.0-or-later -->
 								<child>
 									<object class="GtkButton" id="button:clear-filters">
 										<property name="label">Clear filters</property>
-										<signal name="clicked" handler="callbackClearFilters"/>
+										<signal name="clicked" handler="callbacks_onFiltersClear"/>
 										<style>
 											<class name="clear-filters-btn"/>
 										</style>

@@ -25,11 +25,16 @@ add_executable(fm_player_rater
 	src/app/search.c
 	src/app/search-handler.c
 	src/app/ui.c
+	src/app/callbacks/club-search.c
 	src/app/helpers/date.c
 	src/app/helpers/formatter.c
 	src/core/logger.c
 	src/platform/linux.c
 	src/platform/windows.c
+	src/app/callbacks/filters.c
+	src/app/callbacks/filters.h
+	src/app/callbacks/player.c
+	src/app/callbacks/player.h
 )
 
 # Apply -mwindows only in Release mode

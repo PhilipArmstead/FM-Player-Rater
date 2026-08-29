@@ -6,5 +6,4 @@
 #include <gtk/gtk.h>
 
 
-void callbacks_init(void);
 G_MODULE_EXPORT void callbacks_onShowCurrentPlayer(void);

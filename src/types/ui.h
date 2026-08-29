@@ -13,9 +13,3 @@ typedef struct {
 	GtkEntryBuffer *minRating;
 	GtkEntryBuffer *maxRating;
 } FilterBuffer;
-
-typedef struct {
-	GtkSearchEntry *entry;
-	GtkPopover *popover;
-	GtkListBox *listBox;
-} SearchDatalist;
