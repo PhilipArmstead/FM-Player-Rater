@@ -16,18 +16,10 @@
 extern ProcessContext processContext;
 extern GameContext gameContext;
 
-#ifdef ARCH_WIN
-typedef HANDLE thread_t;
-typedef HANDLE event_t;
-#else
-typedef pthread_t thread_t;
-typedef sem_t event_t;
-#endif
-
 static thread_t threads[THREAD_COUNT];
 
 #ifdef ARCH_WIN
-DWORD WINAPI threadFunction(const LPVOID arg) {
+static DWORD WINAPI threadFunction(const LPVOID arg) {
 	const uint8_t func_num = (uint8_t)(intptr_t)arg;
 
 	switch (func_num) {
@@ -53,7 +45,7 @@ DWORD WINAPI threadFunction(const LPVOID arg) {
 #include <semaphore.h>
 
 
-void *threadFunction(void *arg) {
+static void *threadFunction(void *arg) {
 	int func_num = (int)(intptr_t)arg;
 
 	switch (func_num) {
@@ -251,6 +243,7 @@ void runMultiThreadedCache(void) {
 
 	uint8_t i;
 
+	// TODO: "if (isWindows)" should not appear in code; this is platform stuff, put it there
 	#ifdef ARCH_WIN
 	for (i = 0; i < THREAD_COUNT; i++) {
 		threads[i] = CreateThread(

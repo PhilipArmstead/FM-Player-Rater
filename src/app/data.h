@@ -13,11 +13,5 @@ void cacheClubs(void);
 void cacheNations(void);
 void cachePlayers(uint8_t half);
 void runMultiThreadedCache(void);
-#ifdef ARCH_WIN
-#include <windows.h>
-DWORD WINAPI threadFunction(LPVOID arg);
-#else
-void *threadFunction(void *arg);
-#endif
 
 void clubDataListCreate(void);

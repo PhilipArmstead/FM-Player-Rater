@@ -8,6 +8,17 @@
 #include <unistd.h>
 
 
+#ifdef ARCH_WIN
+#include <windows.h>
+
+typedef HANDLE thread_t;
+typedef HANDLE event_t;
+#else
+typedef pthread_t thread_t;
+typedef sem_t event_t;
+#endif
+
+
 // Logger
 void platform_consoleWrite(const char *message, LogLevel colour);
 void platform_consoleWriteError(const char *message, LogLevel colour);
