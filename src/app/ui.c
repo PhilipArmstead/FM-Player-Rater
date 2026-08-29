@@ -26,19 +26,10 @@ static inline void updateWhileConnected(void);
 static inline void updateWhileDisconnected(void);
 static void onFilterTagClick(GtkWidget *self, GtkEntryBuffer *buffer);
 static void onClubFilterTagClick(GtkWidget *self, GtkEditable *buffer);
+static void loadStylesheet(const char *fileName);
 
 void ui_init(GtkApplication *app) {
-	// Load main CSS
-	char pathToStylesheet[256] = {0};
-	GtkCssProvider *css_provider = gtk_css_provider_new();
-	snprintf(pathToStylesheet, sizeof(pathToStylesheet), "%s/show-players.css", LAYOUTS_DIR);
-	gtk_css_provider_load_from_path(css_provider, pathToStylesheet);
-	gtk_style_context_add_provider_for_display(
-		gdk_display_get_default(),
-		GTK_STYLE_PROVIDER(css_provider),
-		GTK_STYLE_PROVIDER_PRIORITY_APPLICATION
-	);
-	g_object_unref(css_provider);
+	loadStylesheet("show-players.css");
 
 	// Show main window
 	const WindowContext context = openWindow("show-players", "window:show-players");
@@ -224,16 +215,7 @@ WindowContext createPlayerInfoWindow(void) {
 	const WindowContext context = openWindow("player-info", "window:player-info");
 	gtk_window_set_default_size(GTK_WINDOW(context.window), 420, 900);
 
-	char pathToStylesheet[256] = {0};
-	GtkCssProvider *css_provider = gtk_css_provider_new();
-	snprintf(pathToStylesheet, sizeof(pathToStylesheet), "%s/player-info.css", LAYOUTS_DIR);
-	gtk_css_provider_load_from_path(css_provider, pathToStylesheet);
-	gtk_style_context_add_provider_for_display(
-		gdk_display_get_default(),
-		GTK_STYLE_PROVIDER(css_provider),
-		GTK_STYLE_PROVIDER_PRIORITY_APPLICATION
-	);
-	g_object_unref(css_provider);
+	loadStylesheet("player-info.css");
 
 	return context;
 }
@@ -551,4 +533,19 @@ void onClubFilterTagClick(GtkWidget *self, GtkEditable *buffer) {
 void onFilterTagClick(GtkWidget *self, GtkEntryBuffer *buffer) {
 	gtk_entry_buffer_set_text(buffer, "", 1);
 	onTagClick(self);
+}
+
+
+static void loadStylesheet(const char *fileName) {
+	char pathToStylesheet[256] = {0};
+	GtkCssProvider *provider = gtk_css_provider_new();
+
+	snprintf(pathToStylesheet, sizeof(pathToStylesheet), "%s/%s", LAYOUTS_DIR, fileName);
+	gtk_css_provider_load_from_path(provider, pathToStylesheet);
+	gtk_style_context_add_provider_for_display(
+		gdk_display_get_default(),
+		GTK_STYLE_PROVIDER(provider),
+		GTK_STYLE_PROVIDER_PRIORITY_APPLICATION
+	);
+	g_object_unref(provider);
 }
