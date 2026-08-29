@@ -10,7 +10,6 @@ Player getPlayer(void *handle, bool skipIsValidCheck, uint32_t personAddress, ui
 uint32_t getPersonAddressFromPlayerAddress(void *handle, uint32_t playerAddress);
 uint32_t getCurrentPersonUniqueId(const ProcessContext *processContext);
 Player getPlayerById(const ProcessContext *processContext, uint32_t uniqueId);
-PartialPlayer getPlayerByIdPartial(const ProcessContext *processContext, uint32_t uniqueId);
 void getWeightsForPosition(
 	PositionGrouped position,
 	float out_attr[ATTRIBUTE_COUNT],

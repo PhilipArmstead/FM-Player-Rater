@@ -90,7 +90,7 @@ static void onRowClicked(GtkGestureClick *gesture, uint8_t clickCount, double x,
 	const SearchPlayerRow *row = gtk_list_item_get_item(listItem);
 
 	if (row != NULL && row->player != NULL && clickCount == 2) {
-		const WindowContext context = createPlayerInfoWindow(row->player);
+		const WindowContext context = createPlayerInfoWindow();
 		renderPlayerInfoWindow(context, row->player);
 	}
 }
@@ -314,13 +314,21 @@ static void bindCellValue(GtkSignalListItemFactory *factory, GtkListItem *item, 
 		return;
 	}
 
+	const Player *player = row->player;
+
 	switch (columnId) {
 		case COLUMN_NAME:
-			gtk_label_set_text(GTK_LABEL(label), row->player->commonName);
+			if (player->commonName[0] == '\0') {
+				char buffer[PERSON_FORENAME_LENGTH + PERSON_SURNAME_LENGTH + 2];
+				snprintf(buffer, sizeof(buffer), "%s %s", player->forename, player->surname);
+				gtk_label_set_text(GTK_LABEL(label), buffer);
+			} else {
+				gtk_label_set_text(GTK_LABEL(label), player->commonName);
+			}
 			gtk_label_set_xalign(GTK_LABEL(label), 0);
 			break;
 		case COLUMN_AGE:
-			printNumeric(label, row->player->age);
+			printNumeric(label, player->age);
 			break;
 		case COLUMN_POSITIONS:
 			GString *str = formatPlayerPositions(row->player->positions);
@@ -329,32 +337,32 @@ static void bindCellValue(GtkSignalListItemFactory *factory, GtkListItem *item, 
 			g_string_free(str, TRUE);
 			break;
 		case COLUMN_CA:
-			printNumeric(label, row->player->ca);
+			printNumeric(label, player->ca);
 			break;
 		case COLUMN_PA:
-			printNumeric(label, row->player->pa);
+			printNumeric(label, player->pa);
 			break;
 		case COLUMN_CA_PA_DELTA:
-			printNumeric(label, row->player->pa - row->player->ca);
+			printNumeric(label, player->pa - player->ca);
 			break;
 		case COLUMN_RATING:
-			printPercentage(label, row->player->ratings[0].value);
+			printPercentage(label, player->ratings[0].value);
 			break;
 		case COLUMN_VALUE:
-			printCurrency(label, row->player->guideValue);
+			printCurrency(label, player->guideValue);
 			break;
 		case COLUMN_CLUB:
 			gtk_label_set_text(GTK_LABEL(label), gameContext.clubs[row->player->clubIndex].shortName);
 			gtk_label_set_xalign(GTK_LABEL(label), 0);
 			break;
 		case COLUMN_REPUTATION_HOME:
-			printNumeric(label, row->player->homeReputation);
+			printNumeric(label, player->homeReputation);
 			break;
 		case COLUMN_REPUTATION_CURRENT:
-			printNumeric(label, row->player->currentReputation);
+			printNumeric(label, player->currentReputation);
 			break;
 		case COLUMN_REPUTATION_WORLD:
-			printNumeric(label, row->player->worldReputation);
+			printNumeric(label, player->worldReputation);
 			break;
 		default:
 			break;
@@ -500,10 +508,10 @@ void playerTable_populate(GtkColumnView *table, const uint32_t *playerIds) {
 	GtkLabel *resultsCountLabel = GTK_LABEL(
 		GTK_WIDGET(gtk_builder_get_object(gameContext.builder, "label:results-count"))
 	);
-	char resultCountString[16] = {0};
+	char resultCountString[32] = {0};
 	char formattedResults[12] = {0};
 	snprintf(formattedResults, 12, "%llu", playerCount);
 	formatter_printNumber(formattedResults);
-	snprintf(resultCountString, 16, "%s result%c", formattedResults, playerCount != 1 ? 's' : '\0');
+	snprintf(resultCountString, 32, "%s result%c", formattedResults, playerCount != 1 ? 's' : '\0');
 	gtk_label_set_text(resultsCountLabel, resultCountString);
 }

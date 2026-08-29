@@ -48,7 +48,7 @@ void callbacks_onClubNameSelected(
 	// Block the change handler while we update the text
 	g_signal_handlers_block_by_func(
 		dataList->entry,
-		(gpointer)callbacks_OnClubNameChange,
+		(gpointer)(uintptr_t)callbacks_OnClubNameChange,
 		(gpointer)dataList
 	);
 
@@ -57,7 +57,7 @@ void callbacks_onClubNameSelected(
 	// Unblock the handler
 	g_signal_handlers_unblock_by_func(
 		dataList->entry,
-		(gpointer)callbacks_OnClubNameChange,
+		(gpointer)(uintptr_t)callbacks_OnClubNameChange,
 		(gpointer)dataList
 	);
 
@@ -66,7 +66,7 @@ void callbacks_onClubNameSelected(
 	gameContext.filterOptions.filterMask |= FILTER_HAS_CLUB;
 	gameContext.filterOptions.clubIndex = GPOINTER_TO_INT(g_object_get_data(G_OBJECT(child), "index"));
 	char buffer[48] = {0};
-	snprintf(buffer, 32, "Club: %s", gameContext.clubs[gameContext.filterOptions.clubIndex].shortName);
+	snprintf(buffer, 48, "Club: %s", gameContext.clubs[gameContext.filterOptions.clubIndex].shortName);
 	ui_createClubFilterTag(buffer, GTK_EDITABLE(dataList->entry));
 
 	// NOTE: this is the same as the on-enter handler
@@ -128,7 +128,7 @@ static void runSearch(SearchContext *context) {
 		char *key = gameContext.clubs[clubIndex].shortName;
 		int64_t j = i - 1;
 
-		while (j >= 0 && strncmp(gameContext.clubs[context->clubIndices[j]].shortName, key, CLUB_SEARCH_NAME_LENGTH) > 0) {
+		while (j >= 0 && strncmp(gameContext.clubs[context->clubIndices[j]].shortName, key, CLUB_SHORT_NAME_LENGTH) > 0) {
 			context->clubIndices[j + 1] = context->clubIndices[j];
 			j--;
 		}

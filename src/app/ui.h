@@ -22,7 +22,7 @@ void updateInGameDate(void);
 void updateShowCurrentPlayerButton(void);
 WindowContext openWindow(const char *layoutName, const char *windowName);
 
-WindowContext createPlayerInfoWindow(const Player *player);
+WindowContext createPlayerInfoWindow(void);
 void renderPlayerInfoWindow(WindowContext context, const Player *player);
 void ui_clearFilterTags(void);
 void ui_createFilterTag(const char *text, GtkEntryBuffer *buffer);

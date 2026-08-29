@@ -55,9 +55,9 @@ typedef struct {
 typedef struct {
 	uint8_t attributes[ATTRIBUTE_COUNT];
 	Rating ratings[POSITION_GROUPED_COUNT];
-	char forename[PERSON_FORENAME_LENGTH];
-	char surname[PERSON_SURNAME_LENGTH];
-	char commonName[PERSON_COMMON_NAME_LENGTH];
+	char forename[PERSON_FORENAME_LENGTH + 1];
+	char surname[PERSON_SURNAME_LENGTH + 1];
+	char commonName[PERSON_COMMON_NAME_LENGTH + 1];
 	uint8_t nationality[4];
 	int64_t clubIndex; // -1 means unemployed
 	uint32_t rowId;
@@ -81,14 +81,6 @@ typedef struct {
 	bool canDevelopQuickly;
 	bool isHotProspect;
 } Player;
-
-typedef struct {
-	char forename[PERSON_FORENAME_LENGTH];
-	char surname[PERSON_SURNAME_LENGTH];
-	char commonName[PERSON_COMMON_NAME_LENGTH];
-	uint32_t uid;
-	uint32_t personAddress;
-} PartialPlayer;
 
 typedef struct {
 	uint16_t days;

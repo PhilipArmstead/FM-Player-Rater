@@ -17,5 +17,5 @@ static inline uint64_t hexBytesToInt(const uint8_t *bytes, const uint8_t length)
 
 // Converts a number 0-100 to 1-20
 static inline uint8_t convertTo20Scale(const uint8_t value) {
-	return (value + 4) / 5;
+	return (uint8_t)((value + 4) / 5);
 }

@@ -220,7 +220,7 @@ WindowContext openWindow(const char *layoutName, const char *windowName) {
 	return context;
 }
 
-WindowContext createPlayerInfoWindow(const Player *player) {
+WindowContext createPlayerInfoWindow(void) {
 	const WindowContext context = openWindow("player-info", "window:player-info");
 	gtk_window_set_default_size(GTK_WINDOW(context.window), 420, 900);
 
@@ -235,23 +235,19 @@ WindowContext createPlayerInfoWindow(const Player *player) {
 	);
 	g_object_unref(css_provider);
 
-	LOG_INFO(
-		"Found Player: %s (Age: %d, Ability: %d, Potential: %d, Row ID: %d, Address: 0x%08X)",
-		player->commonName,
-		player->age,
-		player->ca,
-		player->pa,
-		player->rowId,
-		player->personAddress
-	);
-
 	return context;
 }
 
 void renderPlayerInfoWindow(WindowContext context, const Player *player) {
 	// Player name
 	GtkLabel *commonNameLabel = GTK_LABEL(GTK_WIDGET(gtk_builder_get_object(context.builder, "label:common-name")));
-	gtk_label_set_text(commonNameLabel, player->commonName);
+	if (player->commonName[0] == '\0') {
+		char buffer[PERSON_FORENAME_LENGTH + PERSON_SURNAME_LENGTH + 2];
+		snprintf(buffer, sizeof(buffer), "%s %s", player->forename, player->surname);
+		gtk_label_set_text(commonNameLabel, buffer);
+	} else {
+		gtk_label_set_text(commonNameLabel, player->commonName);
+	}
 
 	// Player age
 	{
