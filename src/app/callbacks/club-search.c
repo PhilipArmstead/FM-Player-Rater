@@ -13,11 +13,11 @@ extern GameContext gameContext;
 
 static void runThreadedSearch(SearchContext *context);
 
-G_MODULE_EXPORT void callbacks_OnClubNameChange(GtkEditable *editable, SearchDatalist *dataList) {
-	gameContext.filterOptions.filterMask &= ~FILTER_HAS_CLUB;
+void callbacks_OnClubNameChange(GtkEditable *editable, SearchDatalist *dataList) {
+	gameContext.filterOptions.filterMask &= ~(uint32_t)FILTER_HAS_CLUB;
 
 	const char *searchValue = gtk_editable_get_text(editable);
-	if (strlen(searchValue) < 4) {
+	if (strlen(searchValue) < 3) {
 		gtk_popover_popdown(dataList->popover);
 		return;
 	}
@@ -31,8 +31,8 @@ G_MODULE_EXPORT void callbacks_OnClubNameChange(GtkEditable *editable, SearchDat
 	runThreadedSearch(context);
 }
 
-G_MODULE_EXPORT void callbacks_onClubNameSelected(
-	GtkListBox *box,
+void callbacks_onClubNameSelected(
+	const GtkListBox *box,
 	GtkListBoxRow *row,
 	const SearchDatalist *dataList
 ) {
@@ -78,19 +78,17 @@ G_MODULE_EXPORT void callbacks_onClubNameSelected(
 static gboolean updateUIWithResults(gpointer userData) {
 	SearchContext *context = userData;
 	const SearchDatalist *dataList = context->dataList;
-	gtk_popover_popup(dataList->popover);
+	gtk_popover_popdown(dataList->popover);
 
 	// Clear the list
-	{
-		GtkWidget *child;
-		while ((child = gtk_widget_get_first_child(GTK_WIDGET(dataList->listBox))) != NULL) {
-			gtk_list_box_remove(dataList->listBox, GTK_WIDGET(child));
-		}
+	GtkWidget *child;
+	while ((child = gtk_widget_get_first_child(GTK_WIDGET(dataList->listBox))) != NULL) {
+		gtk_list_box_remove(dataList->listBox, GTK_WIDGET(child));
 	}
 
 	// Add matching options using results from worker thread
 	for (uint64_t i = 0; i < context->count; i++) {
-		uint64_t clubIndex = context->clubIndices[i];
+		const uint64_t clubIndex = context->clubIndices[i];
 		GtkWidget *label = gtk_label_new(gameContext.clubs[clubIndex].shortName);
 		g_object_set_data(G_OBJECT(label), "index", GINT_TO_POINTER(clubIndex));
 		gtk_widget_set_halign(label, GTK_ALIGN_START);
@@ -109,7 +107,6 @@ static gboolean updateUIWithResults(gpointer userData) {
 }
 
 // This runs on the worker thread; CPU-intensive work only
-// TODO: sort by name
 static void runSearch(SearchContext *context) {
 	const int64_t timeStart = platform_getMicroseconds();
 	const char *searchValue = context->searchValue;
@@ -124,6 +121,18 @@ static void runSearch(SearchContext *context) {
 			context->clubIndices[context->count] = i;
 			++context->count;
 		}
+	}
+
+	for (uint32_t i = 1; i < context->count; ++i) {
+		const uint64_t clubIndex = context->clubIndices[i];
+		char *key = gameContext.clubs[clubIndex].shortName;
+		int64_t j = i - 1;
+
+		while (j >= 0 && strncmp(gameContext.clubs[context->clubIndices[j]].shortName, key, CLUB_SEARCH_NAME_LENGTH) > 0) {
+			context->clubIndices[j + 1] = context->clubIndices[j];
+			j--;
+		}
+		context->clubIndices[j + 1] = clubIndex;
 	}
 
 	const int64_t timeEnd = platform_getMicroseconds();

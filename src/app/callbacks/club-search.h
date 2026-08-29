@@ -8,9 +8,9 @@
 #include "app/types.h"
 
 
-G_MODULE_EXPORT void callbacks_OnClubNameChange(GtkEditable *editable, SearchDatalist *dataList);
-G_MODULE_EXPORT void callbacks_onClubNameSelected(
-	GtkListBox *box,
+void callbacks_OnClubNameChange(GtkEditable *editable, SearchDatalist *dataList);
+void callbacks_onClubNameSelected(
+	const GtkListBox *box,
 	GtkListBoxRow *row,
 	const SearchDatalist *dataList
 );
