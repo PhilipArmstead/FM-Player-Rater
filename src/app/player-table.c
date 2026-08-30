@@ -8,6 +8,15 @@
 
 #include <glib.h>
 
+
+typedef struct {
+	GListStore *store;
+	GtkSortListModel *sortModel;
+	GtkSingleSelection *selection;
+} PlayerTableContext;
+
+static PlayerTableContext context = {0};
+
 extern GameContext gameContext;
 
 G_DEFINE_TYPE(SearchPlayerRow, search_player_row, G_TYPE_OBJECT)
@@ -17,8 +26,12 @@ static void search_player_row_finalize(GObject *object) {
 }
 
 enum {
-	PROP_0,
-	PROP_PLAYER,
+	PROP_PLAYER = 1,
+	PROP_AGE,
+	PROP_CA,
+	PROP_PA,
+	PROP_DIFF,
+	PROP_RATING,
 	N_PROPS
 };
 
@@ -42,18 +55,38 @@ typedef enum {
 static GParamSpec *properties[N_PROPS];
 
 static void search_player_row_set_property(GObject *object, guint propertyId, const GValue *value, GParamSpec *pspec) {
+	SearchPlayerRow *self = SEARCH_PLAYER_ROW(object);
 	if (propertyId == PROP_PLAYER) {
-		SearchPlayerRow *self = SEARCH_PLAYER_ROW(object);
 		self->player = (Player*)g_value_get_pointer(value);
+	} else if (propertyId == PROP_AGE) {
+		self->age = (uint8_t)g_value_get_int(value);
+	} else if (propertyId == PROP_CA) {
+		self->ca = (uint8_t)g_value_get_int(value);
+	} else if (propertyId == PROP_PA) {
+		self->pa = (uint8_t)g_value_get_int(value);
+	} else if (propertyId == PROP_DIFF) {
+		self->diff = (uint8_t)g_value_get_int(value);
+	} else if (propertyId == PROP_RATING) {
+		self->rating = g_value_get_float(value);
 	} else {
 		G_OBJECT_WARN_INVALID_PROPERTY_ID(object, propertyId, pspec);
 	}
 }
 
 static void search_player_row_get_property(GObject *object, guint propertyId, GValue *value, GParamSpec *pspec) {
+	const SearchPlayerRow *self = SEARCH_PLAYER_ROW(object);
 	if (propertyId == PROP_PLAYER) {
-		SearchPlayerRow *self = SEARCH_PLAYER_ROW(object);
 		g_value_set_pointer(value, self->player);
+	} else if (propertyId == PROP_AGE) {
+		g_value_set_uint(value, self->player->age);
+	} else if (propertyId == PROP_CA) {
+		g_value_set_uint(value, self->player->ca);
+	} else if (propertyId == PROP_PA) {
+		g_value_set_uint(value, self->player->pa);
+	} else if (propertyId == PROP_DIFF) {
+		g_value_set_uint(value, self->player->pa - self->player->ca);
+	} else if (propertyId == PROP_RATING) {
+		g_value_set_float(value, self->player->ratings[0].value);
 	} else {
 		G_OBJECT_WARN_INVALID_PROPERTY_ID(object, propertyId, pspec);
 	}
@@ -76,6 +109,51 @@ static void search_player_row_class_init(SearchPlayerRowClass *klass) {
 		"Player",
 		"Player data",
 		G_PARAM_READWRITE | G_PARAM_CONSTRUCT_ONLY
+	);
+	properties[PROP_AGE] = g_param_spec_uint(
+		"age",
+		"Age",
+		"Player age",
+		0,
+		100,
+		0,
+		G_PARAM_READABLE
+	);
+	properties[PROP_CA] = g_param_spec_uint(
+		"ca",
+		"CA",
+		"Player CA",
+		0,
+		200,
+		0,
+		G_PARAM_READABLE
+	);
+	properties[PROP_PA] = g_param_spec_uint(
+		"pa",
+		"PA",
+		"Player PA",
+		0,
+		200,
+		0,
+		G_PARAM_READABLE
+	);
+	properties[PROP_DIFF] = g_param_spec_uint(
+		"diff",
+		"Diff",
+		"Player PA - CA",
+		0,
+		200,
+		0,
+		G_PARAM_READABLE
+	);
+	properties[PROP_RATING] = g_param_spec_float(
+		"rating",
+		"Rating",
+		"Player's best rating",
+		0,
+		200,
+		0,
+		G_PARAM_READABLE
 	);
 
 	g_object_class_install_properties(object_class, N_PROPS, properties);
@@ -132,7 +210,7 @@ static void printNumeric(GtkWidget *label, int64_t value) {
 
 static void printPercentage(GtkWidget *label, float value) {
 	char buffer[8];
-	// getScaledHSL(getBestRatingForFilteredPositions(player))
+	// TODO: getScaledHSL(getBestRatingForFilteredPositions(player))
 	snprintf(buffer, sizeof(buffer), "%.2f%%", value);
 	gtk_label_set_text(GTK_LABEL(label), buffer);
 }
@@ -431,7 +509,7 @@ static void bindNationalitiesValue(GtkSignalListItemFactory *factory, GtkListIte
 	}
 }
 
-static GtkColumnViewColumn *createColumn(const char *title, uint8_t columnType) {
+static GtkColumnViewColumn *createColumn(const char *title, uint8_t columnType, GtkSorter *sorter) {
 	GtkListItemFactory *factory = gtk_signal_list_item_factory_new();
 	if (columnType == COLUMN_NATIONALITIES) {
 		g_signal_connect(factory, "setup", G_CALLBACK(setupBox), NULL);
@@ -445,40 +523,79 @@ static GtkColumnViewColumn *createColumn(const char *title, uint8_t columnType) 
 	}
 
 	GtkColumnViewColumn *column = gtk_column_view_column_new(title, factory);
+
+	// Attach sorter if provided
+	if (sorter != NULL) {
+		gtk_column_view_column_set_sorter(column, sorter);
+	}
+
 	return column;
 }
 
 void playerTable_init(void) {
+	GtkSorter *ageSorter = GTK_SORTER(
+		gtk_numeric_sorter_new(
+			gtk_property_expression_new(SEARCH_TYPE_PLAYER_ROW, NULL, "age")
+		)
+	);
+	GtkSorter *caSorter = GTK_SORTER(
+		gtk_numeric_sorter_new(
+			gtk_property_expression_new(SEARCH_TYPE_PLAYER_ROW, NULL, "ca")
+		)
+	);
+	GtkSorter *paSorter = GTK_SORTER(
+		gtk_numeric_sorter_new(
+			gtk_property_expression_new(SEARCH_TYPE_PLAYER_ROW, NULL, "pa")
+		)
+	);
+	GtkSorter *diffSorter = GTK_SORTER(
+		gtk_numeric_sorter_new(
+			gtk_property_expression_new(SEARCH_TYPE_PLAYER_ROW, NULL, "diff")
+		)
+	);
+	GtkSorter *ratingSorter = GTK_SORTER(
+		gtk_numeric_sorter_new(
+			gtk_property_expression_new(SEARCH_TYPE_PLAYER_ROW, NULL, "rating")
+		)
+	);
+
 	GtkColumnView *table = gameContext.table;
-	gtk_column_view_append_column(table, createColumn("", COLUMN_NATIONALITIES));
-	gtk_column_view_append_column(table, createColumn("Name", COLUMN_NAME));
-	gtk_column_view_append_column(table, createColumn("Age", COLUMN_AGE));
-	gtk_column_view_append_column(table, createColumn("Positions", COLUMN_POSITIONS));
-	gtk_column_view_append_column(table, createColumn("CA", COLUMN_CA));
-	gtk_column_view_append_column(table, createColumn("PA", COLUMN_PA));
-	gtk_column_view_append_column(table, createColumn("Diff", COLUMN_CA_PA_DELTA));
-	gtk_column_view_append_column(table, createColumn("Status", COLUMN_STATUS));
-	gtk_column_view_append_column(table, createColumn("Rating", COLUMN_RATING));
-	gtk_column_view_append_column(table, createColumn("Value", COLUMN_VALUE));
-	gtk_column_view_append_column(table, createColumn("Club", COLUMN_CLUB));
-	gtk_column_view_append_column(table, createColumn("Home rep", COLUMN_REPUTATION_HOME));
-	gtk_column_view_append_column(table, createColumn("Current rep", COLUMN_REPUTATION_CURRENT));
-	gtk_column_view_append_column(table, createColumn("World rep", COLUMN_REPUTATION_WORLD));
+	gtk_column_view_append_column(table, createColumn("", COLUMN_NATIONALITIES, NULL));
+	gtk_column_view_append_column(table, createColumn("Name", COLUMN_NAME, NULL));
+	gtk_column_view_append_column(table, createColumn("Age", COLUMN_AGE, ageSorter));
+	gtk_column_view_append_column(table, createColumn("Positions", COLUMN_POSITIONS, NULL));
+	gtk_column_view_append_column(table, createColumn("CA", COLUMN_CA, caSorter));
+	gtk_column_view_append_column(table, createColumn("PA", COLUMN_PA, paSorter));
+	gtk_column_view_append_column(table, createColumn("Diff", COLUMN_CA_PA_DELTA, diffSorter));
+	gtk_column_view_append_column(table, createColumn("Status", COLUMN_STATUS, NULL));
+	gtk_column_view_append_column(table, createColumn("Rating", COLUMN_RATING, ratingSorter));
+	gtk_column_view_append_column(table, createColumn("Value", COLUMN_VALUE, NULL));
+	gtk_column_view_append_column(table, createColumn("Club", COLUMN_CLUB, NULL));
+	gtk_column_view_append_column(table, createColumn("Home rep", COLUMN_REPUTATION_HOME, NULL));
+	gtk_column_view_append_column(table, createColumn("Current rep", COLUMN_REPUTATION_CURRENT, NULL));
+	gtk_column_view_append_column(table, createColumn("World rep", COLUMN_REPUTATION_WORLD, NULL));
+
+	// Create store → sort model → selection model chain (once)
+	context.store = g_list_store_new(SEARCH_TYPE_PLAYER_ROW);
+	context.sortModel = gtk_sort_list_model_new(G_LIST_MODEL(context.store), NULL);
+	context.selection = gtk_single_selection_new(G_LIST_MODEL(context.sortModel));
+	gtk_column_view_set_model(table, GTK_SELECTION_MODEL(context.selection));
+	gtk_single_selection_set_autoselect(context.selection, false);
+
+	// Get the column view's sorter and attach it to the sort model
+	GtkSorter *viewSorter = gtk_column_view_get_sorter(table);
+	gtk_sort_list_model_set_sorter(context.sortModel, viewSorter);
 
 	playerTable_clear(table);
 	playerTable_populate(table, NULL);
 }
 
-GListStore *store = NULL;
-
 void playerTable_clear(const GtkColumnView *table) {
 	(void)table;
 
-	if (store != NULL) {
-		g_list_store_remove_all(store);
+	if (context.store != NULL) {
+		g_list_store_remove_all(context.store);
 	}
-
-	store = g_list_store_new(SEARCH_TYPE_PLAYER_ROW);
 }
 
 void playerTable_populate(GtkColumnView *table, const uint32_t *playerIds) {
@@ -497,13 +614,9 @@ void playerTable_populate(GtkColumnView *table, const uint32_t *playerIds) {
 			player,
 			NULL
 		);
-		g_list_store_append(store, row);
+		g_list_store_append(context.store, row);
 		g_object_unref(row);
 	}
-
-	GtkSingleSelection *selection = gtk_single_selection_new(G_LIST_MODEL(store));
-	gtk_column_view_set_model(table, GTK_SELECTION_MODEL(selection));
-	g_object_unref(selection);
 
 	GtkLabel *resultsCountLabel = GTK_LABEL(
 		GTK_WIDGET(gtk_builder_get_object(gameContext.builder, "label:results-count"))
@@ -515,3 +628,8 @@ void playerTable_populate(GtkColumnView *table, const uint32_t *playerIds) {
 	snprintf(resultCountString, 32, "%s result%c", formattedResults, playerCount != 1 ? 's' : '\0');
 	gtk_label_set_text(resultsCountLabel, resultCountString);
 }
+
+// TODO: there are some issues with Sort
+//   1. I can't find a way in the GTK API to show sort indicators (arrows) on column headers
+//   2. Sorting scrolls me to the currently selected row and I can't stop this
+//			I may need to switch to a callback-based approach so I can control what happens before/after the sort fn
