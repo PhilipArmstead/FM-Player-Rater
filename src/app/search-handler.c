@@ -93,13 +93,7 @@ void searchHandler_doSearch(bool refreshFilterCache) {
 		searchHandler_cacheFilters();
 	}
 
-	GtkAdjustment *adjustment = gtk_scrollable_get_vadjustment(GTK_SCROLLABLE(gameContext.table));
-	gtk_adjustment_set_value(adjustment, 0);
-
-	playerTable_populate(
-		gameContext.table,
-		search_findPlayers()
-	);
+	playerTable_populate(search_findPlayers());
 }
 
 void searchHandler_clearFilters(void) {

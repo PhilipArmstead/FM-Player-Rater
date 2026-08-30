@@ -11,7 +11,7 @@
 
 extern GameContext gameContext;
 
-static void runThreadedSearch(SearchContext *context);
+static void runThreadedSearch(SearchContext * context);
 
 void callbacks_OnClubNameChange(GtkEditable *editable, SearchDatalist *dataList) {
 	gameContext.filterOptions.filterMask &= ~(uint32_t)FILTER_HAS_CLUB;
@@ -116,7 +116,7 @@ static void runSearch(SearchContext *context) {
 	for (uint64_t i = 0; i < gameContext.clubCount && context->count < CLUB_SEARCH_LIMIT; i++) {
 		if (
 			g_str_match_string(searchValue, gameContext.clubs[i].name, TRUE)
-			|| g_str_match_string(searchValue, gameContext.clubs[i].shortName,TRUE)
+			|| g_str_match_string(searchValue, gameContext.clubs[i].shortName, TRUE)
 		) {
 			context->clubIndices[context->count] = i;
 			++context->count;
@@ -136,7 +136,7 @@ static void runSearch(SearchContext *context) {
 	}
 
 	const int64_t timeEnd = platform_getMicroseconds();
-	LOG_INFO("Searched %llu clubs in %llu microseconds", context->count, timeEnd - timeStart);
+	LOG_INFO("Searched %zu clubs in %zu microseconds", context->count, timeEnd - timeStart);
 
 	// Schedule UI update on the main thread
 	g_idle_add(updateUIWithResults, context);

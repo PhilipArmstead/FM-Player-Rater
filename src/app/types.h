@@ -64,8 +64,6 @@ typedef struct {
 	SearchDatalist *dataList;
 	DayMonthYear currentDate;
 	GtkBuilder *builder;
-	GtkColumnView *table; // TODO: group in to Table properties
-	GListStore *store;    //  with this
 	Club *clubs;
 	Nation *nations;
 	Player *players;

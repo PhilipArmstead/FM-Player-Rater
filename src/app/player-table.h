@@ -14,13 +14,7 @@ G_DECLARE_FINAL_TYPE(SearchPlayerRow, search_player_row, SEARCH, PLAYER_ROW, GOb
 struct _SearchPlayerRow {
 	GObject parent_instance;
 	Player *player;
-	uint8_t age;
-	uint8_t ca;
-	uint8_t pa;
-	uint8_t diff;
-	float rating;
 };
 
 void playerTable_init(void);
-void playerTable_clear(const GtkColumnView *table);
-void playerTable_populate(GtkColumnView *table, const uint32_t *playerIds);
+void playerTable_populate(const uint32_t *playerIds);

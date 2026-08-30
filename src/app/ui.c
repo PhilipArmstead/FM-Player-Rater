@@ -36,9 +36,6 @@ void ui_init(GtkApplication *app) {
 	gameContext.builder = context.builder;
 	gtk_window_set_application(GTK_WINDOW(context.window), GTK_APPLICATION(app));
 
-	// Cache table
-	gameContext.table = GTK_COLUMN_VIEW(GTK_WIDGET(gtk_builder_get_object(gameContext.builder, "table:player-list")));
-
 	#ifdef MOCKS_MODE
 	// In mock mode, we never have the process-connected callback run
 	runMultiThreadedCache();
@@ -521,7 +518,7 @@ static void onTagClick(GtkWidget *self) {
 	if (gameContext.filterOptions.filterMask) {
 		searchHandler_doSearch(false);
 	} else {
-		playerTable_populate(gameContext.table, NULL);
+		playerTable_populate(NULL);
 	}
 }
 

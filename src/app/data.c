@@ -132,7 +132,7 @@ void cacheNations(void) {
 	#endif
 
 	const int64_t timeEnd = platform_getMicroseconds();
-	LOG_INFO("Cached %d nations in %llu microseconds", nationCount, timeEnd - timeStart);
+	LOG_INFO("Cached %d nations in %zu microseconds", nationCount, timeEnd - timeStart);
 }
 
 void cacheClubs(void) {
@@ -187,7 +187,7 @@ void cacheClubs(void) {
 	#endif
 
 	const int64_t timeEnd = platform_getMicroseconds();
-	LOG_INFO("Cached %d clubs in %llu microseconds", gameContext.clubCount, timeEnd - timeStart);
+	LOG_INFO("Cached %d clubs in %zu microseconds", gameContext.clubCount, timeEnd - timeStart);
 }
 
 void cachePlayers(uint8_t half) {
@@ -225,7 +225,7 @@ void cachePlayers(uint8_t half) {
 	gameContext.playerCount -= missed;
 
 	const int64_t timeEnd = platform_getMicroseconds();
-	LOG_INFO("Cached %d players in %llu microseconds", end - start - missed, timeEnd - timeStart);
+	LOG_INFO("Cached %d players in %zu microseconds", end - start - missed, timeEnd - timeStart);
 }
 
 void runMultiThreadedCache(void) {

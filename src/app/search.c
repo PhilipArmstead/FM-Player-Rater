@@ -89,7 +89,7 @@ uint32_t *search_findPlayers(void) {
 	}
 
 	const int64_t timeEnd = platform_getMicroseconds();
-	LOG_INFO("Found %d players in %llu microseconds", vector_length(searchResults), timeEnd - timeStart);
+	LOG_INFO("Found %d players in %zu microseconds", vector_length(searchResults), timeEnd - timeStart);
 
 	return searchResults;
 }

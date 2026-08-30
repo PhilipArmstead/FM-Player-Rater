@@ -13,7 +13,7 @@ G_MODULE_EXPORT void callbacks_onFiltersClear(void) {
 	searchHandler_clearFilters();
 
 	ui_clearFilterTags();
-	playerTable_populate(gameContext.table, NULL);
+	playerTable_populate(NULL);
 }
 
 G_MODULE_EXPORT gboolean callbacks_onFiltersKeypress(

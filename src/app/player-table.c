@@ -5,6 +5,8 @@
 #include "app/ui.h"
 #include "app/helpers/formatter.h"
 #include "app/helpers/vector.h"
+#include "core/logger.h"
+#include "platform/platform.h"
 
 #include <glib.h>
 
@@ -12,8 +14,7 @@
 
 
 typedef struct {
-	GListStore *store;
-	GtkSortListModel *sortModel;
+	GtkColumnView *table;
 	GtkSingleSelection *selection;
 } PlayerTableContext;
 
@@ -56,26 +57,21 @@ typedef enum {
 
 static GParamSpec *properties[N_PROPS];
 
-static void search_player_row_set_property(GObject *object, guint propertyId, const GValue *value, GParamSpec *pspec) {
+static void search_player_row_set_property(
+	GObject *object,
+	const guint propertyId,
+	const GValue *value,
+	GParamSpec *pspec
+) {
 	SearchPlayerRow *self = SEARCH_PLAYER_ROW(object);
 	if (propertyId == PROP_PLAYER) {
 		self->player = (Player*)g_value_get_pointer(value);
-	} else if (propertyId == PROP_AGE) {
-		self->age = (uint8_t)g_value_get_int(value);
-	} else if (propertyId == PROP_CA) {
-		self->ca = (uint8_t)g_value_get_int(value);
-	} else if (propertyId == PROP_PA) {
-		self->pa = (uint8_t)g_value_get_int(value);
-	} else if (propertyId == PROP_DIFF) {
-		self->diff = (uint8_t)g_value_get_int(value);
-	} else if (propertyId == PROP_RATING) {
-		self->rating = g_value_get_float(value);
 	} else {
 		G_OBJECT_WARN_INVALID_PROPERTY_ID(object, propertyId, pspec);
 	}
 }
 
-static void search_player_row_get_property(GObject *object, guint propertyId, GValue *value, GParamSpec *pspec) {
+static void search_player_row_get_property(GObject *object, const guint propertyId, GValue *value, GParamSpec *pspec) {
 	const SearchPlayerRow *self = SEARCH_PLAYER_ROW(object);
 	if (propertyId == PROP_PLAYER) {
 		g_value_set_pointer(value, self->player);
@@ -161,7 +157,13 @@ static void search_player_row_class_init(SearchPlayerRowClass *klass) {
 	g_object_class_install_properties(object_class, N_PROPS, properties);
 }
 
-static void onRowClicked(GtkGestureClick *gesture, uint8_t clickCount, double x, double y, gpointer data) {
+static void onRowClicked(
+	const GtkGestureClick *gesture,
+	const uint8_t clickCount,
+	const double x,
+	const double y,
+	gpointer data
+) {
 	(void)gesture;
 	(void)x;
 	(void)y;
@@ -170,8 +172,7 @@ static void onRowClicked(GtkGestureClick *gesture, uint8_t clickCount, double x,
 	const SearchPlayerRow *row = gtk_list_item_get_item(listItem);
 
 	if (row != NULL && row->player != NULL && clickCount == 2) {
-		const WindowContext context = createPlayerInfoWindow();
-		renderPlayerInfoWindow(context, row->player);
+		renderPlayerInfoWindow(createPlayerInfoWindow(), row->player);
 	}
 }
 
@@ -181,7 +182,7 @@ static void bindClickHandler(GtkWidget *widget, GtkListItem *item) {
 	g_signal_connect(gesture, "pressed", G_CALLBACK(onRowClicked), item);
 }
 
-static void setupTextLabel(GtkSignalListItemFactory *factory, GtkListItem *item, gpointer data) {
+static void setupTextLabel(const GtkSignalListItemFactory *factory, GtkListItem *item, gpointer data) {
 	(void)factory;
 	(void)data;
 
@@ -191,7 +192,7 @@ static void setupTextLabel(GtkSignalListItemFactory *factory, GtkListItem *item,
 	bindClickHandler(label, item);
 }
 
-static void setupBox(GtkSignalListItemFactory *factory, GtkListItem *item, gpointer data) {
+static void setupBox(const GtkSignalListItemFactory *factory, GtkListItem *item, gpointer data) {
 	(void)factory;
 	(void)data;
 
@@ -201,24 +202,18 @@ static void setupBox(GtkSignalListItemFactory *factory, GtkListItem *item, gpoin
 	bindClickHandler(box, item);
 }
 
-static void printNumeric(GtkWidget *label, int64_t value) {
+static void printNumeric(GtkWidget *label, const int64_t value) {
 	gchar buffer[32];
-	g_snprintf(buffer, sizeof(buffer), "%llu", value);
+	g_snprintf(buffer, sizeof(buffer), "%zu", value);
 	if (value > 999) {
 		formatter_printNumber(buffer);
 	}
 	gtk_label_set_text(GTK_LABEL(label), buffer);
 }
 
-static void printPercentage(GtkWidget *label, float value) {
-	char buffer[8];
-	snprintf(buffer, sizeof(buffer), "%.2f%%", value);
-	gtk_label_set_text(GTK_LABEL(label), buffer);
-}
-
 static void printCurrency(GtkWidget *label, uint64_t value) {
 	gchar buffer[32];
-	g_snprintf(buffer, sizeof(buffer), "%llu", value);
+	g_snprintf(buffer, sizeof(buffer), "%zu", value);
 	formatter_printCurrency(buffer);
 	gtk_label_set_xalign(GTK_LABEL(label), 0);
 	gtk_label_set_text(GTK_LABEL(label), buffer);
@@ -382,7 +377,7 @@ static GString *formatPlayerPositions(const uint8_t *positions) {
 	return str;
 }
 
-static void bindCellValue(GtkSignalListItemFactory *factory, GtkListItem *item, uint8_t columnId) {
+static void bindCellValue(const GtkSignalListItemFactory *factory, GtkListItem *item, const uint8_t columnId) {
 	(void)factory;
 
 	GtkWidget *label = gtk_list_item_get_child(GTK_LIST_ITEM(item));
@@ -456,7 +451,7 @@ static void bindCellValue(GtkSignalListItemFactory *factory, GtkListItem *item, 
 	}
 }
 
-static void bindStatusValue(GtkSignalListItemFactory *factory, GtkListItem *item, gpointer data) {
+static void bindStatusValue(const GtkSignalListItemFactory *factory, GtkListItem *item, gpointer data) {
 	(void)factory;
 	(void)data;
 
@@ -484,7 +479,7 @@ static void bindStatusValue(GtkSignalListItemFactory *factory, GtkListItem *item
 	}
 }
 
-static void bindNationalitiesValue(GtkSignalListItemFactory *factory, GtkListItem *item, gpointer data) {
+static void bindNationalitiesValue(const GtkSignalListItemFactory *factory, GtkListItem *item, gpointer data) {
 	(void)factory;
 	(void)data;
 
@@ -518,7 +513,7 @@ static void bindNationalitiesValue(GtkSignalListItemFactory *factory, GtkListIte
 	}
 }
 
-static GtkColumnViewColumn *createColumn(const char *title, uint8_t columnType, GtkSorter *sorter) {
+static GtkColumnViewColumn *createColumn(const char *title, const uint8_t columnType, GtkSorter *sorter) {
 	GtkListItemFactory *factory = gtk_signal_list_item_factory_new();
 	if (columnType == COLUMN_NATIONALITIES) {
 		g_signal_connect(factory, "setup", G_CALLBACK(setupBox), NULL);
@@ -568,7 +563,11 @@ void playerTable_init(void) {
 		)
 	);
 
-	GtkColumnView *table = gameContext.table;
+	GtkColumnView *table = GTK_COLUMN_VIEW(GTK_WIDGET(gtk_builder_get_object(gameContext.builder, "table:player-list")));
+	context.table = table;
+
+	GtkColumnViewColumn *ratingColumn = createColumn("Rating", COLUMN_RATING, ratingSorter);
+
 	gtk_column_view_append_column(table, createColumn("", COLUMN_NATIONALITIES, NULL));
 	gtk_column_view_append_column(table, createColumn("Name", COLUMN_NAME, NULL));
 	gtk_column_view_append_column(table, createColumn("Age", COLUMN_AGE, ageSorter));
@@ -577,65 +576,74 @@ void playerTable_init(void) {
 	gtk_column_view_append_column(table, createColumn("PA", COLUMN_PA, paSorter));
 	gtk_column_view_append_column(table, createColumn("Diff", COLUMN_CA_PA_DELTA, diffSorter));
 	gtk_column_view_append_column(table, createColumn("Status", COLUMN_STATUS, NULL));
-	gtk_column_view_append_column(table, createColumn("Rating", COLUMN_RATING, ratingSorter));
+	gtk_column_view_append_column(table, ratingColumn);
 	gtk_column_view_append_column(table, createColumn("Value", COLUMN_VALUE, NULL));
 	gtk_column_view_append_column(table, createColumn("Club", COLUMN_CLUB, NULL));
 	gtk_column_view_append_column(table, createColumn("Home rep", COLUMN_REPUTATION_HOME, NULL));
 	gtk_column_view_append_column(table, createColumn("Current rep", COLUMN_REPUTATION_CURRENT, NULL));
 	gtk_column_view_append_column(table, createColumn("World rep", COLUMN_REPUTATION_WORLD, NULL));
 
-	// Create store → sort model → selection model chain (once)
-	context.store = g_list_store_new(SEARCH_TYPE_PLAYER_ROW);
-	context.sortModel = gtk_sort_list_model_new(G_LIST_MODEL(context.store), NULL);
-	context.selection = gtk_single_selection_new(G_LIST_MODEL(context.sortModel));
-	gtk_column_view_set_model(table, GTK_SELECTION_MODEL(context.selection));
-	gtk_single_selection_set_autoselect(context.selection, false);
+	context.selection = NULL;
+	playerTable_populate(NULL);
 
-	// Get the column view's sorter and attach it to the sort model
-	GtkSorter *viewSorter = gtk_column_view_get_sorter(table);
-	gtk_sort_list_model_set_sorter(context.sortModel, viewSorter);
-
-	playerTable_clear(table);
-	playerTable_populate(table, NULL);
+	gtk_column_view_sort_by_column(context.table, ratingColumn, GTK_SORT_DESCENDING);
 }
 
-void playerTable_clear(const GtkColumnView *table) {
-	(void)table;
-
-	if (context.store != NULL) {
-		g_list_store_remove_all(context.store);
-	}
+static SearchPlayerRow *search_player_row_new(Player *player) {
+	return g_object_new(SEARCH_TYPE_PLAYER_ROW, "player", player,NULL);
 }
 
-void playerTable_populate(GtkColumnView *table, const uint32_t *playerIds) {
-	playerTable_clear(table);
+void playerTable_populate(const uint32_t *playerIds) {
+	const int64_t timeStart = platform_getMicroseconds();
+
+	GtkAdjustment *adjustment = gtk_scrollable_get_vadjustment(GTK_SCROLLABLE(context.table));
+	gtk_adjustment_set_value(adjustment, 0);
 
 	const size_t playerCount = vector_length(playerIds);
 
 	GtkWidget *clearAll = GTK_WIDGET(gtk_builder_get_object(gameContext.builder, "button:clear-all"));
 	gtk_widget_set_visible(clearAll, playerCount > 0);
 
+	GListStore *store = g_list_store_new(SEARCH_TYPE_PLAYER_ROW);
 	for (size_t i = 0; i < playerCount; ++i) {
 		const Player *player = &gameContext.players[playerIds[i]];
-		SearchPlayerRow *row = g_object_new(
-			SEARCH_TYPE_PLAYER_ROW,
-			"player",
-			player,
-			NULL
-		);
-		g_list_store_append(context.store, row);
+		SearchPlayerRow *row = search_player_row_new((Player*)player);
+		g_list_store_append(store, row);
 		g_object_unref(row);
 	}
+
+	GtkSorter *sorter = g_object_ref(gtk_column_view_get_sorter(context.table));
+	GtkSortListModel *sortModel = gtk_sort_list_model_new(G_LIST_MODEL(store), sorter);
+	GtkSingleSelection *newSelection = gtk_single_selection_new(G_LIST_MODEL(sortModel));
+	gtk_single_selection_set_autoselect(newSelection,false);
+
+	GtkSingleSelection *oldSelection = context.selection;
+
+	gtk_column_view_set_model(context.table, GTK_SELECTION_MODEL(newSelection));
+
+	if (oldSelection != NULL) g_object_unref(oldSelection);
+
+	context.selection = newSelection;
 
 	GtkLabel *resultsCountLabel = GTK_LABEL(
 		GTK_WIDGET(gtk_builder_get_object(gameContext.builder, "label:results-count"))
 	);
 	char resultCountString[32] = {0};
 	char formattedResults[12] = {0};
-	snprintf(formattedResults, 12, "%llu", playerCount);
+	snprintf(formattedResults, 12, "%zu", playerCount);
 	formatter_printNumber(formattedResults);
-	snprintf(resultCountString, 32, "%s result%c", formattedResults, playerCount != 1 ? 's' : '\0');
+	snprintf(
+		resultCountString,
+		sizeof(resultCountString),
+		"%s result%c",
+		formattedResults,
+		playerCount != 1 ? 's' : '\0'
+	);
 	gtk_label_set_text(resultsCountLabel, resultCountString);
+
+	const int64_t timeEnd = platform_getMicroseconds();
+
+	LOG_INFO("Rendered %zu players in %lld microseconds", playerCount, (long long)(timeEnd - timeStart));
 }
 
 // TODO: there are some issues with Sort
