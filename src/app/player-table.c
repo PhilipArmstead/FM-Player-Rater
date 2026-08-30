@@ -8,6 +8,8 @@
 
 #include <glib.h>
 
+#include "maths.h"
+
 
 typedef struct {
 	GListStore *store;
@@ -210,7 +212,6 @@ static void printNumeric(GtkWidget *label, int64_t value) {
 
 static void printPercentage(GtkWidget *label, float value) {
 	char buffer[8];
-	// TODO: getScaledHSL(getBestRatingForFilteredPositions(player))
 	snprintf(buffer, sizeof(buffer), "%.2f%%", value);
 	gtk_label_set_text(GTK_LABEL(label), buffer);
 }
@@ -424,7 +425,15 @@ static void bindCellValue(GtkSignalListItemFactory *factory, GtkListItem *item, 
 			printNumeric(label, player->pa - player->ca);
 			break;
 		case COLUMN_RATING:
-			printPercentage(label, player->ratings[0].value);
+			const float rating = player->ratings[0].value;
+			#define MAX_RATING_VALUE 120.f
+			const uint8_t value = (uint8_t)((rating < MAX_RATING_VALUE ? rating / MAX_RATING_VALUE : 1.f) * 120);
+
+			char colour[9];
+			hueToHex(value, colour);
+			char *buffer = g_markup_printf_escaped("<span foreground=\"%s\">%.2f%%</span>", colour, rating);
+			gtk_label_set_markup(GTK_LABEL(label), buffer);
+			g_free(buffer);
 			break;
 		case COLUMN_VALUE:
 			printCurrency(label, player->guideValue);

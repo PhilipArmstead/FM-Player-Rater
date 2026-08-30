@@ -243,12 +243,3 @@ headerbar .title {
 	background-color: #f8f9fa;
 	padding: 6px 0;
 }
-
-
-columnview > header {
-	background: #222;
-}
-
-columnview > header > * {
-	color: red;
-}
