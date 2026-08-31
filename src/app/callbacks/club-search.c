@@ -168,16 +168,14 @@ static void runThreadedSearch(SearchContext *context) {
 		free(context);
 	}
 	#else
-	for (i = 0; i < THREAD_COUNT; i++) {
-		if (pthread_create(
-			NULL,
-			NULL,
-			threadFunction,
-			context
-		) != 0) {
-			LOG_ERROR("Failed to create thread %d", i + 1);
-			free(context);
-		}
+	if (pthread_create(
+		NULL,
+		NULL,
+		threadFunction,
+		context
+	) != 0) {
+		LOG_ERROR("Failed to create thread");
+		free(context);
 	}
 	#endif
 }

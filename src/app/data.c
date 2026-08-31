@@ -216,8 +216,12 @@ void cachePlayers(uint8_t half) {
 	}
 
 	#else
-	const uint16_t end = 900;
-	const uint16_t start = 900;
+	const uint16_t end = 1;
+	const uint16_t start = 0;
+	const Player playerVini = PLAYER_VINI;
+	memcpy(&gameContext.players[0], &playerVini, sizeof(Player));
+	const Player playerJeff = PLAYER_JEFF;
+	memcpy(&gameContext.players[1], &playerJeff, sizeof(Player));
 	#endif
 
 	// TODO: use vector_reserve to shrink the size of Players

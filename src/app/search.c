@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 
 #include "search.h"
-
+#include "app/mocks.h"
 #include "core/logger.h"
 #include "helpers/vector.h"
 #include "platform/platform.h"
@@ -14,9 +14,14 @@ extern GameContext gameContext;
 uint32_t *search_findPlayers(void) {
 	const int64_t timeStart = platform_getMicroseconds();
 
+	uint32_t *searchResults = NULL;
+
+#ifdef PLAYER_BY_ID
+	vector_push(searchResults, 0);
+	vector_push(searchResults, 1);
+#else
 	const FilterOptions options = gameContext.filterOptions;
 
-	uint32_t *searchResults = NULL;
 	for (uint32_t i = 0; i < gameContext.playerCount; ++i) {
 		const Player *player = &gameContext.players[i];
 
@@ -87,6 +92,7 @@ uint32_t *search_findPlayers(void) {
 
 		vector_push(searchResults, i);
 	}
+#endif
 
 	const int64_t timeEnd = platform_getMicroseconds();
 	LOG_INFO("Found %d players in %zu microseconds", vector_length(searchResults), timeEnd - timeStart);
