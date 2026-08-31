@@ -16,6 +16,8 @@
 typedef struct {
 	GtkColumnView *table;
 	GtkSingleSelection *selection;
+	double savedScrollValue;
+	gulong scrollGuardId;
 } PlayerTableContext;
 
 static PlayerTableContext context = {0};
@@ -513,6 +515,55 @@ static void bindNationalitiesValue(const GtkSignalListItemFactory *factory, GtkL
 	}
 }
 
+// One-shot correction: the sort makes GTK scroll the focused row into view, and
+// that happens on an indeterminate later frame — so instead of guessing when,
+// we react. The first time the scroll value changes after a sort, we snap it
+// back to the saved position and immediately disconnect, so normal user
+// scrolling afterwards is untouched.
+static void onScrollGuard(GtkAdjustment *adjustment, gpointer data) {
+	(void)data;
+
+	if (context.scrollGuardId != 0) {
+		g_signal_handler_disconnect(adjustment, context.scrollGuardId);
+		context.scrollGuardId = 0;
+	}
+
+	const double upper = gtk_adjustment_get_upper(adjustment);
+	const double pageSize = gtk_adjustment_get_page_size(adjustment);
+	const double maxValue = upper - pageSize;
+	gtk_adjustment_set_value(adjustment, CLAMP(context.savedScrollValue, 0, maxValue));
+}
+
+// Runs when the user clicks a column header to change the sort. This fires
+// before the GtkSortListModel reorders (we connect first), so we snapshot the
+// current scroll position here and arm a one-shot guard that undoes GTK's
+// follow-the-focused-row scroll whenever it lands.
+static void onSorterChanged(GtkSorter *sorter, const GtkSorterChange change, gpointer data) {
+	(void)sorter;
+	(void)change;
+	(void)data;
+
+	if (context.table == NULL) {
+		return;
+	}
+
+	GtkAdjustment *adjustment = gtk_scrollable_get_vadjustment(GTK_SCROLLABLE(context.table));
+	if (adjustment == NULL) {
+		return;
+	}
+
+	context.savedScrollValue = gtk_adjustment_get_value(adjustment);
+
+	if (context.scrollGuardId == 0) {
+		context.scrollGuardId = g_signal_connect(
+			adjustment,
+			"value-changed",
+			G_CALLBACK(onScrollGuard),
+			NULL
+		);
+	}
+}
+
 static GtkColumnViewColumn *createColumn(const char *title, const uint8_t columnType, GtkSorter *sorter) {
 	GtkListItemFactory *factory = gtk_signal_list_item_factory_new();
 	if (columnType == COLUMN_NATIONALITIES) {
@@ -584,6 +635,12 @@ void playerTable_init(void) {
 	gtk_column_view_append_column(table, createColumn("World rep", COLUMN_REPUTATION_WORLD, NULL));
 
 	context.selection = NULL;
+
+	GtkSorter *columnViewSorter = gtk_column_view_get_sorter(context.table);
+	if (columnViewSorter != NULL) {
+		g_signal_connect(columnViewSorter, "changed", G_CALLBACK(onSorterChanged), NULL);
+	}
+
 	playerTable_populate(NULL);
 
 	gtk_column_view_sort_by_column(context.table, ratingColumn, GTK_SORT_DESCENDING);
@@ -645,7 +702,3 @@ void playerTable_populate(const uint32_t *playerIds) {
 
 	LOG_INFO("Rendered %zu players in %lld microseconds", playerCount, (long long)(timeEnd - timeStart));
 }
-
-// TODO: there are some issues with Sort
-//   1. Sorting scrolls me to the currently selected row and I can't stop this
-//			I may need to switch to a callback-based approach so I can control what happens before/after the sort fn
