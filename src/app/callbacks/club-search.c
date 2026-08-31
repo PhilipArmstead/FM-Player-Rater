@@ -168,14 +168,12 @@ static void runThreadedSearch(SearchContext *context) {
 		free(context);
 	}
 	#else
-	if (pthread_create(
-		NULL,
-		NULL,
-		threadFunction,
-		context
-	) != 0) {
-		LOG_ERROR("Failed to create thread");
+	pthread_t thread;
+	if (pthread_create(&thread, NULL, threadFunction, context) != 0) {
+		LOG_ERROR("Failed to create club-search thread");
 		free(context);
+	} else {
+		pthread_detach(thread);
 	}
 	#endif
 }

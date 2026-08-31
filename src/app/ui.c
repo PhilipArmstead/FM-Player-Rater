@@ -46,8 +46,7 @@ void ui_init(GtkApplication *app) {
 	update(NULL);
 
 	// Create datalist box
-	SearchDatalist *dataList = gameContext.dataList;
-	dataList = g_new0(SearchDatalist, 1);
+	SearchDatalist *dataList = g_new0(SearchDatalist, 1);
 
 	dataList->entry = GTK_SEARCH_ENTRY(gtk_search_entry_new());
 	dataList->popover = GTK_POPOVER(gtk_popover_new());
@@ -159,7 +158,7 @@ void updateInGameDate(void) {
 
 	#ifndef MOCKS_MODE
 	if (processContext.handle == NULL || gameContext.currentDate.year <= 1970) {
-		gtk_label_set_text(dateLabel, "\0");
+		gtk_label_set_text(dateLabel, "");
 		return;
 	}
 	#endif
@@ -271,14 +270,14 @@ void renderPlayerInfoWindow(WindowContext context, const Player *player) {
 		gtk_label_set_text(clubNameLabel, club.name);
 	}
 
-	float attr_weights[ATTRIBUTE_COUNT];
-	float pers_weights[8];
+	float attrWeights[ATTRIBUTE_COUNT];
+	float persWeights[8];
 	float totalWeight = 1.0f;
-	getWeightsForPosition(player->ratings[0].position, attr_weights, pers_weights, &totalWeight);
+	getWeightsForPosition(player->ratings[0].position, attrWeights, persWeights, &totalWeight);
 	float max = 0;
 	for (int i = 0; i < ATTRIBUTE_COUNT; ++i) {
-		if (attr_weights[i] > max) {
-			max = attr_weights[i];
+		if (attrWeights[i] > max) {
+			max = attrWeights[i];
 		}
 	}
 
@@ -293,9 +292,9 @@ void renderPlayerInfoWindow(WindowContext context, const Player *player) {
 		gtk_label_set_text(label, buffer);																									\
 		snprintf(widgetId, 64, "row:%s", id);																								\
 		widget = GTK_WIDGET(gtk_builder_get_object(context.builder, widgetId));							\
-		if (attr_weights[attributeIndex] > max * 0.5f) {																		\
+		if (attrWeights[attributeIndex] > max * 0.5f) {																		\
 			gtk_widget_add_css_class(widget, "attribute-row--high");													\
-		} else if (attr_weights[attributeIndex] > max * 0.15f) {														\
+		} else if (attrWeights[attributeIndex] > max * 0.15f) {														\
 			gtk_widget_add_css_class(widget, "attribute-row--mid");														\
 		}																																										\
 	}
@@ -343,7 +342,7 @@ void renderPlayerInfoWindow(WindowContext context, const Player *player) {
 		setRowTextAndHighlight("attribute:goalkeeper:eccentricity", ATTR_ECC);
 		setRowTextAndHighlight("attribute:goalkeeper:first-touch", ATTR_FIR);
 		setRowTextAndHighlight("attribute:goalkeeper:handling", ATTR_HAN);
-		setRowTextAndHighlight("attribute:goalkeeper:kicking", ATTR_HEA);
+		setRowTextAndHighlight("attribute:goalkeeper:kicking", ATTR_KIC);
 		setRowTextAndHighlight("attribute:goalkeeper:one-on-ones", ATTR_ONE);
 		setRowTextAndHighlight("attribute:goalkeeper:passing", ATTR_PAS);
 		setRowTextAndHighlight("attribute:goalkeeper:punching-tendency", ATTR_TTP);
@@ -352,7 +351,7 @@ void renderPlayerInfoWindow(WindowContext context, const Player *player) {
 		setRowTextAndHighlight("attribute:goalkeeper:throwing", ATTR_THR);
 	}
 
-	setRowTextAndHighlight("attribute:mental:aggression", ATTR_COR);
+	setRowTextAndHighlight("attribute:mental:aggression", ATTR_AGG);
 	setRowTextAndHighlight("attribute:mental:anticipation", ATTR_ANT);
 	setRowTextAndHighlight("attribute:mental:bravery", ATTR_BRA);
 	setRowTextAndHighlight("attribute:mental:concentration", ATTR_CNT);

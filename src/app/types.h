@@ -31,15 +31,15 @@
 #define FILTER_HAS_MIN_AGE (1 << 15)
 #define FILTER_HAS_MAX_AGE (1 << 16)
 
-#define POSITION_MASK_GK (1 << 0),
-#define POSITION_MASK_FB (1 << 1),
-#define POSITION_MASK_CB (1 << 2),
-#define POSITION_MASK_WB (1 << 3),
-#define POSITION_MASK_DM (1 << 4),
-#define POSITION_MASK_MC (1 << 5),
-#define POSITION_MASK_W (1 << 6),
-#define POSITION_MASK_AM (1 << 7),
-#define POSITION_MASK_ST (1 << 8),
+#define POSITION_MASK_GK (1 << 0)
+#define POSITION_MASK_FB (1 << 1)
+#define POSITION_MASK_CB (1 << 2)
+#define POSITION_MASK_WB (1 << 3)
+#define POSITION_MASK_DM (1 << 4)
+#define POSITION_MASK_MC (1 << 5)
+#define POSITION_MASK_W (1 << 6)
+#define POSITION_MASK_AM (1 << 7)
+#define POSITION_MASK_ST (1 << 8)
 
 typedef struct {
 	int64_t clubIndex;

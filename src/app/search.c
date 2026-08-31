@@ -54,26 +54,25 @@ uint32_t *search_findPlayers(void) {
 		}
 
 		if (options.positions > 0) {
-			#define MINIMUM_POSITIONAL_PROFICIENCY 15
 			bool hasPosition = false;
 			if (
-				(options.positions & POSITION_GROUPED_GK && player->positions[POSITION_GROUPED_GK] >=
+				(options.positions & POSITION_MASK_GK && player->positions[POSITION_GROUPED_GK] >=
 					MINIMUM_POSITIONAL_PROFICIENCY) ||
-				(options.positions & POSITION_GROUPED_FB && player->positions[POSITION_GROUPED_FB] >=
+				(options.positions & POSITION_MASK_FB && player->positions[POSITION_GROUPED_FB] >=
 					MINIMUM_POSITIONAL_PROFICIENCY) ||
-				(options.positions & POSITION_GROUPED_CB && player->positions[POSITION_GROUPED_CB] >=
+				(options.positions & POSITION_MASK_CB && player->positions[POSITION_GROUPED_CB] >=
 					MINIMUM_POSITIONAL_PROFICIENCY) ||
-				(options.positions & POSITION_GROUPED_WB && player->positions[POSITION_GROUPED_WB] >=
+				(options.positions & POSITION_MASK_WB && player->positions[POSITION_GROUPED_WB] >=
 					MINIMUM_POSITIONAL_PROFICIENCY) ||
-				(options.positions & POSITION_GROUPED_DM && player->positions[POSITION_GROUPED_DM] >=
+				(options.positions & POSITION_MASK_DM && player->positions[POSITION_GROUPED_DM] >=
 					MINIMUM_POSITIONAL_PROFICIENCY) ||
-				(options.positions & POSITION_GROUPED_MC && player->positions[POSITION_GROUPED_MC] >=
+				(options.positions & POSITION_MASK_MC && player->positions[POSITION_GROUPED_MC] >=
 					MINIMUM_POSITIONAL_PROFICIENCY) ||
-				(options.positions & POSITION_GROUPED_W && player->positions[POSITION_GROUPED_W] >=
+				(options.positions & POSITION_MASK_W && player->positions[POSITION_GROUPED_W] >=
 					MINIMUM_POSITIONAL_PROFICIENCY) ||
-				(options.positions & POSITION_GROUPED_AM && player->positions[POSITION_GROUPED_AM] >=
+				(options.positions & POSITION_MASK_AM && player->positions[POSITION_GROUPED_AM] >=
 					MINIMUM_POSITIONAL_PROFICIENCY) ||
-				(options.positions & POSITION_GROUPED_ST && player->positions[POSITION_GROUPED_ST] >=
+				(options.positions & POSITION_MASK_ST && player->positions[POSITION_GROUPED_ST] >=
 					MINIMUM_POSITIONAL_PROFICIENCY)
 			) {
 				hasPosition = true;

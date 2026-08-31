@@ -57,12 +57,12 @@ static inline size_t vector__allocateSize(size_t elementSize, size_t capacity) {
 		}																																							\
 		Header *header = (Header*)(vector) - 1;																				\
 		if (header->count >= header->capacity) {																			\
-			size_t new_capacity = header->capacity * 2;																	\
-			Header *new_header =																												\
-				realloc(header, vector__allocateSize(sizeof(*(vector)), new_capacity));		\
-			if (new_header == NULL) VECTOR__OOM();																			\
-			header = new_header;																												\
-			header->capacity = new_capacity;																						\
+			size_t newCapacity = header->capacity * 2;																	\
+			Header *newHeader =																												\
+				realloc(header, vector__allocateSize(sizeof(*(vector)), newCapacity));		\
+			if (newHeader == NULL) VECTOR__OOM();																			\
+			header = newHeader;																												\
+			header->capacity = newCapacity;																						\
 			(vector) = (void*)(header + 1);																							\
 		}																																							\
 		(vector)[header->count++] = (x);																							\
@@ -93,10 +93,10 @@ static inline size_t vector__allocateSize(size_t elementSize, size_t capacity) {
 		} else {																																				\
 			Header *header = (Header*)(vector) - 1;																				\
 			if (header->capacity < need) {																								\
-				Header *new_header =																												\
+				Header *newHeader =																												\
 					realloc(header, vector__allocateSize(sizeof(*(vector)), need));						\
-				if (new_header == NULL) VECTOR__OOM();																			\
-				header = new_header;																												\
+				if (newHeader == NULL) VECTOR__OOM();																			\
+				header = newHeader;																												\
 				header->capacity = need;																										\
 				(vector) = (void*)(header + 1);																							\
 			}																																							\

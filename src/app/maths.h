@@ -23,7 +23,7 @@ static inline uint8_t convertTo20Scale(const uint8_t value) {
 }
 
 
-static void hueToHex(double hue, char hex[8]) {
+static inline void hueToHex(double hue, char hex[8]) {
 	hue = fmod(hue, 360.0);
 	if (hue < 0.0) {
 		hue += 360.0;

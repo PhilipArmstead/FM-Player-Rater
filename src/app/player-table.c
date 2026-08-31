@@ -406,12 +406,13 @@ static void bindCellValue(const GtkSignalListItemFactory *factory, GtkListItem *
 		case COLUMN_AGE:
 			printNumeric(label, player->age);
 			break;
-		case COLUMN_POSITIONS:
+		case COLUMN_POSITIONS: {
 			GString *str = formatPlayerPositions(row->player->positions);
 			gtk_label_set_text(GTK_LABEL(label), str->str);
 			gtk_label_set_xalign(GTK_LABEL(label), 0);
 			g_string_free(str, TRUE);
 			break;
+		}
 		case COLUMN_CA:
 			printNumeric(label, player->ca);
 			break;
@@ -421,9 +422,8 @@ static void bindCellValue(const GtkSignalListItemFactory *factory, GtkListItem *
 		case COLUMN_CA_PA_DELTA:
 			printNumeric(label, player->pa - player->ca);
 			break;
-		case COLUMN_RATING:
+		case COLUMN_RATING: {
 			const float rating = player->ratings[0].value;
-			#define MAX_RATING_VALUE 120.f
 			const uint8_t value = (uint8_t)((rating < MAX_RATING_VALUE ? rating / MAX_RATING_VALUE : 1.f) * 120);
 
 			char colour[9];
@@ -432,12 +432,15 @@ static void bindCellValue(const GtkSignalListItemFactory *factory, GtkListItem *
 			gtk_label_set_markup(GTK_LABEL(label), buffer);
 			g_free(buffer);
 			break;
+		}
 		case COLUMN_VALUE:
 			printCurrency(label, player->guideValue);
 			break;
 		case COLUMN_CLUB:
-			gtk_label_set_text(GTK_LABEL(label), gameContext.clubs[row->player->clubIndex].shortName);
-			gtk_label_set_xalign(GTK_LABEL(label), 0);
+			if (row->player->clubIndex >= 0) {
+				gtk_label_set_text(GTK_LABEL(label), gameContext.clubs[row->player->clubIndex].shortName);
+				gtk_label_set_xalign(GTK_LABEL(label), 0);
+			}
 			break;
 		case COLUMN_REPUTATION_HOME:
 			printNumeric(label, player->homeReputation);
@@ -692,9 +695,8 @@ void playerTable_populate(const uint32_t *playerIds) {
 	snprintf(
 		resultCountString,
 		sizeof(resultCountString),
-		"%s result%c",
-		formattedResults,
-		playerCount != 1 ? 's' : '\0'
+		playerCount == 1 ? "1 result" : "%s results",
+		formattedResults
 	);
 	gtk_label_set_text(resultsCountLabel, resultCountString);
 

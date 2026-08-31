@@ -14,6 +14,9 @@
 typedef HANDLE thread_t;
 typedef HANDLE event_t;
 #else
+#include <pthread.h>
+#include <semaphore.h>
+
 typedef pthread_t thread_t;
 typedef sem_t event_t;
 #endif

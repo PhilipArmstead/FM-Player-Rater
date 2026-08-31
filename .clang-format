@@ -1,0 +1,33 @@
+# SPDX-FileCopyrightText: © 2026 Phil Armstead <philarmstead@mailbox.org>
+# SPDX-License-Identifier: GPL-3.0-or-later
+---
+Language: C
+BasedOnStyle: LLVM
+
+# Indentation: hard tabs, as used throughout src/.
+UseTab: Always
+TabWidth: 2
+IndentWidth: 2
+ContinuationIndentWidth: 2
+
+# Braces: K&R / attached ("if (...) {" on the same line).
+BreakBeforeBraces: Attach
+
+# Pointers/references bind to the name: "void *handle".
+PointerAlignment: Right
+DerivePointerAlignment: false
+
+# Preserve the codebase's existing manual line wrapping instead of reflowing.
+ColumnLimit: 0
+
+# Control statements get a space before the paren; calls do not.
+SpaceBeforeParens: ControlStatements
+
+IndentCaseLabels: true
+AllowShortFunctionsOnASingleLine: None
+AllowShortIfStatementsOnASingleLine: "false"
+AllowShortLoopsOnASingleLine: false
+AllowShortCaseLabelsOnASingleLine: true
+SortIncludes: "true"
+KeepEmptyLinesAtTheStartOfBlocks: false
+MaxEmptyLinesToKeep: 2

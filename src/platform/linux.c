@@ -31,7 +31,10 @@ bool readFromMemory(void *handle, uintptr_t address, size_t length, uint8_t *byt
 	if (pread((int)(intptr_t)handle, bytes, length, (off_t)address) != (ssize_t)length) {
 		memset(bytes, 0, length);
 		platform_consoleWriteError("Failed to read memory\n", LogLevelError);
+		return false;
 	}
+
+	return true;
 }
 
 uint8_t readByte(void *handle, uintptr_t address) {

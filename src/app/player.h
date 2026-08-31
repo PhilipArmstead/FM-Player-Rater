@@ -12,7 +12,7 @@ uint32_t getCurrentPersonUniqueId(const ProcessContext *processContext);
 Player getPlayerById(const ProcessContext *processContext, uint32_t uniqueId);
 void getWeightsForPosition(
 	PositionGrouped position,
-	float out_attr[ATTRIBUTE_COUNT],
-	float out_personality[8],
-	float *out_weight
+	float outAttr[ATTRIBUTE_COUNT],
+	float outPersonality[8],
+	float *outWeight
 );

@@ -11,6 +11,7 @@
 #include "platform/platform.h"
 
 #include <string.h>
+#include <stdlib.h>
 
 
 extern ProcessContext processContext;
@@ -33,20 +34,15 @@ static DWORD WINAPI threadFunction(const LPVOID arg) {
 			break;
 	}
 
-	WaitForSingleObject(threads[0], 0);
-	WaitForSingleObject(threads[1], 0);
-	WaitForSingleObject(threads[2], 0);
-	WaitForSingleObject(threads[3], 0);
-
+	// Workers must not join each other; runMultiThreadedCache() owns the join.
 	return 0;
 }
 #else
 #include <pthread.h>
-#include <semaphore.h>
 
 
 static void *threadFunction(void *arg) {
-	int func_num = (int)(intptr_t)arg;
+	const int func_num = (int)(intptr_t)arg;
 
 	switch (func_num) {
 		case 1: cacheClubs();
@@ -59,12 +55,7 @@ static void *threadFunction(void *arg) {
 			break;
 	}
 
-	// Check if all threads are done
-	pthread_tryjoin_np(threads[0], NULL);
-	pthread_tryjoin_np(threads[1], NULL);
-	pthread_tryjoin_np(threads[2], NULL);
-	pthread_tryjoin_np(threads[3], NULL);
-
+	// Workers must not join each other; runMultiThreadedCache() owns the join.
 	return NULL;
 }
 #endif
@@ -192,8 +183,7 @@ void cacheClubs(void) {
 
 void cachePlayers(uint8_t half) {
 	const int64_t timeStart = platform_getMicroseconds();
-
-	uint64_t missed = 0;
+	uint64_t cached = 0;
 
 	#ifndef MOCKS_MODE
 	const uint64_t halfCount = (gameContext.playerCount - 1) / 2;
@@ -207,29 +197,49 @@ void cachePlayers(uint8_t half) {
 		readFromMemory(processContext.handle, playerStart + i * PLAYER_LIST_STRIDE, 4, bytes);
 		const uint32_t playerAddress = (uint32_t)hexBytesToInt(bytes, 4);
 		const uint32_t personAddress = getPersonAddressFromPlayerAddress(processContext.handle, playerAddress);
-		Player player = getPlayer(processContext.handle, true, personAddress, playerAddress);
+		const Player player = getPlayer(processContext.handle, true, personAddress, playerAddress);
+		// Each worker owns a disjoint index range [start, end) and writes in
+		// place. Invalid players are left zeroed (uid == 0) for compactPlayers()
+		// to strip out afterwards, so the worker never touches shared counters
+		// or another thread's slots.
 		if (!player.uid) {
-			++missed;
 			continue;
 		}
-		memcpy(&gameContext.players[i - missed], &player, sizeof(Player));
+		gameContext.players[i] = player;
+		++cached;
 	}
-
 	#else
-	const uint16_t end = 1;
-	const uint16_t start = 0;
-	const Player playerVini = PLAYER_VINI;
-	memcpy(&gameContext.players[0], &playerVini, sizeof(Player));
-	const Player playerJeff = PLAYER_JEFF;
-	memcpy(&gameContext.players[1], &playerJeff, sizeof(Player));
+	// Only one worker seeds the mock data so the two halves never race.
+	if (half == 0) {
+		gameContext.players[0] = PLAYER_VINI;
+		gameContext.players[1] = PLAYER_JEFF;
+		cached = 2;
+	}
 	#endif
 
-	// TODO: use vector_reserve to shrink the size of Players
-	//  also why are there ~3k empty players sometimes? Newgens?
-	gameContext.playerCount -= missed;
-
 	const int64_t timeEnd = platform_getMicroseconds();
-	LOG_INFO("Cached %d players in %zu microseconds", end - start - missed, timeEnd - timeStart);
+	LOG_INFO(
+		"Cached %llu players in %llu microseconds",
+		(unsigned long long)cached,
+		(unsigned long long)(timeEnd - timeStart)
+	);
+}
+
+// Removes the invalid (zeroed) players the workers skipped, closing the gaps so
+// gameContext.players is a dense [0, playerCount) range again. Must run on a
+// single thread after every worker has been joined.
+static void compactPlayers(void) {
+	uint64_t write = 0;
+	for (uint64_t read = 0; read < gameContext.playerCount; ++read) {
+		if (gameContext.players[read].uid == 0) {
+			continue;
+		}
+		if (write != read) {
+			gameContext.players[write] = gameContext.players[read];
+		}
+		++write;
+	}
+	gameContext.playerCount = write;
 }
 
 void runMultiThreadedCache(void) {
@@ -243,13 +253,17 @@ void runMultiThreadedCache(void) {
 	#endif
 
 	gameContext.playerCount = playerCount;
-	gameContext.players = malloc(playerCount * sizeof(Player));
+	// calloc so that slots the workers skip stay zeroed (uid == 0) and are
+	// recognisable to compactPlayers().
+	gameContext.players = calloc(playerCount, sizeof(Player));
+	if (gameContext.players == NULL) {
+		LOG_ERROR("Failed to allocate memory for %llu players", (unsigned long long)playerCount);
+		gameContext.playerCount = 0;
+		return;
+	}
 
-	uint8_t i;
-
-	// TODO: "if (isWindows)" should not appear in code; this is platform stuff, put it there
 	#ifdef ARCH_WIN
-	for (i = 0; i < THREAD_COUNT; i++) {
+	for (uint8_t i = 0; i < THREAD_COUNT; i++) {
 		threads[i] = CreateThread(
 			NULL,
 			0,
@@ -261,20 +275,41 @@ void runMultiThreadedCache(void) {
 
 		if (threads[i] == NULL) {
 			LOG_ERROR("Failed to create thread %d", i + 1);
-			return;
 		}
 	}
 
+	// Wait for every worker to finish before reading/mutating shared caches.
+	for (uint8_t i = 0; i < THREAD_COUNT; i++) {
+		if (threads[i] != NULL) {
+			WaitForSingleObject(threads[i], INFINITE);
+			CloseHandle(threads[i]);
+			threads[i] = NULL;
+		}
+	}
 	#else
-	for (i = 0; i < THREAD_COUNT; i++) {
+	bool created[THREAD_COUNT] = {false};
+	for (uint8_t i = 0; i < THREAD_COUNT; i++) {
 		if (pthread_create(
 			&threads[i],
 			NULL,
 			threadFunction,
 			(void*)(intptr_t)(i + 1)
-		) != 0) {
+		) == 0) {
+			created[i] = true;
+		} else {
 			LOG_ERROR("Failed to create thread %d", i + 1);
 		}
 	}
+
+	// Wait for every worker to finish before reading/mutating shared caches.
+	for (uint8_t i = 0; i < THREAD_COUNT; i++) {
+		if (created[i]) {
+			pthread_join(threads[i], NULL);
+		}
+	}
 	#endif
+
+	// Safe now that all workers have been joined: single-threaded compaction of
+	// the players written by the two player workers.
+	compactPlayers();
 }

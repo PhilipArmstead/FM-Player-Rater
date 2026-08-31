@@ -307,16 +307,16 @@ typedef struct {
 
 /* Personality weights are fixed length 8 */
 
-static void fill_weights_for_position(
+static void fillWeightsForPosition(
 	PositionGrouped p,
-	float out_attr[ATTRIBUTE_COUNT],
-	float out_personality[8],
-	float *out_weight
+	float outAttr[ATTRIBUTE_COUNT],
+	float outPersonality[8],
+	float *outWeight
 ) {
 	/* zero defaults */
-	for (int i = 0; i < ATTRIBUTE_COUNT; ++i) out_attr[i] = 0.0f;
-	for (int i = 0; i < 8; ++i) out_personality[i] = 0.0f;
-	*out_weight = 1.0f;
+	for (int i = 0; i < ATTRIBUTE_COUNT; ++i) outAttr[i] = 0.0f;
+	for (int i = 0; i < 8; ++i) outPersonality[i] = 0.0f;
+	*outWeight = 1.0f;
 
 	/* Define sparse attribute lists and personality for each position */
 	switch (p) {
@@ -355,9 +355,9 @@ static void fill_weights_for_position(
 			};
 			const float pers[8] = {0, 0, 0, 32, 0, 0, 0, 0};
 			const float weight = 4.4638f;
-			for (size_t i = 0; i < sizeof(attrs) / sizeof(attrs[0]); ++i) out_attr[attrs[i].idx] = attrs[i].weight;
-			for (int i = 0; i < 8; ++i) out_personality[i] = pers[i];
-			*out_weight = weight;
+			for (size_t i = 0; i < sizeof(attrs) / sizeof(attrs[0]); ++i) outAttr[attrs[i].idx] = attrs[i].weight;
+			for (int i = 0; i < 8; ++i) outPersonality[i] = pers[i];
+			*outWeight = weight;
 			break;
 		}
 		case POSITION_GROUPED_CB: {
@@ -392,9 +392,9 @@ static void fill_weights_for_position(
 			};
 			const float pers[8] = {4, 10, 9, 34, 21, 0, 10, -1};
 			const float weight = 5.84f;
-			for (size_t i = 0; i < sizeof(attrs) / sizeof(attrs[0]); ++i) out_attr[attrs[i].idx] = attrs[i].weight;
-			for (int i = 0; i < 8; ++i) out_personality[i] = pers[i];
-			*out_weight = weight;
+			for (size_t i = 0; i < sizeof(attrs) / sizeof(attrs[0]); ++i) outAttr[attrs[i].idx] = attrs[i].weight;
+			for (int i = 0; i < 8; ++i) outPersonality[i] = pers[i];
+			*outWeight = weight;
 			break;
 		}
 		case POSITION_GROUPED_FB: {
@@ -429,9 +429,9 @@ static void fill_weights_for_position(
 			};
 			const float pers[8] = {3, 6, 5, 24, 17, 0, 6, -1};
 			const float weight = 5.17f;
-			for (size_t i = 0; i < sizeof(attrs) / sizeof(attrs[0]); ++i) out_attr[attrs[i].idx] = attrs[i].weight;
-			for (int i = 0; i < 8; ++i) out_personality[i] = pers[i];
-			*out_weight = weight;
+			for (size_t i = 0; i < sizeof(attrs) / sizeof(attrs[0]); ++i) outAttr[attrs[i].idx] = attrs[i].weight;
+			for (int i = 0; i < 8; ++i) outPersonality[i] = pers[i];
+			*outWeight = weight;
 			break;
 		}
 		case POSITION_GROUPED_WB: {
@@ -465,9 +465,9 @@ static void fill_weights_for_position(
 			};
 			const float pers[8] = {3, 6, 5, 24, 17, 0, 6, -1};
 			const float weight = 5.17f;
-			for (size_t i = 0; i < sizeof(attrs) / sizeof(attrs[0]); ++i) out_attr[attrs[i].idx] = attrs[i].weight;
-			for (int i = 0; i < 8; ++i) out_personality[i] = pers[i];
-			*out_weight = weight;
+			for (size_t i = 0; i < sizeof(attrs) / sizeof(attrs[0]); ++i) outAttr[attrs[i].idx] = attrs[i].weight;
+			for (int i = 0; i < 8; ++i) outPersonality[i] = pers[i];
+			*outWeight = weight;
 			break;
 		}
 		case POSITION_GROUPED_DM: {
@@ -502,9 +502,9 @@ static void fill_weights_for_position(
 			};
 			const float pers[8] = {2, 3, 3, 22, 15, 0, 5, -1};
 			const float weight = 5.17f;
-			for (size_t i = 0; i < sizeof(attrs) / sizeof(attrs[0]); ++i) out_attr[attrs[i].idx] = attrs[i].weight;
-			for (int i = 0; i < 8; ++i) out_personality[i] = pers[i];
-			*out_weight = weight;
+			for (size_t i = 0; i < sizeof(attrs) / sizeof(attrs[0]); ++i) outAttr[attrs[i].idx] = attrs[i].weight;
+			for (int i = 0; i < 8; ++i) outPersonality[i] = pers[i];
+			*outWeight = weight;
 			break;
 		}
 		case POSITION_GROUPED_MC: {
@@ -539,9 +539,9 @@ static void fill_weights_for_position(
 			};
 			const float pers[8] = {2, 4, 3, 22, 15, 0, 4, -1};
 			const float weight = 5.17f;
-			for (size_t i = 0; i < sizeof(attrs) / sizeof(attrs[0]); ++i) out_attr[attrs[i].idx] = attrs[i].weight;
-			for (int i = 0; i < 8; ++i) out_personality[i] = pers[i];
-			*out_weight = weight;
+			for (size_t i = 0; i < sizeof(attrs) / sizeof(attrs[0]); ++i) outAttr[attrs[i].idx] = attrs[i].weight;
+			for (int i = 0; i < 8; ++i) outPersonality[i] = pers[i];
+			*outWeight = weight;
 			break;
 		}
 		case POSITION_GROUPED_AM: {
@@ -576,9 +576,9 @@ static void fill_weights_for_position(
 			};
 			const float pers[8] = {2, 4, 3, 22, 15, 0, 5, -1};
 			const float weight = 5.17f;
-			for (size_t i = 0; i < sizeof(attrs) / sizeof(attrs[0]); ++i) out_attr[attrs[i].idx] = attrs[i].weight;
-			for (int i = 0; i < 8; ++i) out_personality[i] = pers[i];
-			*out_weight = weight;
+			for (size_t i = 0; i < sizeof(attrs) / sizeof(attrs[0]); ++i) outAttr[attrs[i].idx] = attrs[i].weight;
+			for (int i = 0; i < 8; ++i) outPersonality[i] = pers[i];
+			*outWeight = weight;
 			break;
 		}
 		case POSITION_GROUPED_W: {
@@ -613,9 +613,9 @@ static void fill_weights_for_position(
 			};
 			const float pers[8] = {5, 12, 11, 30, 23, 0, 13, -1};
 			const float weight = 6.6f;
-			for (size_t i = 0; i < sizeof(attrs) / sizeof(attrs[0]); ++i) out_attr[attrs[i].idx] = attrs[i].weight;
-			for (int i = 0; i < 8; ++i) out_personality[i] = pers[i];
-			*out_weight = weight;
+			for (size_t i = 0; i < sizeof(attrs) / sizeof(attrs[0]); ++i) outAttr[attrs[i].idx] = attrs[i].weight;
+			for (int i = 0; i < 8; ++i) outPersonality[i] = pers[i];
+			*outWeight = weight;
 			break;
 		}
 		default: {
@@ -650,40 +650,40 @@ static void fill_weights_for_position(
 			};
 			const float pers[8] = {3, 8, 7, 26, 19, 0, 9, -1};
 			const float weight = 5.79f;
-			for (size_t i = 0; i < sizeof(attrs) / sizeof(attrs[0]); ++i) out_attr[attrs[i].idx] = attrs[i].weight;
-			for (int i = 0; i < 8; ++i) out_personality[i] = pers[i];
-			*out_weight = weight;
+			for (size_t i = 0; i < sizeof(attrs) / sizeof(attrs[0]); ++i) outAttr[attrs[i].idx] = attrs[i].weight;
+			for (int i = 0; i < 8; ++i) outPersonality[i] = pers[i];
+			*outWeight = weight;
 			break;
 		}
 	}
 }
 
-static inline int position_group_to_indices(PositionGrouped p, int out_indices[5]) {
-	/* returns number of indices filled in out_indices (max 5) */
+static inline int positionGroupToIndices(PositionGrouped p, int outIndices[5]) {
+	/* returns number of indices filled in outIndices (max 5) */
 	int n = 0;
 	switch (p) {
-		case POSITION_GROUPED_GK: out_indices[n++] = 0;
+		case POSITION_GROUPED_GK: outIndices[n++] = 0;
 			break;
-		case POSITION_GROUPED_FB: out_indices[n++] = 2;
-			out_indices[n++] = 4;
+		case POSITION_GROUPED_FB: outIndices[n++] = 2;
+			outIndices[n++] = 4;
 			break;
-		case POSITION_GROUPED_CB: out_indices[n++] = 3;
+		case POSITION_GROUPED_CB: outIndices[n++] = 3;
 			break;
-		case POSITION_GROUPED_WB: out_indices[n++] = 13;
-			out_indices[n++] = 14;
+		case POSITION_GROUPED_WB: outIndices[n++] = 13;
+			outIndices[n++] = 14;
 			break;
-		case POSITION_GROUPED_DM: out_indices[n++] = 5;
+		case POSITION_GROUPED_DM: outIndices[n++] = 5;
 			break;
-		case POSITION_GROUPED_MC: out_indices[n++] = 7;
+		case POSITION_GROUPED_MC: outIndices[n++] = 7;
 			break;
-		case POSITION_GROUPED_W: out_indices[n++] = 6;
-			out_indices[n++] = 8;
-			out_indices[n++] = 9;
-			out_indices[n++] = 11;
+		case POSITION_GROUPED_W: outIndices[n++] = 6;
+			outIndices[n++] = 8;
+			outIndices[n++] = 9;
+			outIndices[n++] = 11;
 			break;
-		case POSITION_GROUPED_AM: out_indices[n++] = 10;
+		case POSITION_GROUPED_AM: outIndices[n++] = 10;
 			break;
-		default: out_indices[n++] = 12;
+		default: outIndices[n++] = 12;
 			break;
 	}
 	return n;
@@ -691,22 +691,22 @@ static inline int position_group_to_indices(PositionGrouped p, int out_indices[5
 
 void getWeightsForPosition(
 	PositionGrouped position,
-	float out_attr[ATTRIBUTE_COUNT],
-	float out_personality[8],
-	float *out_weight
+	float outAttr[ATTRIBUTE_COUNT],
+	float outPersonality[8],
+	float *outWeight
 ) {
-	fill_weights_for_position(position, out_attr, out_personality, out_weight);
+	fillWeightsForPosition(position, outAttr, outPersonality, outWeight);
 }
 
 static float getRatingPerPosition(const Player *player, PositionGrouped position) {
-	float attr_weights[ATTRIBUTE_COUNT];
-	float pers_weights[8];
+	float attrWeights[ATTRIBUTE_COUNT];
+	float persWeights[8];
 	float totalWeight = 1.0f;
-	fill_weights_for_position(position, attr_weights, pers_weights, &totalWeight);
+	fillWeightsForPosition(position, attrWeights, persWeights, &totalWeight);
 
 	/* Check positional proficiency */
 	int indices[5];
-	const int count = position_group_to_indices(position, indices);
+	const int count = positionGroupToIndices(position, indices);
 	bool canPlay = false;
 	for (int i = 0; i < count; ++i) {
 		const int idx = indices[i];
@@ -721,10 +721,10 @@ static float getRatingPerPosition(const Player *player, PositionGrouped position
 	// LOG_INFO("%s can play	%d", player->forename, position);
 	float rating = 0.0f;
 	for (int i = 0; i < ATTRIBUTE_COUNT; ++i) {
-		if (attr_weights[i] != 0.f) {
+		if (attrWeights[i] != 0.f) {
 			const float value = (float)player->attributes[i] / 100.f;
-			rating += attr_weights[i] * value;
-			// LOG_INFO("Attr %d: %f * %f = %f (new rating: %f)", i, value, attr_weights[i], attr_weights[i] * value, rating);
+			rating += attrWeights[i] * value;
+			// LOG_INFO("Attr %d: %f * %f = %f (new rating: %f)", i, value, attrWeights[i], attrWeights[i] * value, rating);
 		}
 	}
 

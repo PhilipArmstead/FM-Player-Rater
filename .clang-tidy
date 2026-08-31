@@ -139,4 +139,37 @@ readability-static-accessed-through-instance,
 readability-static-definition-in-anonymous-namespace,
 readability-string-compare,
 readability-uniqueptr-delete-release,
-readability-use-anyofallof'
+readability-use-anyofallof,
+readability-identifier-naming'
+
+# Enforce the project naming standard: camelCase for functions, variables and
+# parameters; UPPER_CASE for macros and enum constants; CamelCase for types.
+# A trailing "namespace_" prefix (e.g. vector_push, ui_init) is allowed via
+# the *Prefix options where the codebase uses a module_functionName style.
+CheckOptions:
+  - key:   readability-identifier-naming.FunctionCase
+    value: camelBack
+  - key:   readability-identifier-naming.VariableCase
+    value: camelBack
+  - key:   readability-identifier-naming.ParameterCase
+    value: camelBack
+  - key:   readability-identifier-naming.LocalVariableCase
+    value: camelBack
+  - key:   readability-identifier-naming.GlobalVariableCase
+    value: camelBack
+  - key:   readability-identifier-naming.MemberCase
+    value: camelBack
+  - key:   readability-identifier-naming.StructCase
+    value: CamelCase
+  - key:   readability-identifier-naming.UnionCase
+    value: CamelCase
+  - key:   readability-identifier-naming.EnumCase
+    value: CamelCase
+  - key:   readability-identifier-naming.TypedefCase
+    value: CamelCase
+  - key:   readability-identifier-naming.EnumConstantCase
+    value: UPPER_CASE
+  - key:   readability-identifier-naming.MacroDefinitionCase
+    value: UPPER_CASE
+  - key:   readability-identifier-naming.ConstantCase
+    value: camelBack

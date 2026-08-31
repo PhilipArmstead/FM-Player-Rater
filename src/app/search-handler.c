@@ -73,22 +73,16 @@ void searchHandler_cacheFilters(void) {
 		}
 	}
 	if (minRating != NULL && *minRating != '\0') {
-		value = g_ascii_strtoll(minRating, NULL, 10);
-		if (valueFitsOneByte(value)) {
-			options->minRating = (uint8_t)value;
-			options->filterMask |= FILTER_HAS_MIN_RATING;
-		}
+		options->minRating = (float)g_ascii_strtod(minRating, NULL);
+		options->filterMask |= FILTER_HAS_MIN_RATING;
 	}
 	if (maxRating != NULL && *maxRating != '\0') {
-		value = g_ascii_strtoll(maxRating, NULL, 10);
-		if (valueFitsOneByte(value)) {
-			options->maxRating = (uint8_t)value;
-			options->filterMask |= FILTER_HAS_MAX_RATING;
-		}
+		options->maxRating = (float)g_ascii_strtod(maxRating, NULL);
+		options->filterMask |= FILTER_HAS_MAX_RATING;
 	}
 }
 
-void searchHandler_doSearch(bool refreshFilterCache) {
+void searchHandler_doSearch(const bool refreshFilterCache) {
 	if (refreshFilterCache) {
 		searchHandler_cacheFilters();
 	}

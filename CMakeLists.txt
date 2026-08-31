@@ -26,15 +26,13 @@ add_executable(fm_player_rater
 	src/app/search-handler.c
 	src/app/ui.c
 	src/app/callbacks/club-search.c
+	src/app/callbacks/filters.c
+	src/app/callbacks/player.c
 	src/app/helpers/date.c
 	src/app/helpers/formatter.c
 	src/core/logger.c
 	src/platform/linux.c
 	src/platform/windows.c
-	src/app/callbacks/filters.c
-	src/app/callbacks/filters.h
-	src/app/callbacks/player.c
-	src/app/callbacks/player.h
 )
 
 # Apply -mwindows only in Release mode
@@ -78,6 +76,7 @@ target_compile_definitions(fm_player_rater PRIVATE
 	$<$<CONFIG:Debug>:DEBUG>
 	REPO_ROOT_DIR="${REPO_ROOT}"
 	LAYOUTS_DIR="${REPO_ROOT}/layouts"
+	GNU_SOURCE
 )
 
 target_link_libraries(fm_player_rater PRIVATE PkgConfig::GTK4)
