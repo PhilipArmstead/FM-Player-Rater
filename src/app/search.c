@@ -17,8 +17,9 @@ uint32_t *search_findPlayers(void) {
 	uint32_t *searchResults = NULL;
 
 #ifdef PLAYER_BY_ID
-	vector_push(searchResults, 0);
-	vector_push(searchResults, 1);
+	for (uint32_t i = 0; i < (uint32_t)gameContext.playerCount; i++) {
+	vector_push(searchResults, i);
+	}
 #else
 	const FilterOptions options = gameContext.filterOptions;
 

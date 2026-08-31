@@ -647,6 +647,5 @@ void playerTable_populate(const uint32_t *playerIds) {
 }
 
 // TODO: there are some issues with Sort
-//   1. I can't find a way in the GTK API to show sort indicators (arrows) on column headers
-//   2. Sorting scrolls me to the currently selected row and I can't stop this
+//   1. Sorting scrolls me to the currently selected row and I can't stop this
 //			I may need to switch to a callback-based approach so I can control what happens before/after the sort fn

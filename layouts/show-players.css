@@ -243,3 +243,19 @@ headerbar .title {
 	background-color: #f8f9fa;
 	padding: 6px 0;
 }
+
+.table > header button sort-indicator {
+	-gtk-icon-source: -gtk-recolor(url("../assets/icons/sort-ascending.svg"));
+	color: var(--colour-primary-darker);
+	margin-left: 6px;
+	min-height: 16px;
+	min-width: 16px;
+}
+
+.table > header button sort-indicator.descending {
+	transform: rotate(180deg);
+}
+
+.table > header button sort-indicator.unsorted {
+	opacity: 0.2;
+}
