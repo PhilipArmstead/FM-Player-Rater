@@ -8,14 +8,33 @@
 #include "platform/platform.h"
 
 
+#define LOG_FILE_PATH "fm-player-rater.log"
+
+static FILE *logFile = NULL;
+
 bool logger_init(void) {
-	// TODO: create log file
+	logFile = fopen(LOG_FILE_PATH, "a");
+	if (logFile == NULL) {
+		platform_consoleWriteError("[ERROR]: Failed to open log file: " LOG_FILE_PATH "\n", LogLevelError);
+		return false;
+	}
+
 	return true;
 }
 
 void logger_shutdown(void) {
-	// TODO: cleanup logging
-	// TODO: flush queued logs to file
+	if (logFile == NULL) {
+		return;
+	}
+
+	fclose(logFile);
+	logFile = NULL;
+}
+
+void logger_flush(void) {
+	if (logFile != NULL) {
+		fflush(logFile);
+	}
 }
 
 #define PREFIX_SIZE 9  // "[FATAL]: " is the longest prefix
@@ -50,6 +69,13 @@ void logger_output(LogLevel level, const char *message, ...) {
 
 	char outputWithPrefix[MAX_LOG_SIZE];
 	snprintf(outputWithPrefix, MAX_LOG_SIZE, "%s%s\n", levelStrings[level], output);
+
+	if (logFile != NULL) {
+		fputs(outputWithPrefix, logFile);
+		if (isError) {
+			fflush(logFile);
+		}
+	}
 
 	// Platform-specific output
 	if (isError) {
