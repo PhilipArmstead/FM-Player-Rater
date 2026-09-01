@@ -87,7 +87,8 @@ void searchHandler_doSearch(const bool refreshFilterCache) {
 		searchHandler_cacheFilters();
 	}
 
-	playerTable_populate(search_findPlayers());
+	search_findPlayers();
+	playerTable_populate();
 }
 
 void searchHandler_clearFilters(void) {

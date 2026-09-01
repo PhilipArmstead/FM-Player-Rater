@@ -6,8 +6,6 @@
 #include "app/config.h"
 #include "app/data.h"
 #include "app/game-status.h"
-#include "app/maths.h"
-#include "app/player.h"
 #include "app/search-handler.h"
 #include "app/helpers/date.h"
 #include "core/logger.h"
@@ -30,7 +28,7 @@ static void onClubFilterTagClick(GtkWidget *self, GtkEditable *buffer);
 static void loadStylesheet(const char *fileName);
 
 void ui_init(GtkApplication *app) {
-	loadStylesheet("show-players.css");
+	loadStylesheet("styles.css");
 
 	// Show main window
 	const WindowContext context = openWindow("show-players", "window:show-players");
@@ -108,7 +106,7 @@ gboolean update(gpointer userData) {
 	return G_SOURCE_CONTINUE;
 }
 
-void updateUi(void) {
+void ui_update(void) {
 	updateGameStatus();
 }
 
@@ -214,242 +212,13 @@ WindowContext openWindow(const char *layoutName, const char *windowName) {
 	return context;
 }
 
-WindowContext createPlayerInfoWindow(void) {
-	const WindowContext context = openWindow("player-info", "window:player-info");
-	gtk_window_set_default_size(GTK_WINDOW(context.window), 420, 900);
-
-	loadStylesheet("player-info.css");
-
-	return context;
-}
-
-void renderPlayerInfoWindow(WindowContext context, const Player *player) {
-	// Player name
-	GtkLabel *commonNameLabel = GTK_LABEL(GTK_WIDGET(gtk_builder_get_object(context.builder, "label:common-name")));
-	if (player->commonName[0] == '\0') {
-		char buffer[PERSON_FORENAME_LENGTH + PERSON_SURNAME_LENGTH + 2];
-		snprintf(buffer, sizeof(buffer), "%s %s", player->forename, player->surname);
-		gtk_label_set_text(commonNameLabel, buffer);
-	} else {
-		gtk_label_set_text(commonNameLabel, player->commonName);
-	}
-
-	// Player age
-	{
-		char buffer[8];
-		snprintf(buffer, 8, "%d yrs", player->age);
-		GtkLabel *ageLabel = GTK_LABEL(GTK_WIDGET(gtk_builder_get_object(context.builder, "label:age")));
-		gtk_label_set_text(ageLabel, buffer);
-	}
-
-	// Player status
-	GtkWidget *isFastLearner = GTK_WIDGET(gtk_builder_get_object(context.builder, "widget:is-fast-learner"));
-	gtk_widget_set_visible(isFastLearner, player->canDevelopQuickly);
-	GtkWidget *isHotProspect = GTK_WIDGET(gtk_builder_get_object(context.builder, "widget:is-hot-prospect"));
-	gtk_widget_set_visible(isHotProspect, player->isHotProspect);
-
-
-	// Player nationalities
-	uint8_t nationalityIndex = 0;
-	while (nationalityIndex < 4 && player->nationality[nationalityIndex] != 0xFF) {
-		GtkBox *nationalityBox = GTK_BOX(GTK_WIDGET(gtk_builder_get_object(context.builder, "label:nationality")));
-		char pathToFlag[256] = {0};
-		const Nation nation = gameContext.nations[player->nationality[nationalityIndex]];
-		snprintf(
-			pathToFlag,
-			sizeof(pathToFlag),
-			"%s/assets/flags/%s.png",
-			REPO_ROOT_DIR,
-			nation.code
-		);
-		GtkWidget *flagImage = gtk_image_new_from_file(pathToFlag);
-		gtk_box_append(nationalityBox, flagImage);
-		gtk_widget_set_tooltip_text(flagImage, nation.name);
-		nationalityIndex++;
-	}
-
-	// Club name
-	GtkLabel *clubNameLabel = GTK_LABEL(GTK_WIDGET(gtk_builder_get_object(context.builder, "label:club-name")));
-	if (player->clubIndex == -1) {
-		gtk_label_set_text(clubNameLabel, "Free agent");
-	} else {
-		const Club club = gameContext.clubs[player->clubIndex];
-		gtk_label_set_text(clubNameLabel, club.name);
-	}
-
-	float attrWeights[ATTRIBUTE_COUNT];
-	float persWeights[8];
-	float totalWeight = 1.0f;
-	getWeightsForPosition(player->ratings[0].position, attrWeights, persWeights, &totalWeight);
-	float max = 0;
-	for (int i = 0; i < ATTRIBUTE_COUNT; ++i) {
-		if (attrWeights[i] > max) {
-			max = attrWeights[i];
-		}
-	}
-
-	char buffer[8] = {0};
-	char widgetId[64];
-	GtkLabel *label;
-	GtkWidget *widget;
-	#define setRowTextAndHighlight(id, attributeIndex) {																	\
-		snprintf(buffer, 8, "%d", convertTo20Scale(player->attributes[attributeIndex]));		\
-		snprintf(widgetId, 64, "label:%s", id);																							\
-		label = GTK_LABEL(GTK_WIDGET(gtk_builder_get_object(context.builder, widgetId)));		\
-		gtk_label_set_text(label, buffer);																									\
-		snprintf(widgetId, 64, "row:%s", id);																								\
-		widget = GTK_WIDGET(gtk_builder_get_object(context.builder, widgetId));							\
-		if (attrWeights[attributeIndex] > max * 0.5f) {																		\
-			gtk_widget_add_css_class(widget, "attribute-row--high");													\
-		} else if (attrWeights[attributeIndex] > max * 0.15f) {														\
-			gtk_widget_add_css_class(widget, "attribute-row--mid");														\
-		}																																										\
-	}
-
-	// Ability scores
-	{
-		GtkLabel *caLabel = GTK_LABEL(GTK_WIDGET(gtk_builder_get_object(context.builder, "label:ca")));
-		GtkLabel *paLabel = GTK_LABEL(GTK_WIDGET(gtk_builder_get_object(context.builder, "label:pa")));
-		char ability[4] = {0};
-		snprintf(ability, 4, "%d", player->ca);
-		gtk_label_set_label(caLabel, ability);
-		snprintf(ability, 4, "%d", player->pa);
-		gtk_label_set_label(paLabel, ability);
-	}
-
-	// Attributes
-	GtkWidget *boxGoalkeeper = GTK_WIDGET(gtk_builder_get_object(context.builder, "box:attribute:goalkeeper"));
-	GtkWidget *boxTechnical = GTK_WIDGET(gtk_builder_get_object(context.builder, "box:attribute:technical"));
-
-	if (player->positions[0] < 12) {
-		gtk_widget_set_visible(boxTechnical, true);
-		gtk_widget_set_visible(boxGoalkeeper, false);
-
-		setRowTextAndHighlight("attribute:technical:corners", ATTR_COR);
-		setRowTextAndHighlight("attribute:technical:crossing", ATTR_CRO);
-		setRowTextAndHighlight("attribute:technical:dribbling", ATTR_DRI);
-		setRowTextAndHighlight("attribute:technical:finishing", ATTR_FIN);
-		setRowTextAndHighlight("attribute:technical:first-touch", ATTR_FIR);
-		setRowTextAndHighlight("attribute:technical:free-kicks", ATTR_FRE);
-		setRowTextAndHighlight("attribute:technical:heading", ATTR_HEA);
-		setRowTextAndHighlight("attribute:technical:long-shots", ATTR_LON);
-		setRowTextAndHighlight("attribute:technical:long-throws", ATTR_LTH);
-		setRowTextAndHighlight("attribute:technical:marking", ATTR_MAR);
-		setRowTextAndHighlight("attribute:technical:passing", ATTR_PAS);
-		setRowTextAndHighlight("attribute:technical:penalty-taking", ATTR_PEN);
-		setRowTextAndHighlight("attribute:technical:tackling", ATTR_TCK);
-		setRowTextAndHighlight("attribute:technical:technique", ATTR_TEC);
-	} else {
-		gtk_widget_set_visible(boxGoalkeeper, true);
-		gtk_widget_set_visible(boxTechnical, false);
-
-		setRowTextAndHighlight("attribute:goalkeeper:aerial-reach", ATTR_AER);
-		setRowTextAndHighlight("attribute:goalkeeper:command-of-area", ATTR_CMD);
-		setRowTextAndHighlight("attribute:goalkeeper:communication", ATTR_COM);
-		setRowTextAndHighlight("attribute:goalkeeper:eccentricity", ATTR_ECC);
-		setRowTextAndHighlight("attribute:goalkeeper:first-touch", ATTR_FIR);
-		setRowTextAndHighlight("attribute:goalkeeper:handling", ATTR_HAN);
-		setRowTextAndHighlight("attribute:goalkeeper:kicking", ATTR_KIC);
-		setRowTextAndHighlight("attribute:goalkeeper:one-on-ones", ATTR_ONE);
-		setRowTextAndHighlight("attribute:goalkeeper:passing", ATTR_PAS);
-		setRowTextAndHighlight("attribute:goalkeeper:punching-tendency", ATTR_TTP);
-		setRowTextAndHighlight("attribute:goalkeeper:reflexes", ATTR_REF);
-		setRowTextAndHighlight("attribute:goalkeeper:rushing-out-tendency", ATTR_TRO);
-		setRowTextAndHighlight("attribute:goalkeeper:throwing", ATTR_THR);
-	}
-
-	setRowTextAndHighlight("attribute:mental:aggression", ATTR_AGG);
-	setRowTextAndHighlight("attribute:mental:anticipation", ATTR_ANT);
-	setRowTextAndHighlight("attribute:mental:bravery", ATTR_BRA);
-	setRowTextAndHighlight("attribute:mental:concentration", ATTR_CNT);
-	setRowTextAndHighlight("attribute:mental:composure", ATTR_CMP);
-	setRowTextAndHighlight("attribute:mental:decisions", ATTR_DEC);
-	setRowTextAndHighlight("attribute:mental:determination", ATTR_DET);
-	setRowTextAndHighlight("attribute:mental:flair", ATTR_FLA);
-	setRowTextAndHighlight("attribute:mental:leadership", ATTR_LDR);
-	setRowTextAndHighlight("attribute:mental:off-the-ball", ATTR_OTB);
-	setRowTextAndHighlight("attribute:mental:positioning", ATTR_POS);
-	setRowTextAndHighlight("attribute:mental:teamwork", ATTR_TEA);
-	setRowTextAndHighlight("attribute:mental:vision", ATTR_VIS);
-	setRowTextAndHighlight("attribute:mental:work-rate", ATTR_WOR);
-
-	setRowTextAndHighlight("attribute:physical:acceleration", ATTR_ACC);
-	setRowTextAndHighlight("attribute:physical:agility", ATTR_AGI);
-	setRowTextAndHighlight("attribute:physical:balance", ATTR_BAL);
-	setRowTextAndHighlight("attribute:physical:jumping-reach", ATTR_JUM);
-	setRowTextAndHighlight("attribute:physical:natural-fitness", ATTR_NAT);
-	setRowTextAndHighlight("attribute:physical:pace", ATTR_PAC);
-	setRowTextAndHighlight("attribute:physical:stamina", ATTR_STA);
-	setRowTextAndHighlight("attribute:physical:strength", ATTR_STR);
-
-	setRowTextAndHighlight("attribute:hidden:adaptability", ATTR_ADA);
-	setRowTextAndHighlight("attribute:hidden:ambition", ATTR_AMB);
-	setRowTextAndHighlight("attribute:hidden:consistency", ATTR_CON);
-	setRowTextAndHighlight("attribute:hidden:controversy", ATTR_CNY);
-	setRowTextAndHighlight("attribute:hidden:dirtiness", ATTR_DIR);
-	setRowTextAndHighlight("attribute:hidden:important-matches", ATTR_IMP);
-	setRowTextAndHighlight("attribute:hidden:injury-proneness", ATTR_INJ);
-	setRowTextAndHighlight("attribute:hidden:loyalty", ATTR_LOY);
-	setRowTextAndHighlight("attribute:hidden:pressure", ATTR_PRE);
-	setRowTextAndHighlight("attribute:hidden:professionalism", ATTR_PRO);
-	setRowTextAndHighlight("attribute:hidden:sportsmanship", ATTR_SPO);
-	setRowTextAndHighlight("attribute:hidden:temperament", ATTR_TEM);
-	setRowTextAndHighlight("attribute:hidden:versatility", ATTR_VER);
-
-	// Ratings
-	{
-		static const char *labels[POSITION_GROUPED_COUNT] = {
-			"Goalkeeper",
-			"Full back",
-			"Centre back",
-			"Wing back",
-			"Defensive midfielder",
-			"Midfielder",
-			"Winger",
-			"Attacking midfielder",
-			"Striker"
-		};
-		GtkBox *boxRoles = GTK_BOX(GTK_WIDGET(gtk_builder_get_object(context.builder, "box:top-roles")));
-		uint8_t i = 0;
-		while (i < POSITION_GROUPED_COUNT && player->ratings[i].value > 0.f) {
-			GtkWidget *parent = gtk_box_new(GTK_ORIENTATION_VERTICAL, 2);
-			gtk_box_append(boxRoles, parent);
-
-			GtkWidget *labelContainer = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 0);
-			GtkWidget *roleLabel = gtk_label_new(labels[player->ratings[i].position]);
-			gtk_label_set_xalign(GTK_LABEL(roleLabel), 0);
-			gtk_widget_add_css_class(roleLabel, "heading");
-			gtk_widget_set_hexpand(roleLabel, true);
-			gtk_box_append(GTK_BOX(labelContainer), roleLabel);
-
-			char valueBuffer[8] = {0};
-			snprintf(valueBuffer, 8, "%.1f", player->ratings[i].value);
-			GtkWidget *roleValue = gtk_label_new(valueBuffer);
-			gtk_widget_add_css_class(roleValue, "heading");
-			gtk_widget_add_css_class(roleValue, "accent-orange");
-			gtk_widget_add_css_class(roleValue, "role-value");
-			gtk_box_append(GTK_BOX(labelContainer), roleValue);
-
-			GtkWidget *progressBar = gtk_progress_bar_new();
-			gtk_progress_bar_set_fraction(GTK_PROGRESS_BAR(progressBar), player->ratings[i].value / 100.0f);
-			gtk_widget_add_css_class(progressBar, "role-bar");
-
-			gtk_box_append(GTK_BOX(parent), labelContainer);
-			gtk_box_append(GTK_BOX(parent), progressBar);
-
-			i++;
-		}
-	}
-}
-
-
 static void handleDisconnect(void) {
 	processContext.handle = NULL;
 
 	gameContext.gameVersion[0] = '\0';
 	gameContext.currentDate = (DayMonthYear){0};
 
-	updateUi();
+	ui_update();
 }
 
 static void handleConnect(void) {
@@ -458,7 +227,7 @@ static void handleConnect(void) {
 		processContext.pid,
 		(void*)processContext.moduleBaseAddress
 	);
-	updateUi();
+	ui_update();
 	update(NULL);
 
 	runMultiThreadedCache();
@@ -524,7 +293,7 @@ static void onTagClick(GtkWidget *self) {
 	if (gameContext.filterOptions.filterMask) {
 		searchHandler_doSearch(false);
 	} else {
-		playerTable_populate(NULL);
+		playerTable_clear();
 	}
 }
 

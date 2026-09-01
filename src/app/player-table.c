@@ -4,6 +4,7 @@
 #include "player-table.h"
 #include "app/ui.h"
 #include "app/helpers/formatter.h"
+#include "app/helpers/vector-shared-pointer.h"
 #include "app/helpers/vector.h"
 #include "core/logger.h"
 #include "platform/platform.h"
@@ -174,7 +175,7 @@ static void onRowClicked(
 	const SearchPlayerRow *row = gtk_list_item_get_item(listItem);
 
 	if (row != NULL && row->player != NULL && clickCount == 2) {
-		renderPlayerInfoWindow(createPlayerInfoWindow(), row->player);
+		ui_renderPlayerInfoWindow(ui_createPlayerInfoWindow(), row->player);
 	}
 }
 
@@ -644,7 +645,7 @@ void playerTable_init(void) {
 		g_signal_connect(columnViewSorter, "changed", G_CALLBACK(onSorterChanged), NULL);
 	}
 
-	playerTable_populate(NULL);
+	playerTable_clear();
 
 	gtk_column_view_sort_by_column(context.table, ratingColumn, GTK_SORT_DESCENDING);
 }
@@ -653,12 +654,21 @@ static SearchPlayerRow *search_player_row_new(Player *player) {
 	return g_object_new(SEARCH_TYPE_PLAYER_ROW, "player", player,NULL);
 }
 
-void playerTable_populate(const uint32_t *playerIds) {
+void playerTable_clear(void) {
+	if (gameContext.searchResults != NULL && vector_length(gameContext.searchResults->data) > 0) {
+		sharedPointer_unref(gameContext.searchResults);
+		gameContext.searchResults = sharedPointer_new(NULL);
+	}
+	playerTable_populate();
+}
+
+void playerTable_populate(void) {
 	const int64_t timeStart = platform_getMicroseconds();
 
 	GtkAdjustment *adjustment = gtk_scrollable_get_vadjustment(GTK_SCROLLABLE(context.table));
 	gtk_adjustment_set_value(adjustment, 0);
 
+	const uint32_t *playerIds = gameContext.searchResults->data;
 	const size_t playerCount = vector_length(playerIds);
 
 	GtkWidget *clearAll = GTK_WIDGET(gtk_builder_get_object(gameContext.builder, "button:clear-all"));

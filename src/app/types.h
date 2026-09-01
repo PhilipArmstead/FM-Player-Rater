@@ -11,6 +11,7 @@
 #include "types/logger.h"
 #include "types/process.h"
 #include "types/search.h"
+#include "types/shared-pointer.h"
 #include "types/ui.h"
 
 #define FILTER_HAS_MIN_RATING (1 << 0)
@@ -62,6 +63,7 @@ typedef struct {
 	FilterOptions filterOptions;
 	char gameVersion[GAME_STATUS_STRING_BUFFER_SIZE];
 	SearchDatalist *dataList;
+	SharedPointer *searchResults;
 	DayMonthYear currentDate;
 	GtkBuilder *builder;
 	GtkApplication *app;

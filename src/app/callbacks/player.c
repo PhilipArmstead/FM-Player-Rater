@@ -44,6 +44,6 @@ static void showPlayerById(uint32_t uniqueId) {
 		return;
 	}
 
-	const WindowContext context = createPlayerInfoWindow();
-	renderPlayerInfoWindow(context, &player);
+	const WindowContext context = ui_createPlayerInfoWindow();
+	ui_renderPlayerInfoWindow(context, &player);
 }

@@ -12,10 +12,8 @@ SPDX-License-Identifier: GPL-3.0-or-later -->
 	<object class="GtkWindow" id="window:player-info">
 		<property name="default-height">800</property>
 		<property name="default-width">420</property>
-		<property name="gravity">center</property>
-		<property name="overflow">visible</property>
 		<property name="title">FM Player Rater</property>
-		<property name="can-focus">False</property>
+		<property name="css-classes">app-root</property>
 		<child>
 			<object class="GtkBox">
 				<property name="orientation">1</property>
@@ -39,9 +37,9 @@ SPDX-License-Identifier: GPL-3.0-or-later -->
 										<child>
 											<object class="GtkLabel" id="label:common-name">
 												<property name="label"/>
-												<property name="css-classes">title-1
-													player-name
-												</property>
+												<style>
+													<class name="title-1"/>
+												</style>
 												<property name="halign">1</property>
 												<property name="xalign">0</property>
 											</object>
@@ -58,9 +56,9 @@ SPDX-License-Identifier: GPL-3.0-or-later -->
 								<child>
 									<object class="GtkLabel" id="label:club-name">
 										<property name="label"/>
-										<property name="css-classes">heading
-											club-name
-										</property>
+										<style>
+											<class name="heading"/>
+										</style>
 										<property name="halign">1</property>
 										<property name="xalign">0</property>
 									</object>
@@ -76,7 +74,9 @@ SPDX-License-Identifier: GPL-3.0-or-later -->
 								<child>
 									<object class="GtkLabel" id="label:age">
 										<property name="label"/>
-										<property name="css-classes">dim-label</property>
+										<style>
+											<class name="dim-label"/>
+										</style>
 										<property name="halign">2</property>
 										<property name="xalign">1</property>
 									</object>

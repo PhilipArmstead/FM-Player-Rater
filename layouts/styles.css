@@ -1,3 +1,4 @@
+/** Common */
 .app-root {
 	--background-colour-primary: #0f1216;
 	--border-colour-primary: #232a31;
@@ -8,9 +9,11 @@
 	--colour-primary: #c2c9d0;
 	--colour-primary-dark: #9aa4ad;
 	--colour-primary-darker: #7f8a93;
+	--border-radius-l: 12px;
+	--border-radius-m: 8px;
+	--border-radius-s: 4px;
 }
 
-window,
 .app-root {
 	background-color: var(--background-colour-primary);
 	color: var(--colour-primary);
@@ -32,36 +35,25 @@ headerbar .title {
 	font-weight: bold;
 }
 
+.link-btn {
+	background: transparent;
+	border: none;
+	box-shadow: none;
+	color: var(--colour-link);
+	padding: 2px 6px;
+}
+
+/** Player search */
 .topbar {
 	background-color: #14181d;
 	border-bottom: 1px solid var(--border-colour-primary);
 	padding: 6px 10px;
 }
 
-.brand {
-	color: #fff;
-	font-weight: bold;
-	margin: 0 6px;
-}
-
-.icon-btn {
-	background: transparent;
-	border: none;
-	box-shadow: none;
-	color: var(--colour-primary-dark);
-	min-height: 22px;
-	min-width: 22px;
-	padding: 2px;
-}
-
-.icon-btn:hover {
-	color: #fff;
-}
-
 .nav-tab {
 	background: transparent;
 	border: none;
-	border-radius: 4px;
+	border-radius: var(--border-radius-s);
 	box-shadow: none;
 	color: var(--colour-primary);
 	padding: 4px 10px;
@@ -94,7 +86,7 @@ headerbar .title {
 .chip {
 	background-color: #1c2530;
 	border: 1px solid var(--border-colour-primary-lighter);
-	border-radius: 12px;
+	border-radius: var(--border-radius-l);
 	margin-right: 4px;
 	padding: 2px 8px;
 }
@@ -113,14 +105,6 @@ headerbar .title {
 	padding: 2px;
 }
 
-.link-btn {
-	background: transparent;
-	border: none;
-	box-shadow: none;
-	color: var(--colour-link);
-	padding: 2px 6px;
-}
-
 .sidebar {
 	background-color: var(--background-colour-primary-light);
 	border-right: 1px solid var(--border-colour-primary);
@@ -130,7 +114,7 @@ headerbar .title {
 .sidebar-search {
 	background-color: var(--background-colour-primary-lighter);
 	border: 1px solid var(--border-colour-primary-lighter);
-	border-radius: 4px;
+	border-radius: var(--border-radius-s);
 	color: var(--colour-primary);
 	min-height: 26px;
 }
@@ -147,7 +131,7 @@ headerbar .title {
 .clear-filters-btn {
 	background-color: var(--background-colour-primary-lighter);
 	border: 1px solid var(--border-colour-primary-lighter);
-	border-radius: 4px;
+	border-radius: var(--border-radius-s);
 	color: #c9d1d9;
 	padding: 5px 8px;
 }
@@ -196,7 +180,7 @@ headerbar .title {
 .quality-entry {
 	background-color: var(--background-colour-primary-lighter);
 	border: 1px solid var(--border-colour-primary-lighter);
-	border-radius: 3px;
+	border-radius: var(--border-radius-s);
 	color: var(--colour-primary);
 	min-height: 20px;
 	padding: 0 4px;
@@ -215,6 +199,22 @@ headerbar .title {
 	border: none;
 	color: var(--colour-primary-darker);
 	padding: 8px;
+}
+
+.table > header button sort-indicator {
+	color: var(--colour-primary-darker);
+	-gtk-icon-source: -gtk-recolor(url("../assets/icons/sort-ascending.svg"));
+	margin-left: 6px;
+	min-height: 16px;
+	min-width: 16px;
+}
+
+.table > header button sort-indicator.descending {
+	transform: rotate(180deg);
+}
+
+.table > header button sort-indicator.unsorted {
+	opacity: 0.2;
 }
 
 .table row {
@@ -244,18 +244,135 @@ headerbar .title {
 	padding: 6px 0;
 }
 
-.table > header button sort-indicator {
-	-gtk-icon-source: -gtk-recolor(url("../assets/icons/sort-ascending.svg"));
-	color: var(--colour-primary-darker);
-	margin-left: 6px;
-	min-height: 16px;
-	min-width: 16px;
+/** Player info */
+.card {
+	background-color: #1b2430;
+	padding: 24px;
 }
 
-.table > header button sort-indicator.descending {
-	transform: rotate(180deg);
+.card-border {
+	border: 2px solid #d9a441;
+	outline: 4px solid alpha(#d9a441, 0.35);
+	outline-offset: -8px;
 }
 
-.table > header button sort-indicator.unsorted {
-	opacity: 0.2;
+.panel {
+	background-color: alpha(#000, 0.25);
+	border-radius: var(--border-radius-m);
+	padding: 14px 18px;
+}
+
+.title-1 {
+	color: #f2f2f2;
+	font-weight: 900;
+}
+
+.section-heading {
+	color: #8fa0b3;
+	letter-spacing: 1px;
+}
+
+.caption-heading {
+	font-size: 11px;
+	letter-spacing: 1px;
+}
+
+.accent-rule {
+	background-color: #d9a441;
+	margin-bottom: 4px;
+	min-height: 2px;
+}
+
+.accent-yellow {
+	color: #f0b23c;
+	font-weight: 800;
+}
+
+.accent-orange {
+	color: #e08a2c;
+	font-weight: 800;
+}
+
+.attribute-list {
+	background: transparent;
+}
+
+.attr-row {
+	color: #d7dde5;
+	padding: 3px 4px;
+}
+
+.attr-row label:last-child {
+	font-weight: 700;
+}
+
+.pill-fast-learner {
+	background-color: #2b3a5c;
+	border: 1px solid #3182ce;
+	border-radius: 999px;
+	color: #90cdf4;
+	font-weight: 600;
+	padding: 3px 8px;
+}
+
+.pill-hot-prospect {
+	background-color: #3d2112;
+	border: 1px solid #dd6b20;
+	border-radius: 999px;
+	color: #fbd38d;
+	font-weight: 600;
+	padding: 3px 8px;
+}
+
+.current-ability, .potential-ability {
+	font-size: 28px;
+	font-weight: bold;
+}
+
+.current-ability {
+	color: #66b5e5;
+}
+
+.potential-ability {
+	color: #66cb93;
+}
+
+.role-bar, .role-bar progress {
+	border: 0;
+	padding: 0;
+}
+
+.role-bar trough {
+	border: none;
+	border-radius: 0;
+}
+
+.dim-label {
+	color: #8fa0b3;
+}
+
+.attribute-row--high {
+	background: rgb(51, 64, 9);
+}
+
+.attribute-row--mid {
+	background: rgb(68, 57, 17);
+}
+
+.role-value {
+	margin-left: 12px;
+}
+
+.nationality {
+	margin-top: 8px;
+}
+
+/** Best XI */
+.best-eleven-root .card {
+	border-radius: var(--border-radius-m);
+}
+
+.best-eleven-root .dim-label {
+	color: var(--colour-primary);
+	font-size: 14px;
 }

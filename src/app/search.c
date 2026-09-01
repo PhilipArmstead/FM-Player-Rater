@@ -4,6 +4,7 @@
 #include "search.h"
 #include "app/mocks.h"
 #include "core/logger.h"
+#include "helpers/vector-shared-pointer.h"
 #include "helpers/vector.h"
 #include "platform/platform.h"
 
@@ -14,13 +15,13 @@ extern GameContext gameContext;
 uint32_t *search_findPlayers(void) {
 	const int64_t timeStart = platform_getMicroseconds();
 
-	uint32_t *searchResults = NULL;
+	uint32_t *playerIds = NULL;
 
-#ifdef PLAYER_BY_ID
+	#ifdef PLAYER_BY_ID
 	for (uint32_t i = 0; i < (uint32_t)gameContext.playerCount; i++) {
-	vector_push(searchResults, i);
+		vector_push(playerIds, i);
 	}
-#else
+	#else
 	const FilterOptions options = gameContext.filterOptions;
 
 	for (uint32_t i = 0; i < gameContext.playerCount; ++i) {
@@ -90,12 +91,13 @@ uint32_t *search_findPlayers(void) {
 			continue;
 		}
 
-		vector_push(searchResults, i);
+		vector_push(playerIds, i);
 	}
-#endif
+	#endif
+
+	sharedPointer_unref(gameContext.searchResults);
+	gameContext.searchResults = sharedPointer_new(playerIds);
 
 	const int64_t timeEnd = platform_getMicroseconds();
-	LOG_INFO("Found %d players in %zu microseconds", vector_length(searchResults), timeEnd - timeStart);
-
-	return searchResults;
+	LOG_INFO("Found %d players in %zu microseconds", vector_length(playerIds), timeEnd - timeStart);
 }

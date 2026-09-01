@@ -8,6 +8,7 @@
 #include "app/data.h"
 #include "app/player-table.h"
 #include "app/ui.h"
+#include "app/helpers/vector-shared-pointer.h"
 #include "core/logger.h"
 
 
@@ -24,6 +25,8 @@ int main(const int argc, char **argv) {
 	logger_init();
 
 	LOG_INFO("App started");
+
+	gameContext.searchResults = sharedPointer_new(NULL);
 
 	GtkApplication *app = gtk_application_new("org.gtk.example", G_APPLICATION_DEFAULT_FLAGS);
 	gameContext.app = app;

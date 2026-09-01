@@ -14,16 +14,19 @@ typedef struct {
 } WindowContext;
 
 void ui_init(GtkApplication *app);
+void ui_update(void);
 void connectToProcess(void);
 gboolean update(gpointer userData);
-void updateUi(void);
 void updateGameStatus(void);
 void updateInGameDate(void);
 void updateShowCurrentPlayerButton(void);
-WindowContext openWindow(const char *layoutName, const char *windowName);
 
-WindowContext createPlayerInfoWindow(void);
-void renderPlayerInfoWindow(WindowContext context, const Player *player);
 void ui_clearFilterTags(void);
 void ui_createFilterTag(const char *text, GtkEntryBuffer *buffer);
 void ui_createClubFilterTag(const char *text, GtkEditable *buffer);
+
+WindowContext openWindow(const char *layoutName, const char *windowName);
+WindowContext ui_createPlayerInfoWindow(void);
+void ui_renderPlayerInfoWindow(WindowContext context, const Player *player);
+WindowContext ui_createBestElevenWindow(void);
+void ui_renderBestElevenWindow(WindowContext context);

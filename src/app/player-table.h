@@ -17,4 +17,5 @@ struct _SearchPlayerRow {
 };
 
 void playerTable_init(void);
-void playerTable_populate(const uint32_t *playerIds);
+void playerTable_clear(void);
+void playerTable_populate(void);

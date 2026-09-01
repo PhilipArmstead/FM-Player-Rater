@@ -42,6 +42,7 @@ SPDX-License-Identifier: GPL-3.0-or-later -->
 						<child>
 							<object class="GtkButton">
 								<property name="label">Best XI</property>
+								<signal name="clicked" handler="callbacks_onShowBestEleven"/>
 								<style>
 									<class name="nav-tab"/>
 								</style>

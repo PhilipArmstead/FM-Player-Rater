@@ -64,7 +64,7 @@
 	})
 #define PLAYER_BY_ID PLAYER_VINI
 
-#define PLAYER_BY_ID_CLUB (Club){.name = "Real Madrid Club de Fútbol", .address = 1, .teamType = 19}
+#define PLAYER_BY_ID_CLUB (Club){.name = "Real Madrid Club de Fútbol", .shortName = "Real Madrid", .address = 1, .teamType = 19}
 #define PLAYER_BY_ID_NATION_1 (Nation){.code = "BRA", .name = "Brazil"}
 #define PLAYER_BY_ID_NATION_2 (Nation){.code = "ESP", .name = "Spain"}
 #endif

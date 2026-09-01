@@ -25,6 +25,7 @@ add_executable(fm_player_rater
 	src/app/search.c
 	src/app/search-handler.c
 	src/app/ui.c
+	src/app/callbacks/best-eleven.c
 	src/app/callbacks/club-search.c
 	src/app/callbacks/filters.c
 	src/app/callbacks/player.c
@@ -34,6 +35,10 @@ add_executable(fm_player_rater
 	src/platform/linux.c
 	src/platform/macos.c
 	src/platform/windows.c
+	src/app/ui/player-info.c
+	src/app/ui/best-eleven.c
+		src/app/helpers/vector-shared-pointer.c
+		src/app/helpers/vector-shared-pointer.h
 )
 
 # Apply -mwindows only in Release mode
