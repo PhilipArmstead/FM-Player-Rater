@@ -15,7 +15,61 @@ pkg_check_modules(GTK4 REQUIRED IMPORTED_TARGET gtk4)
 
 set(REPO_ROOT "${CMAKE_CURRENT_SOURCE_DIR}")
 
+# Bundle runtime assets (layouts, flags, icons) into the executable via GResource
+pkg_get_variable(GLIB_COMPILE_RESOURCES gio-2.0 glib_compile_resources)
+if (NOT GLIB_COMPILE_RESOURCES)
+	find_program(GLIB_COMPILE_RESOURCES glib-compile-resources REQUIRED)
+endif ()
+
+set(RESOURCE_PREFIX "/com/philarmstead/fmplayerrater")
+set(GRESOURCE_XML "${CMAKE_CURRENT_BINARY_DIR}/resources.gresource.xml")
+set(GRESOURCE_C "${CMAKE_CURRENT_BINARY_DIR}/resources.c")
+
+file(GLOB LAYOUT_FILES CONFIGURE_DEPENDS RELATIVE "${REPO_ROOT}"
+	"${REPO_ROOT}/layouts/*.ui"
+	"${REPO_ROOT}/layouts/*.css"
+)
+file(GLOB ASSET_ICONS CONFIGURE_DEPENDS RELATIVE "${REPO_ROOT}"
+	"${REPO_ROOT}/assets/icons/*"
+)
+file(GLOB ASSET_FLAGS CONFIGURE_DEPENDS RELATIVE "${REPO_ROOT}"
+	"${REPO_ROOT}/assets/flags/*.png"
+)
+set(RESOURCE_FILES ${LAYOUT_FILES} ${ASSET_ICONS} ${ASSET_FLAGS})
+
+set(GRESOURCE_ENTRIES "")
+foreach (res_file IN LISTS RESOURCE_FILES)
+	# Text assets compress well; PNG flags are already compressed.
+	set(compress "")
+	if (res_file MATCHES "\\.(ui|css|svg)$")
+		set(compress " compressed=\"true\"")
+	endif ()
+	string(APPEND GRESOURCE_ENTRIES "    <file${compress}>${res_file}</file>\n")
+endforeach ()
+
+file(WRITE "${GRESOURCE_XML}"
+	"<?xml version=\"1.0\" encoding=\"UTF-8\"?>
+<gresources>
+  <gresource prefix=\"${RESOURCE_PREFIX}\">
+${GRESOURCE_ENTRIES}  </gresource>
+</gresources>
+")
+
+add_custom_command(
+	OUTPUT "${GRESOURCE_C}"
+	COMMAND ${GLIB_COMPILE_RESOURCES}
+	--target=${GRESOURCE_C}
+	--sourcedir=${REPO_ROOT}
+	--generate-source
+	${GRESOURCE_XML}
+	DEPENDS ${GRESOURCE_XML} ${RESOURCE_FILES}
+	WORKING_DIRECTORY ${REPO_ROOT}
+	COMMENT "Compiling bundled resources"
+	VERBATIM
+)
+
 add_executable(fm_player_rater
+	${GRESOURCE_C}
 	src/main.c
 	src/app/callbacks.c
 	src/app/data.c
@@ -31,19 +85,23 @@ add_executable(fm_player_rater
 	src/app/callbacks/player.c
 	src/app/helpers/date.c
 	src/app/helpers/formatter.c
+	src/app/helpers/vector-shared-pointer.c
+	src/app/helpers/vector-shared-pointer.h
+	src/app/ui/best-eleven.c
+	src/app/ui/player-info.c
 	src/core/logger.c
 	src/platform/linux.c
 	src/platform/macos.c
 	src/platform/windows.c
-	src/app/ui/player-info.c
-	src/app/ui/best-eleven.c
-		src/app/helpers/vector-shared-pointer.c
-		src/app/helpers/vector-shared-pointer.h
 )
 
-# Apply -mwindows only in Release mode
+# Prevent a console/terminal window in Release builds.
 if (WIN32)
+	# Windows: link as a GUI subsystem app so no console is allocated.
 	target_link_options(fm_player_rater PRIVATE $<$<CONFIG:Release>:-mwindows>)
+elseif (APPLE)
+	# macOS: build a .app bundle in Release so launching does not open a Terminal.
+	set_target_properties(fm_player_rater PROPERTIES MACOSX_BUNDLE $<$<CONFIG:Release>:TRUE>)
 endif ()
 
 # Allow including headers using absolute paths relative to the project `src/` directory,
@@ -81,8 +139,6 @@ target_compile_definitions(fm_player_rater PRIVATE
 	$<$<PLATFORM_ID:Linux>:ARCH_LINUX>
 	$<$<PLATFORM_ID:Darwin>:ARCH_MACOS>
 	$<$<CONFIG:Debug>:DEBUG>
-	REPO_ROOT_DIR="${REPO_ROOT}"
-	LAYOUTS_DIR="${REPO_ROOT}/layouts"
 	GNU_SOURCE
 )
 

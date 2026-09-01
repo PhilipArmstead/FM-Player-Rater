@@ -13,11 +13,17 @@
 
 typedef HANDLE thread_t;
 typedef HANDLE event_t;
-#else
+#elifdef ARCH_LINUX
 #include <pthread.h>
 #include <semaphore.h>
 
 typedef pthread_t thread_t;
+typedef sem_t event_t;
+#else
+#include <pthread.h>
+#include <semaphore.h>
+
+typedef mach_port_t thread_t;
 typedef sem_t event_t;
 #endif
 

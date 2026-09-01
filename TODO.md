@@ -2,6 +2,7 @@ TODO
 ===
 
 - Port `platform_openProcess` to Linux
+- Read player positional weights from YAML file
 - To player-info
 	- ⭐ Add footedness
 	- Add height/weight
@@ -15,6 +16,6 @@ TODO
 	- Search for asking/guide price/wage
 - Best Eleven
 	- Show best XI based on search results
-	- Customise formations
+	- Customise formations (read from YAML file)
 	- Filter best XI
 	- Exclude individuals

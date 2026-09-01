@@ -192,9 +192,11 @@ static void cachePlayers(const uint8_t half) {
 	#else
 	// Only one worker seeds the mock data so the two halves never race.
 	if (half == 0) {
-		gameContext.players[0] = PLAYER_VINI;
-		gameContext.players[1] = PLAYER_JEFF;
-		cached = 2;
+		const Player playerVini = PLAYER_VINI;
+		const Player playerJeff = PLAYER_JEFF;
+		for (uint64_t i = 0; i < gameContext.playerCount; i++) {
+			memcpy(&gameContext.players[i], i & 1 ? &playerVini : &playerJeff, sizeof(Player));
+		}
 	}
 	#endif
 
