@@ -98,11 +98,7 @@ typedef struct {
 #define GAME_STATUS_STRING_BUFFER_SIZE 32
 
 typedef struct {
-	char *label;
-	uint8_t position; // 0-14
+	const Player *player;
+	float rating;
 } BestElevenRow;
 
-typedef struct {
-	char *name;
-	uint8_t positions[11];
-} BestElevenFormation;

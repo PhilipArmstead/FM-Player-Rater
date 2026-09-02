@@ -99,5 +99,5 @@ uint32_t *search_findPlayers(void) {
 	gameContext.searchResults = sharedPointer_new(playerIds);
 
 	const int64_t timeEnd = platform_getMicroseconds();
-	LOG_INFO("Found %d players in %zu microseconds", vector_length(playerIds), timeEnd - timeStart);
+	LOG_DEBUG("Found %d players in %zu microseconds", vector_length(playerIds), timeEnd - timeStart);
 }

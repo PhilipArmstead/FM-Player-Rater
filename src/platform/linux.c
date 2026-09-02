@@ -9,15 +9,13 @@
 #include <stdio.h>
 
 
+// Fatal, error, warn, info, debug
+static const char *colourStrings[5] = {"30;41", "1;31", "1;33", "1;32", "1;30"};
 void platform_consoleWrite(const char *message, const LogLevel colour) {
-	// Fatal, error, warn, info
-	const char *colourStrings[4] = {"30;41", "1;31", "1;33", "1;32"};
 	printf("\033[%sm%s\033[0m", colourStrings[colour], message);
 }
 
 void platform_consoleWriteError(const char *message, const LogLevel colour) {
-	// Fatal, error, warn, info
-	const char *colourStrings[4] = {"30;41", "1;31", "1;33", "1;32"};
 	printf("\033[%sm%s\033[0m", colourStrings[colour], message);
 }
 
@@ -158,5 +156,27 @@ int64_t platform_getMicroseconds(void) {
 	struct timespec ts;
 	clock_gettime(CLOCK_MONOTONIC, &ts);
 	return (int64_t)ts.tv_sec * 1000000 + ts.tv_nsec / 1000;
+}
+
+// Paths
+void platform_getExecutableDirectory(char *buffer, const size_t size) {
+	if (size == 0) {
+		return;
+	}
+
+	const ssize_t length = readlink("/proc/self/exe", buffer, size - 1);
+	if (length <= 0) {
+		platform_consoleWriteError("Could not resolve executable path\n", LogLevelError);
+		buffer[0] = '\0';
+		return;
+	}
+
+	buffer[length] = '\0';
+
+	// Strip the executable filename, leaving the directory.
+	char *lastSlash = strrchr(buffer, '/');
+	if (lastSlash) {
+		lastSlash[1] = '\0';
+	}
 }
 #endif

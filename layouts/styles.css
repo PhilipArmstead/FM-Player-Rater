@@ -25,6 +25,36 @@ button {
 	background: initial;
 }
 
+dropdown label {
+	color: var(--colour-primary);
+	font-size: 1.1rem;
+	font-weight: bold;
+	margin-right: 4px;
+}
+
+dropdown popover * {
+	background-color: var(--background-colour-primary-light);
+}
+
+dropdown popover {
+	border: 1px solid var(--border-colour-primary-lighter);
+	border-radius: var(--border-radius-s);
+	padding: 0;
+}
+
+dropdown row {
+	margin: 0;
+}
+
+
+dropdown > popover listview > row label {
+	color: #cccccc;
+}
+
+dropdown > popover row:hover, dropdown > popover row:hover * {
+	background: var(--background-colour-primary-lighter);
+}
+
 headerbar {
 	background: #0b0e11;
 	color: var(--colour-primary);
@@ -375,4 +405,18 @@ headerbar .title {
 .best-eleven-root .dim-label {
 	color: var(--colour-primary);
 	font-size: 14px;
+}
+
+.best-eleven-root .position {
+	color: var(--colour-primary-dark);
+	font-weight: bold;
+}
+
+.best-eleven-root .name {
+	color: #fff;
+	font-size: 1.2rem;
+}
+
+.best-eleven-root .table row {
+	padding: 12px 8px;
 }

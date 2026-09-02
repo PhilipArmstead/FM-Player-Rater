@@ -50,11 +50,10 @@ void ui_renderPlayerInfoWindow(WindowContext context, const Player *player) {
 		snprintf(
 			pathToFlag,
 			sizeof(pathToFlag),
-			"%s/assets/flags/%s.png",
-			REPO_ROOT_DIR,
+			RESOURCE_BASE "/assets/flags/%s.png",
 			nation.code
 		);
-		GtkWidget *flagImage = gtk_image_new_from_file(pathToFlag);
+		GtkWidget *flagImage = gtk_image_new_from_resource(pathToFlag);
 		gtk_box_append(nationalityBox, flagImage);
 		gtk_widget_set_tooltip_text(flagImage, nation.name);
 		nationalityIndex++;

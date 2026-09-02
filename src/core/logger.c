@@ -46,7 +46,8 @@ void logger_output(LogLevel level, const char *message, ...) {
 		"[FATAL]: ",
 		"[ERROR]: ",
 		"[WARN]:  ",
-		"[INFO]:  "
+		"[INFO]:  ",
+		"[DEBUG]: "
 	};
 
 	if (level < 0 || level >= LogLevelCount) {

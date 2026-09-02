@@ -197,10 +197,10 @@ void updateGameStatus(void) {
 
 WindowContext openWindow(const char *layoutName, const char *windowName) {
 	char pathToAppLayout[256] = {0};
-	snprintf(pathToAppLayout, sizeof(pathToAppLayout), "%s/%s.ui", LAYOUTS_DIR, layoutName);
+	snprintf(pathToAppLayout, sizeof(pathToAppLayout), RESOURCE_BASE "/layouts/%s.ui", layoutName);
 
 	WindowContext context = {0};
-	context.builder = gtk_builder_new_from_file(pathToAppLayout);
+	context.builder = gtk_builder_new_from_resource(pathToAppLayout);
 	context.window = GTK_WIDGET(gtk_builder_get_object(context.builder, windowName));
 
 	GtkEventControllerKey *closeController = GTK_EVENT_CONTROLLER_KEY(gtk_event_controller_key_new());
@@ -312,8 +312,8 @@ static void loadStylesheet(const char *fileName) {
 	char pathToStylesheet[256] = {0};
 	GtkCssProvider *provider = gtk_css_provider_new();
 
-	snprintf(pathToStylesheet, sizeof(pathToStylesheet), "%s/%s", LAYOUTS_DIR, fileName);
-	gtk_css_provider_load_from_path(provider, pathToStylesheet);
+	snprintf(pathToStylesheet, sizeof(pathToStylesheet), RESOURCE_BASE "/layouts/%s", fileName);
+	gtk_css_provider_load_from_resource(provider, pathToStylesheet);
 	gtk_style_context_add_provider_for_display(
 		gdk_display_get_default(),
 		GTK_STYLE_PROVIDER(provider),

@@ -13,11 +13,17 @@
 
 typedef HANDLE thread_t;
 typedef HANDLE event_t;
-#else
+#elifdef ARCH_LINUX
 #include <pthread.h>
 #include <semaphore.h>
 
 typedef pthread_t thread_t;
+typedef sem_t event_t;
+#else
+#include <pthread.h>
+#include <semaphore.h>
+
+typedef mach_port_t thread_t;
 typedef sem_t event_t;
 #endif
 
@@ -33,6 +39,9 @@ void writeToMemory(void *handle, uintptr_t address, size_t length, const uint8_t
 
 // Process
 void platform_openProcess(ProcessContext *context);
+
+// Paths
+void platform_getExecutableDirectory(char *buffer, size_t size);
 
 // Time
 int64_t platform_getMicroseconds(void);

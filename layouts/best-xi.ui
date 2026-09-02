@@ -46,23 +46,7 @@ SPDX-License-Identifier: GPL-3.0-or-later -->
 				<property name="page-increment">5</property>
 			</object>
 
-			<!-- TODO: read from config YML -->
-			<object class="GtkStringList" id="string-list:formation">
-				<items>
-					<item>4-4-2</item>
-					<item>4-4-2 Diamond</item>
-					<item>4-2-3-1</item>
-					<item>4-3-3</item>
-					<item>4-3-3 DM Wide</item>
-					<item>4-1-4-1</item>
-					<item>4-5-1</item>
-					<item>3-4-3</item>
-					<item>3-5-2</item>
-					<item>3-4-2-1</item>
-					<item>5-3-2</item>
-					<item>5-2-3</item>
-				</items>
-			</object>
+			<object class="GtkStringList" id="string-list:formation"/>
 
 			<object class="GtkBox">
 				<property name="orientation">horizontal</property>
@@ -108,7 +92,7 @@ SPDX-License-Identifier: GPL-3.0-or-later -->
 								<property name="spacing">12</property>
 								<child>
 									<object class="GtkLabel">
-										<property name="label">Formation</property>
+										<property name="label">Formation:</property>
 										<property name="valign">center</property>
 									</object>
 								</child>
@@ -272,82 +256,83 @@ SPDX-License-Identifier: GPL-3.0-or-later -->
 							</object>
 						</child>
 
-						<child>
-							<object class="GtkBox" id="excluded_players_panel">
-								<property name="orientation">vertical</property>
-								<property name="spacing">10</property>
-								<style>
-									<class name="card"/>
-								</style>
+						<!--						<child>-->
+						<!--							<object class="GtkBox" id="excluded_players_panel">-->
+						<!--								<property name="orientation">vertical</property>-->
+						<!--								<property name="spacing">10</property>-->
+						<!--								<style>-->
+						<!--									<class name="card"/>-->
+						<!--								</style>-->
 
-								<child>
-									<object class="GtkLabel">
-										<property name="label">Excluded Players</property>
-										<property name="halign">start</property>
-										<property name="xalign">0</property>
-										<style>
-											<class name="title-3"/>
-										</style>
-									</object>
-								</child>
+						<!--								<child>-->
+						<!--									<object class="GtkLabel">-->
+						<!--										<property name="label">Excluded Players</property>-->
+						<!--										<property name="halign">start</property>-->
+						<!--										<property name="xalign">0</property>-->
+						<!--										<style>-->
+						<!--											<class name="title-3"/>-->
+						<!--										</style>-->
+						<!--									</object>-->
+						<!--								</child>-->
 
-								<child>
-									<object class="GtkLabel" id="excluded_players_description">
-										<property name="label">These players will not be considered when selecting the best eleven.</property>
-										<property name="halign">start</property>
-										<property name="xalign">0</property>
-										<property name="wrap">true</property>
-										<style>
-											<class name="dim-label"/>
-										</style>
-									</object>
-								</child>
+						<!--								<child>-->
+						<!--									<object class="GtkLabel" id="excluded_players_description">-->
+						<!--										<property name="label">These players will not be considered when selecting the best eleven.-->
+						<!--										</property>-->
+						<!--										<property name="halign">start</property>-->
+						<!--										<property name="xalign">0</property>-->
+						<!--										<property name="wrap">true</property>-->
+						<!--										<style>-->
+						<!--											<class name="dim-label"/>-->
+						<!--										</style>-->
+						<!--									</object>-->
+						<!--								</child>-->
 
-								<child>
-									<object class="GtkScrolledWindow">
-										<property name="vexpand">true</property>
-										<property name="hscrollbar-policy">never</property>
-										<child>
-											<object class="GtkListBox" id="excluded_players_list">
-												<property name="selection-mode">none</property>
-												<property name="show-separators">true</property>
+						<!--								<child>-->
+						<!--									<object class="GtkScrolledWindow">-->
+						<!--										<property name="vexpand">true</property>-->
+						<!--										<property name="hscrollbar-policy">never</property>-->
+						<!--										<child>-->
+						<!--											<object class="GtkListBox" id="excluded_players_list">-->
+						<!--												<property name="selection-mode">none</property>-->
+						<!--												<property name="show-separators">true</property>-->
 
-												<!-- Sample excluded player -->
-												<child>
-													<object class="GtkListBoxRow" id="excluded_player_row_1">
-														<child>
-															<object class="GtkBox">
-																<property name="spacing">8</property>
-																<property name="margin-top">6</property>
-																<property name="margin-bottom">6</property>
-																<property name="margin-start">8</property>
-																<property name="margin-end">8</property>
-																<child>
-																	<object class="GtkLabel">
-																		<property name="label">Example Player</property>
-																		<property name="xalign">0</property>
-																		<property name="ellipsize">end</property>
-																	</object>
-																</child>
-																<child>
-																	<object class="GtkButton" id="restore_excluded_player_1_button">
-																		<child>
-																			<object class="GtkImage">
-																				<property name="icon-name">list-add-symbolic</property>
-																			</object>
-																		</child>
-																	</object>
-																</child>
-															</object>
-														</child>
-													</object>
-												</child>
-											</object>
-										</child>
-									</object>
-								</child>
-							</object>
-						</child>
+						<!--												&lt;!&ndash; Sample excluded player &ndash;&gt;-->
+						<!--												<child>-->
+						<!--													<object class="GtkListBoxRow" id="excluded_player_row_1">-->
+						<!--														<child>-->
+						<!--															<object class="GtkBox">-->
+						<!--																<property name="spacing">8</property>-->
+						<!--																<property name="margin-top">6</property>-->
+						<!--																<property name="margin-bottom">6</property>-->
+						<!--																<property name="margin-start">8</property>-->
+						<!--																<property name="margin-end">8</property>-->
+						<!--																<child>-->
+						<!--																	<object class="GtkLabel">-->
+						<!--																		<property name="label">Example Player</property>-->
+						<!--																		<property name="xalign">0</property>-->
+						<!--																		<property name="ellipsize">end</property>-->
+						<!--																	</object>-->
+						<!--																</child>-->
+						<!--																<child>-->
+						<!--																	<object class="GtkButton" id="restore_excluded_player_1_button">-->
+						<!--																		<child>-->
+						<!--																			<object class="GtkImage">-->
+						<!--																				<property name="icon-name">list-add-symbolic</property>-->
+						<!--																			</object>-->
+						<!--																		</child>-->
+						<!--																	</object>-->
+						<!--																</child>-->
+						<!--															</object>-->
+						<!--														</child>-->
+						<!--													</object>-->
+						<!--												</child>-->
+						<!--											</object>-->
+						<!--										</child>-->
+						<!--									</object>-->
+						<!--								</child>-->
+						<!--							</object>-->
+						<!--						</child>-->
 					</object>
 				</child>
 			</object>

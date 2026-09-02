@@ -6,6 +6,7 @@
 #include "app/callbacks.h"
 #include "app/config.h"
 #include "app/data.h"
+#include "app/options.h"
 #include "app/player-table.h"
 #include "app/ui.h"
 #include "app/helpers/vector-shared-pointer.h"
@@ -25,6 +26,8 @@ int main(const int argc, char **argv) {
 	logger_init();
 
 	LOG_INFO("App started");
+
+	options_init();
 
 	gameContext.searchResults = sharedPointer_new(NULL);
 

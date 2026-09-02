@@ -5,3 +5,4 @@
 
 void formatter_printNumber(char *outString);
 void formatter_printCurrency(char *outString);
+void formatter_formatRating(float rating, char *outString);
