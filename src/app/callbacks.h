@@ -8,3 +8,10 @@
 
 void callbacks_init(void);
 G_MODULE_EXPORT void callbacks_onShowCurrentPlayer(void);
+gboolean callbacks_onWindowKeypress(
+	GtkEventControllerKey *controller,
+	guint keyval,
+	guint keycode,
+	GdkModifierType state,
+	gpointer window
+);

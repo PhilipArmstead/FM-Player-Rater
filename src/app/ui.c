@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 
 #include "ui.h"
+#include "app/callbacks.h"
 #include "app/config.h"
 #include "app/data.h"
 #include "app/game-status.h"
@@ -27,13 +28,6 @@ static inline void updateWhileDisconnected(void);
 static void onFilterTagClick(GtkWidget *self, GtkEntryBuffer *buffer);
 static void onClubFilterTagClick(GtkWidget *self, GtkEditable *buffer);
 static void loadStylesheet(const char *fileName);
-static gboolean onWindowKeypress(
-	GtkEventControllerKey *controller,
-	guint keyval,
-	guint keycode,
-	GdkModifierType state,
-	gpointer window
-);
 
 void ui_init(GtkApplication *app) {
 	loadStylesheet("show-players.css");
@@ -207,13 +201,13 @@ WindowContext openWindow(const char *layoutName, const char *windowName) {
 	char pathToAppLayout[256] = {0};
 	snprintf(pathToAppLayout, sizeof(pathToAppLayout), "%s/%s.ui", LAYOUTS_DIR, layoutName);
 
-	WindowContext context = {};
+	WindowContext context = {0};
 	context.builder = gtk_builder_new_from_file(pathToAppLayout);
 	context.window = GTK_WIDGET(gtk_builder_get_object(context.builder, windowName));
 
 	GtkEventControllerKey *closeController = GTK_EVENT_CONTROLLER_KEY(gtk_event_controller_key_new());
 	gtk_event_controller_set_propagation_phase(GTK_EVENT_CONTROLLER(closeController), GTK_PHASE_CAPTURE);
-	g_signal_connect(closeController, "key-pressed", G_CALLBACK(onWindowKeypress), context.window);
+	g_signal_connect(closeController, "key-pressed", G_CALLBACK(callbacks_onWindowKeypress), context.window);
 	gtk_widget_add_controller(context.window, GTK_EVENT_CONTROLLER(closeController));
 
 	gtk_window_present(GTK_WINDOW(context.window));
@@ -557,37 +551,4 @@ static void loadStylesheet(const char *fileName) {
 		GTK_STYLE_PROVIDER_PRIORITY_APPLICATION
 	);
 	g_object_unref(provider);
-}
-
-static gboolean onWindowKeypress(
-	GtkEventControllerKey *controller,
-	guint keyval,
-	guint keycode,
-	GdkModifierType state,
-	gpointer window
-) {
-	(void)controller;
-	(void)keycode;
-
-	const gboolean ctrl = (state & GDK_CONTROL_MASK) != 0;
-	const gboolean meta = (state & GDK_META_MASK) != 0;
-	const gboolean alt = (state & GDK_ALT_MASK) != 0;
-
-	#ifndef ARCH_DARWIN
-	if (alt && keyval == GDK_KEY_F4) {
-		g_application_quit(G_APPLICATION(gameContext.app));
-		return TRUE;
-	}
-	#else
-	if (meta && (keyval == GDK_KEY_q || keyval == GDK_KEY_Q)) {
-		g_application_quit(G_APPLICATION(gameContext.app));
-		return TRUE;
-	}
-	#endif
-	if (ctrl && (keyval == GDK_KEY_w || keyval == GDK_KEY_W || keyval == GDK_KEY_F4)) {
-		gtk_window_close(GTK_WINDOW(window));
-		return TRUE;
-	}
-
-	return FALSE;
 }

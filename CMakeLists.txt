@@ -32,6 +32,7 @@ add_executable(fm_player_rater
 	src/app/helpers/formatter.c
 	src/core/logger.c
 	src/platform/linux.c
+	src/platform/macos.c
 	src/platform/windows.c
 )
 
@@ -73,6 +74,7 @@ target_compile_options(fm_player_rater PRIVATE
 target_compile_definitions(fm_player_rater PRIVATE
 	$<$<PLATFORM_ID:Windows>:ARCH_WIN>
 	$<$<PLATFORM_ID:Linux>:ARCH_LINUX>
+	$<$<PLATFORM_ID:Darwin>:ARCH_MACOS>
 	$<$<CONFIG:Debug>:DEBUG>
 	REPO_ROOT_DIR="${REPO_ROOT}"
 	LAYOUTS_DIR="${REPO_ROOT}/layouts"

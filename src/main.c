@@ -23,6 +23,8 @@ static void activate(GtkApplication *app) {
 int main(const int argc, char **argv) {
 	logger_init();
 
+	LOG_INFO("App started");
+
 	GtkApplication *app = gtk_application_new("org.gtk.example", G_APPLICATION_DEFAULT_FLAGS);
 	gameContext.app = app;
 	g_signal_connect(app, "activate", G_CALLBACK(activate), NULL);
