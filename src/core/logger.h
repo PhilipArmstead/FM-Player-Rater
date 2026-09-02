@@ -10,6 +10,7 @@
 
 bool logger_init(void);
 void logger_shutdown(void);
+void logger_flush(void);
 void logger_output(LogLevel level, const char *message, ...);
 
 #define LOG_FATAL(message, ...) logger_output(LogLevelFatal, message, ##__VA_ARGS__)

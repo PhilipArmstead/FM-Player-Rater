@@ -10,7 +10,11 @@ TODO
 	- Add happiness
 	- Auto-refresh
 - To player search
-	- Add sort capacity to tables
 	- Search for positions
 	- Search for nationality
 	- Search for asking/guide price/wage
+- Best Eleven
+	- Show best XI based on search results
+	- Customise formations
+	- Filter best XI
+	- Exclude individuals

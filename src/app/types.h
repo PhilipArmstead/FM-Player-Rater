@@ -64,6 +64,7 @@ typedef struct {
 	SearchDatalist *dataList;
 	DayMonthYear currentDate;
 	GtkBuilder *builder;
+	GtkApplication *app;
 	Club *clubs;
 	Nation *nations;
 	Player *players;

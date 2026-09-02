@@ -18,47 +18,30 @@ extern ProcessContext processContext;
 extern GameContext gameContext;
 
 static thread_t threads[THREAD_COUNT];
+static gboolean onThreadComplete(gpointer userData);
+static void cachePlayers(uint8_t half);
+static void cacheClubs(void);
+static void cacheNations(void);
 
-#ifdef ARCH_WIN
-static DWORD WINAPI threadFunction(const LPVOID arg) {
-	const uint8_t func_num = (uint8_t)(intptr_t)arg;
+static gpointer threadFunction(gpointer arg) {
+	const uint8_t functionIndex = (uint8_t)(intptr_t)arg;
 
-	switch (func_num) {
+	switch (functionIndex) {
 		case 1: cacheClubs();
 			break;
 		case 2: cacheNations();
 			break;
 		case 3: cachePlayers(0);
+			g_idle_add(onThreadComplete, arg);
 			break;
 		default: cachePlayers(1);
+			g_idle_add(onThreadComplete, arg);
 			break;
 	}
 
-	// Workers must not join each other; runMultiThreadedCache() owns the join.
+
 	return 0;
 }
-#else
-#include <pthread.h>
-
-
-static void *threadFunction(void *arg) {
-	const int func_num = (int)(intptr_t)arg;
-
-	switch (func_num) {
-		case 1: cacheClubs();
-			break;
-		case 2: cacheNations();
-			break;
-		case 3: cachePlayers(0);
-			break;
-		default: cachePlayers(1);
-			break;
-	}
-
-	// Workers must not join each other; runMultiThreadedCache() owns the join.
-	return NULL;
-}
-#endif
 
 void clearCaches(void) {
 	if (gameContext.clubs != NULL) {
@@ -79,7 +62,7 @@ void clearCaches(void) {
 }
 
 
-void cacheNations(void) {
+static void cacheNations(void) {
 	const int64_t timeStart = platform_getMicroseconds();
 
 	#ifndef MOCKS_MODE
@@ -126,7 +109,7 @@ void cacheNations(void) {
 	LOG_INFO("Cached %d nations in %zu microseconds", nationCount, timeEnd - timeStart);
 }
 
-void cacheClubs(void) {
+static void cacheClubs(void) {
 	const int64_t timeStart = platform_getMicroseconds();
 
 	#ifndef MOCKS_MODE
@@ -177,11 +160,13 @@ void cacheClubs(void) {
 	gameContext.clubs[1125] = PLAYER_BY_ID_CLUB;
 	#endif
 
+	// TODO: use vector_reserve to shrink the size of Players
+	//  also why are there ~3k empty players sometimes? Newgens?
 	const int64_t timeEnd = platform_getMicroseconds();
 	LOG_INFO("Cached %d clubs in %zu microseconds", gameContext.clubCount, timeEnd - timeStart);
 }
 
-void cachePlayers(uint8_t half) {
+static void cachePlayers(const uint8_t half) {
 	const int64_t timeStart = platform_getMicroseconds();
 	uint64_t cached = 0;
 
@@ -198,10 +183,6 @@ void cachePlayers(uint8_t half) {
 		const uint32_t playerAddress = (uint32_t)hexBytesToInt(bytes, 4);
 		const uint32_t personAddress = getPersonAddressFromPlayerAddress(processContext.handle, playerAddress);
 		const Player player = getPlayer(processContext.handle, true, personAddress, playerAddress);
-		// Each worker owns a disjoint index range [start, end) and writes in
-		// place. Invalid players are left zeroed (uid == 0) for compactPlayers()
-		// to strip out afterwards, so the worker never touches shared counters
-		// or another thread's slots.
 		if (!player.uid) {
 			continue;
 		}
@@ -229,8 +210,11 @@ void cachePlayers(uint8_t half) {
 // gameContext.players is a dense [0, playerCount) range again. Must run on a
 // single thread after every worker has been joined.
 static void compactPlayers(void) {
+	const int64_t timeStart = platform_getMicroseconds();
+
 	uint64_t write = 0;
-	for (uint64_t read = 0; read < gameContext.playerCount; ++read) {
+	uint64_t read = 0;
+	for (; read < gameContext.playerCount; ++read) {
 		if (gameContext.players[read].uid == 0) {
 			continue;
 		}
@@ -240,6 +224,9 @@ static void compactPlayers(void) {
 		++write;
 	}
 	gameContext.playerCount = write;
+
+	const int64_t timeEnd = platform_getMicroseconds();
+	LOG_INFO("Compacted players in %zu microseconds (discarded %d)", timeEnd - timeStart, read - write);
 }
 
 void runMultiThreadedCache(void) {
@@ -262,54 +249,28 @@ void runMultiThreadedCache(void) {
 		return;
 	}
 
-	#ifdef ARCH_WIN
 	for (uint8_t i = 0; i < THREAD_COUNT; i++) {
-		threads[i] = CreateThread(
-			NULL,
-			0,
-			threadFunction,
-			(LPVOID)(intptr_t)(i + 1),
-			0,
-			NULL
-		);
+		char buffer[12] = {0};
+		snprintf(buffer, sizeof(buffer), "worker-%d", i);
+		g_thread_new(buffer, threadFunction, (void*)(uintptr_t)(i + 1));
+	}
+}
 
-		if (threads[i] == NULL) {
-			LOG_ERROR("Failed to create thread %d", i + 1);
-		}
+static bool hasClubPartOneFinished = false;
+static bool hasClubPartTwoFinished = false;
+
+static gboolean onThreadComplete(gpointer userData) {
+	const uint8_t threadIndex = (uint8_t)userData;
+	if (threadIndex == 3) {
+		hasClubPartOneFinished = true;
+	} else if (threadIndex == 4) {
+		hasClubPartTwoFinished = true;
 	}
 
-	// Wait for every worker to finish before reading/mutating shared caches.
-	for (uint8_t i = 0; i < THREAD_COUNT; i++) {
-		if (threads[i] != NULL) {
-			WaitForSingleObject(threads[i], INFINITE);
-			CloseHandle(threads[i]);
-			threads[i] = NULL;
-		}
-	}
-	#else
-	bool created[THREAD_COUNT] = {false};
-	for (uint8_t i = 0; i < THREAD_COUNT; i++) {
-		if (pthread_create(
-			&threads[i],
-			NULL,
-			threadFunction,
-			(void*)(intptr_t)(i + 1)
-		) == 0) {
-			created[i] = true;
-		} else {
-			LOG_ERROR("Failed to create thread %d", i + 1);
-		}
+	// Back in main thread, safe to update UI
+	if (hasClubPartOneFinished && hasClubPartTwoFinished) {
+		compactPlayers();
 	}
 
-	// Wait for every worker to finish before reading/mutating shared caches.
-	for (uint8_t i = 0; i < THREAD_COUNT; i++) {
-		if (created[i]) {
-			pthread_join(threads[i], NULL);
-		}
-	}
-	#endif
-
-	// Safe now that all workers have been joined: single-threaded compaction of
-	// the players written by the two player workers.
-	compactPlayers();
+	return G_SOURCE_REMOVE;
 }
