@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 
 #include "formatter.h"
+#include "app/maths.h"
 #include "app/types.h"
 #include "core/logger.h"
 
@@ -59,4 +60,16 @@ void formatter_printCurrency(char *outString) {
 	// UTF-8 encoding of U+00A3 (£)
 	outString[0] = (char)0xC2;
 	outString[1] = (char)0xA3;
+}
+
+/**
+ * Returns a string containing your rating, colourised on a scale of 1-120
+ * @param rating
+ * @param outString - should be at least 44 bytes
+ */
+void formatter_formatRating(const float rating, char *outString) {
+	const uint8_t value = (uint8_t)((rating < MAX_RATING_VALUE ? rating / MAX_RATING_VALUE : 1.f) * 120);
+	char colour[9];
+	hueToHex(value, colour);
+	snprintf(outString, 44, "<span foreground=\"%s\">%.2f%%</span>", colour, rating);
 }

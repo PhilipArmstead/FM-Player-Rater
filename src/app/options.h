@@ -3,11 +3,4 @@
 
 #pragma once
 
-typedef enum LogLevel {
-	LogLevelFatal,
-	LogLevelError,
-	LogLevelWarn,
-	LogLevelInfo,
-	LogLevelDebug,
-	LogLevelCount
-} LogLevel;
+void options_init(void);

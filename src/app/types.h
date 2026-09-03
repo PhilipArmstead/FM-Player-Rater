@@ -9,6 +9,8 @@
 #include "types/common.h"
 #include "types/entities.h"
 #include "types/logger.h"
+#include "types/position.h"
+#include "types/options.h"
 #include "types/process.h"
 #include "types/search.h"
 #include "types/shared-pointer.h"
@@ -61,6 +63,7 @@ typedef struct {
 typedef struct {
 	FilterBuffer filterBuffer;
 	FilterOptions filterOptions;
+	Options options;
 	char gameVersion[GAME_STATUS_STRING_BUFFER_SIZE];
 	SearchDatalist *dataList;
 	SharedPointer *searchResults;

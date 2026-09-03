@@ -1,9 +1,10 @@
 // SPDX-FileCopyrightText: © 2026 Phil Armstead <philarmstead@mailbox.org>
 // SPDX-License-Identifier: GPL-3.0-or-later
 
-#include "app/ui.h"
-#include "app/helpers/vector.h"
+#include "app/helpers/formatter.h"
 #include "app/helpers/vector-shared-pointer.h"
+#include "app/helpers/vector.h"
+#include "app/ui.h"
 #include "core/logger.h"
 #include "platform/platform.h"
 
@@ -12,9 +13,14 @@ extern GameContext gameContext;
 
 #define INFEASIBLE_COST 1e9f
 
-static float getPlayerPositionalRating(const Player *player, uint8_t position);
+static float getPlayerPositionalRating(const Player *player, PositionCode position);
 static void hungarian(float **matrix, uint32_t n, uint32_t *outAssignment);
-static void assignFormation(const uint32_t *playerIds, const uint8_t positions[11], BestElevenRow outSlots[11]);
+static void assignFormation(
+	const uint32_t *playerIds,
+	const PositionCode positions[FORMATION_POSITION_COUNT],
+	BestElevenRow outSlots[FORMATION_POSITION_COUNT]);
+static void renderBestElevenTable(WindowContext context);
+static void onFormationSelected(GObject *dropDown, GParamSpec *pspec, gpointer userData);
 
 WindowContext ui_createBestElevenWindow(void) {
 	const WindowContext context = openWindow("best-xi", "window:best-xi");
@@ -22,17 +28,40 @@ WindowContext ui_createBestElevenWindow(void) {
 
 	SharedPointer *snapshot = gameContext.searchResults;
 	sharedPointer_ref(snapshot);
-	g_object_set_data_full(
-		G_OBJECT(context.window),
-		"best-xi:search-results",
-		snapshot,
-		(GDestroyNotify)sharedPointer_unref
-	);
+	g_object_set_data_full(G_OBJECT(context.window), "best-xi:search-results", snapshot, (GDestroyNotify)sharedPointer_unref);
+
+	GtkDropDown *formationDropDown = GTK_DROP_DOWN(gtk_builder_get_object(context.builder, "dropdown:formation"));
+
+	// Heap allocate WindowContext so I can get it from inside this callback
+	WindowContext *cbContext = g_new(WindowContext, 1);
+	*cbContext = context; // copy the two pointers
+	g_signal_connect_data(
+		formationDropDown,
+		"notify::selected",
+		G_CALLBACK(onFormationSelected),
+		cbContext,
+		(GClosureNotify)g_free,
+		0); // g_free(cbContext) on disconnect
 
 	return context;
 }
 
-void ui_renderBestElevenWindow(WindowContext context) {
+void ui_renderBestElevenWindow(const WindowContext context) {
+	GtkStringList *formationList = GTK_STRING_LIST(gtk_builder_get_object(context.builder, "string-list:formation"));
+	while (gtk_string_list_get_string(formationList, 0) != NULL)
+		gtk_string_list_remove(formationList, 0);
+	for (uint8_t i = 0; i < gameContext.options.formationCount; ++i)
+		gtk_string_list_append(formationList, gameContext.options.formations[i].name);
+}
+
+static void renderBestElevenTable(const WindowContext context) {
+	GtkDropDown *formationDropDown = GTK_DROP_DOWN(gtk_builder_get_object(context.builder, "dropdown:formation"));
+	uint32_t selectedFormationIndex = gtk_drop_down_get_selected(formationDropDown);
+	if (selectedFormationIndex == GTK_INVALID_LIST_POSITION) {
+		selectedFormationIndex = 0;
+	}
+	const Formation formation = gameContext.options.formations[selectedFormationIndex];
+
 	const SharedPointer *snapshot = g_object_get_data(G_OBJECT(context.window), "best-xi:search-results");
 
 	GtkListBox *listBox = GTK_LIST_BOX(gtk_builder_get_object(context.builder, "list-box:best-xi"));
@@ -41,28 +70,12 @@ void ui_renderBestElevenWindow(WindowContext context) {
 	const uint32_t *playerIds = snapshot ? snapshot->data : NULL;
 	const size_t playerCount = playerIds ? vector_length(playerIds) : 0;
 
-	const uint16_t o = PLAYER_OFFSET_POSITION_GK;
-	const BestElevenFormation defaultFormation = (BestElevenFormation){
-		.name = "4-4-2",
-		.positions = {
-			PLAYER_OFFSET_POSITION_GK - o,
-			PLAYER_OFFSET_POSITION_DL - o,
-			PLAYER_OFFSET_POSITION_DC - o,
-			PLAYER_OFFSET_POSITION_DC - o,
-			PLAYER_OFFSET_POSITION_DR - o,
-			PLAYER_OFFSET_POSITION_ML - o,
-			PLAYER_OFFSET_POSITION_MC - o,
-			PLAYER_OFFSET_POSITION_MC - o,
-			PLAYER_OFFSET_POSITION_MR - o,
-			PLAYER_OFFSET_POSITION_ST - o,
-			PLAYER_OFFSET_POSITION_ST - o
-		},
-	};
+
 	BestElevenRow rows[FORMATION_POSITION_COUNT] = {0};
 	const int64_t timeStart = platform_getMicroseconds();
-	assignFormation(playerIds, defaultFormation.positions, rows);
+	assignFormation(playerIds, formation.positions, rows);
 	const int64_t timeEnd = platform_getMicroseconds();
-	LOG_INFO("Found best XI for %d players in %zu microseconds", playerCount, timeEnd - timeStart);
+	LOG_DEBUG("Found best XI for %d players in %zu microseconds", playerCount, timeEnd - timeStart);
 
 	for (uint8_t i = 0; i < FORMATION_POSITION_COUNT; ++i) {
 		GtkWidget *widgetRow = gtk_list_box_row_new();
@@ -74,40 +87,20 @@ void ui_renderBestElevenWindow(WindowContext context) {
 		GtkWidget *widgetGrid = gtk_grid_new();
 		GtkGrid *grid = GTK_GRID(widgetGrid);
 		gtk_grid_set_column_spacing(grid, 12);
-		gtk_widget_set_margin_bottom(widgetGrid, 4);
-		gtk_widget_set_margin_end(widgetGrid, 4);
-		gtk_widget_set_margin_start(widgetGrid, 4);
-		gtk_widget_set_margin_top(widgetGrid, 4);
 
-		static const char *positionNames[15] = {
-			"GK",
-			"SW",
-			"DL",
-			"DC",
-			"DR",
-			"DM",
-			"ML",
-			"MC",
-			"MR",
-			"AML",
-			"AMC",
-			"AMR",
-			"ST",
-			"WBL",
-			"WBR"
-		};
 
-		GtkWidget *widgetLabelPosition = gtk_label_new(positionNames[defaultFormation.positions[i]]);
-		gtk_widget_add_css_class(widgetLabelPosition, "monospace");
+		GtkWidget *widgetLabelPosition = gtk_label_new(positionCodeNames[formation.positions[i]]);
+		gtk_widget_add_css_class(widgetLabelPosition, "position");
 
 		GtkWidget *widgetLabelPlayer = gtk_label_new("");
 		GtkWidget *widgetLabelRating = gtk_label_new("");
-		GtkWidget *widgetButton = gtk_button_new();
 
 		const Player *player = rows[i].player;
 		if (player != NULL) {
 			gtk_widget_set_hexpand(widgetLabelPlayer, true);
 			gtk_label_set_xalign(GTK_LABEL(widgetLabelPlayer), 0);
+			gtk_label_set_yalign(GTK_LABEL(widgetLabelPlayer), GTK_ALIGN_CENTER);
+			gtk_widget_add_css_class(widgetLabelPlayer, "name");
 
 			if (player->commonName[0] == '\0') {
 				char buffer[PERSON_FORENAME_LENGTH + PERSON_SURNAME_LENGTH + 2];
@@ -117,26 +110,25 @@ void ui_renderBestElevenWindow(WindowContext context) {
 				gtk_label_set_text(GTK_LABEL(widgetLabelPlayer), player->commonName);
 			}
 
-			char ratingBuffer[8] = {0};
-			snprintf(ratingBuffer, sizeof(ratingBuffer), "%.2f%%", rows[i].rating);
-			gtk_label_set_text(GTK_LABEL(widgetLabelRating), ratingBuffer);
+			char ratingBuffer[44];
+			formatter_formatRating(player->ratings[0].value, ratingBuffer);
+			gtk_label_set_markup(GTK_LABEL(widgetLabelRating), ratingBuffer);
 			gtk_label_set_xalign(GTK_LABEL(widgetLabelRating), 1.f);
-			gtk_widget_add_css_class(widgetLabelRating, "success");
-			GtkWidget *widgetCrossImage = gtk_image_new_from_icon_name("window-close-symbolic");
-			gtk_button_set_child(GTK_BUTTON(widgetButton), widgetCrossImage);
-			// TODO: connect to callback to remove player from best-XI
 		}
 
 		gtk_grid_attach(grid, widgetLabelPosition, 1, i, 1, 1);
 		gtk_grid_attach(grid, widgetLabelPlayer, 2, i, 1, 1);
 		gtk_grid_attach(grid, widgetLabelRating, 3, i, 1, 1);
-		if (player != NULL) {
-			gtk_grid_attach(grid, widgetButton, 4, i, 1, 1);
-		}
-		gtk_list_box_append(listBox, widgetGrid);
+		gtk_list_box_row_set_child(row, widgetGrid);
 
 		// TODO: show age/condition, if we're going to filter on them
 	}
+}
+
+static void onFormationSelected(GObject *dropDown, GParamSpec *pspec, gpointer userData) {
+	(void)dropDown;
+	(void)pspec;
+	renderBestElevenTable(*(const WindowContext *)userData);
 }
 
 /**
@@ -225,37 +217,37 @@ static void hungarian(float **matrix, const uint32_t n, uint32_t *outAssignment)
  * INFEASIBLE_COST if the player is not sufficiently proficient in `position`
  * or has no rating for the corresponding role. Higher is better.
  */
-static float getPlayerPositionalRating(const Player *player, const uint8_t position) {
+static float getPlayerPositionalRating(const Player *player, const PositionCode position) {
 	if (player->positions[position] < MINIMUM_POSITIONAL_PROFICIENCY) {
 		return INFEASIBLE_COST;
 	}
 
 	PositionGrouped groupedPosition;
 	switch (position) {
-		case PLAYER_OFFSET_POSITION_GK - PLAYER_OFFSET_POSITION_GK:
+		case POSITION_CODE_GK:
 			groupedPosition = POSITION_GROUPED_GK;
 			break;
-		case PLAYER_OFFSET_POSITION_DL - PLAYER_OFFSET_POSITION_GK:
-		case PLAYER_OFFSET_POSITION_DR - PLAYER_OFFSET_POSITION_GK:
+		case POSITION_CODE_DL:
+		case POSITION_CODE_DR:
 			groupedPosition = POSITION_GROUPED_FB;
 			break;
-		case PLAYER_OFFSET_POSITION_WBL - PLAYER_OFFSET_POSITION_GK:
-		case PLAYER_OFFSET_POSITION_WBR - PLAYER_OFFSET_POSITION_GK:
+		case POSITION_CODE_WBL:
+		case POSITION_CODE_WBR:
 			groupedPosition = POSITION_GROUPED_WB;
 			break;
-		case PLAYER_OFFSET_POSITION_DC - PLAYER_OFFSET_POSITION_GK:
+		case POSITION_CODE_DC:
 			groupedPosition = POSITION_GROUPED_CB;
 			break;
-		case PLAYER_OFFSET_POSITION_DM - PLAYER_OFFSET_POSITION_GK:
+		case POSITION_CODE_DM:
 			groupedPosition = POSITION_GROUPED_DM;
 			break;
-		case PLAYER_OFFSET_POSITION_ML - PLAYER_OFFSET_POSITION_GK:
-		case PLAYER_OFFSET_POSITION_AML - PLAYER_OFFSET_POSITION_GK:
-		case PLAYER_OFFSET_POSITION_MR - PLAYER_OFFSET_POSITION_GK:
-		case PLAYER_OFFSET_POSITION_AMR - PLAYER_OFFSET_POSITION_GK:
+		case POSITION_CODE_ML:
+		case POSITION_CODE_AML:
+		case POSITION_CODE_MR:
+		case POSITION_CODE_AMR:
 			groupedPosition = POSITION_GROUPED_W;
 			break;
-		case PLAYER_OFFSET_POSITION_AMC - PLAYER_OFFSET_POSITION_GK:
+		case POSITION_CODE_AMC:
 			groupedPosition = POSITION_GROUPED_AM;
 			break;
 		default:
@@ -282,8 +274,7 @@ static void insertTopK(
 	uint8_t *count,
 	const uint8_t capacity,
 	const uint32_t searchIndex,
-	const float rating
-) {
+	const float rating) {
 	if (*count < capacity) {
 		uint8_t pos = (*count)++;
 		while (pos > 0 && topValues[pos - 1] < rating) {
@@ -323,9 +314,8 @@ static void insertTopK(
  */
 static void assignFormation(
 	const uint32_t *playerIds,
-	const uint8_t positions[FORMATION_POSITION_COUNT],
-	BestElevenRow outSlots[FORMATION_POSITION_COUNT]
-) {
+	const PositionCode positions[FORMATION_POSITION_COUNT],
+	BestElevenRow outSlots[FORMATION_POSITION_COUNT]) {
 	// Default every slot to empty; filled in as the solver assigns players.
 	for (uint8_t i = 0; i < FORMATION_POSITION_COUNT; ++i) {
 		outSlots[i] = (BestElevenRow){.player = NULL, .rating = 0};
@@ -341,7 +331,7 @@ static void assignFormation(
 	}
 
 	// Distinct positions requested by the formation.
-	uint8_t distinctPositions[FORMATION_POSITION_COUNT];
+	PositionCode distinctPositions[FORMATION_POSITION_COUNT];
 	uint8_t distinctCount = 0;
 	for (uint8_t i = 0; i < FORMATION_POSITION_COUNT; ++i) {
 		bool seen = false;
@@ -366,7 +356,7 @@ static void assignFormation(
 	float topValues[FORMATION_POSITION_COUNT];
 
 	for (uint8_t d = 0; d < distinctCount; ++d) {
-		const uint8_t position = distinctPositions[d];
+		const PositionCode position = distinctPositions[d];
 		uint8_t topCount = 0;
 		for (uint32_t j = 0; j < playerCount; ++j) {
 			const float rating = getPlayerPositionalRating(&gameContext.players[playerIds[j]], position);
@@ -418,7 +408,7 @@ static void assignFormation(
 		const Player *player = &gameContext.players[pid];
 		const float rating = getPlayerPositionalRating(player, positions[i]);
 		if (rating >= INFEASIBLE_COST) {
-			LOG_INFO("No player is eligible for position %d", positions[i]);
+			LOG_DEBUG("No player is eligible for position \"%s\"", positionCodeNames[positions[i]]);
 			continue;
 		}
 

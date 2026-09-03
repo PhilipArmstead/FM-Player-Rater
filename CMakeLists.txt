@@ -74,6 +74,7 @@ add_executable(fm_player_rater
 	src/app/callbacks.c
 	src/app/data.c
 	src/app/game-status.c
+	src/app/options.c
 	src/app/player-table.c
 	src/app/player.c
 	src/app/search.c

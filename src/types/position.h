@@ -1,0 +1,28 @@
+// SPDX-FileCopyrightText: © 2026 Phil Armstead <philarmstead@mailbox.org>
+// SPDX-License-Identifier: GPL-3.0-or-later
+
+#pragma once
+
+typedef enum PositionCode {
+	POSITION_CODE_GK = 0,
+	POSITION_CODE_SW,
+	POSITION_CODE_DL,
+	POSITION_CODE_DC,
+	POSITION_CODE_DR,
+	POSITION_CODE_DM,
+	POSITION_CODE_ML,
+	POSITION_CODE_MC,
+	POSITION_CODE_MR,
+	POSITION_CODE_AML,
+	POSITION_CODE_AMC,
+	POSITION_CODE_AMR,
+	POSITION_CODE_ST,
+	POSITION_CODE_WBL,
+	POSITION_CODE_WBR,
+	POSITION_CODE_COUNT,
+} PositionCode;
+
+static const char *positionCodeNames[POSITION_CODE_COUNT] = {
+  "GK", "SW", "DL", "DC", "DR", "DM", "ML", "MC", "MR",
+  "AML", "AMC", "AMR", "ST", "WBL", "WBR",
+};

@@ -18,8 +18,8 @@ static void writeToConsole(const char *message, const LogLevel colour, HANDLE co
 		return;
 	}
 
-	// Fatal, error, warn, info
-	static uint8_t levels[4] = {64, 4, 6, 2};
+	// Fatal, error, warn, info, debug
+	static uint8_t levels[4] = {64, 4, 6, 2, 8};
 	SetConsoleTextAttribute(consoleHandle, levels[colour]);
 
 	OutputDebugStringA(message);
@@ -152,5 +152,31 @@ int64_t platform_getMicroseconds(void) {
 	QueryPerformanceFrequency(&freq);
 	QueryPerformanceCounter(&count);
 	return count.QuadPart * 1000000 / freq.QuadPart;
+}
+
+// Paths
+void platform_getExecutableDirectory(char *buffer, const size_t size) {
+	if (size == 0) {
+		return;
+	}
+
+	const DWORD length = GetModuleFileNameA(NULL, buffer, (DWORD)size);
+	if (length == 0 || length >= size) {
+		platform_consoleWriteError("Could not resolve executable path\n", LogLevelError);
+		buffer[0] = '\0';
+		return;
+	}
+
+	buffer[length] = '\0';
+
+	// Strip the executable filename, leaving the directory (handle both separators).
+	char *lastSlash = strrchr(buffer, '\\');
+	char *lastForward = strrchr(buffer, '/');
+	if (lastForward > lastSlash) {
+		lastSlash = lastForward;
+	}
+	if (lastSlash) {
+		lastSlash[1] = '\0';
+	}
 }
 #endif

@@ -136,7 +136,7 @@ static void runSearch(SearchContext *context) {
 	}
 
 	const int64_t timeEnd = platform_getMicroseconds();
-	LOG_INFO("Searched %zu clubs in %zu microseconds", context->count, timeEnd - timeStart);
+	LOG_DEBUG("Searched %zu clubs in %zu microseconds", context->count, timeEnd - timeStart);
 
 	// Schedule UI update on the main thread
 	g_idle_add(updateUIWithResults, context);

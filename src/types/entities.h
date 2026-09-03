@@ -102,9 +102,3 @@ typedef struct {
 	float rating;
 } BestElevenRow;
 
-#define FORMATION_POSITION_COUNT 11
-
-typedef struct {
-	char *name;
-	uint8_t positions[FORMATION_POSITION_COUNT];
-} BestElevenFormation;

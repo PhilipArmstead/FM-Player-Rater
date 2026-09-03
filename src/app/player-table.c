@@ -2,10 +2,10 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 
 #include "player-table.h"
-#include "app/ui.h"
 #include "app/helpers/formatter.h"
 #include "app/helpers/vector-shared-pointer.h"
 #include "app/helpers/vector.h"
+#include "app/ui.h"
 #include "core/logger.h"
 #include "platform/platform.h"
 
@@ -64,11 +64,10 @@ static void search_player_row_set_property(
 	GObject *object,
 	const guint propertyId,
 	const GValue *value,
-	GParamSpec *pspec
-) {
+	GParamSpec *pspec) {
 	SearchPlayerRow *self = SEARCH_PLAYER_ROW(object);
 	if (propertyId == PROP_PLAYER) {
-		self->player = (Player*)g_value_get_pointer(value);
+		self->player = (Player *)g_value_get_pointer(value);
 	} else {
 		G_OBJECT_WARN_INVALID_PROPERTY_ID(object, propertyId, pspec);
 	}
@@ -109,8 +108,7 @@ static void search_player_row_class_init(SearchPlayerRowClass *klass) {
 		"player",
 		"Player",
 		"Player data",
-		G_PARAM_READWRITE | G_PARAM_CONSTRUCT_ONLY
-	);
+		G_PARAM_READWRITE | G_PARAM_CONSTRUCT_ONLY);
 	properties[PROP_AGE] = g_param_spec_uint(
 		"age",
 		"Age",
@@ -118,8 +116,7 @@ static void search_player_row_class_init(SearchPlayerRowClass *klass) {
 		0,
 		100,
 		0,
-		G_PARAM_READABLE
-	);
+		G_PARAM_READABLE);
 	properties[PROP_CA] = g_param_spec_uint(
 		"ca",
 		"CA",
@@ -127,8 +124,7 @@ static void search_player_row_class_init(SearchPlayerRowClass *klass) {
 		0,
 		200,
 		0,
-		G_PARAM_READABLE
-	);
+		G_PARAM_READABLE);
 	properties[PROP_PA] = g_param_spec_uint(
 		"pa",
 		"PA",
@@ -136,8 +132,7 @@ static void search_player_row_class_init(SearchPlayerRowClass *klass) {
 		0,
 		200,
 		0,
-		G_PARAM_READABLE
-	);
+		G_PARAM_READABLE);
 	properties[PROP_DIFF] = g_param_spec_uint(
 		"diff",
 		"Diff",
@@ -145,8 +140,7 @@ static void search_player_row_class_init(SearchPlayerRowClass *klass) {
 		0,
 		200,
 		0,
-		G_PARAM_READABLE
-	);
+		G_PARAM_READABLE);
 	properties[PROP_RATING] = g_param_spec_float(
 		"rating",
 		"Rating",
@@ -154,8 +148,7 @@ static void search_player_row_class_init(SearchPlayerRowClass *klass) {
 		0,
 		200,
 		0,
-		G_PARAM_READABLE
-	);
+		G_PARAM_READABLE);
 
 	g_object_class_install_properties(object_class, N_PROPS, properties);
 }
@@ -165,8 +158,7 @@ static void onRowClicked(
 	const uint8_t clickCount,
 	const double x,
 	const double y,
-	gpointer data
-) {
+	gpointer data) {
 	(void)gesture;
 	(void)x;
 	(void)y;
@@ -227,55 +219,51 @@ static GString *formatPlayerPositions(const uint8_t *positions) {
 	bool hasPrevious = false;
 	bool sameRow = false;
 
-	// Goalkeeper
-	if (positions[PLAYER_OFFSET_POSITION_GK - PLAYER_OFFSET_POSITION_GK] >= MINIMUM_POSITIONAL_PROFICIENCY) {
-		g_string_append(str, "GK");
+	if (positions[POSITION_CODE_GK] >= MINIMUM_POSITIONAL_PROFICIENCY) {
+		g_string_append(str, positionCodeNames[POSITION_CODE_GK]);
 		hasPrevious = true;
 	}
 
-	// Fullback
-	if (positions[PLAYER_OFFSET_POSITION_DL - PLAYER_OFFSET_POSITION_GK] >= MINIMUM_POSITIONAL_PROFICIENCY) {
+	if (positions[POSITION_CODE_DL] >= MINIMUM_POSITIONAL_PROFICIENCY) {
 		if (hasPrevious) {
 			g_string_append(str, ", ");
 		}
 		hasPrevious = true;
 		sameRow = true;
-		g_string_append(str, "DL");
+		g_string_append(str, positionCodeNames[POSITION_CODE_DL]);
 	}
 
-	if (positions[PLAYER_OFFSET_POSITION_DR - PLAYER_OFFSET_POSITION_GK] >= MINIMUM_POSITIONAL_PROFICIENCY) {
+	if (positions[POSITION_CODE_DR] >= MINIMUM_POSITIONAL_PROFICIENCY) {
 		if (sameRow) {
 			sameRow = false;
 			g_string_append(str, "/R");
 		} else if (hasPrevious) {
 			g_string_append(str, ", ");
 		} else {
-			g_string_append(str, "DR");
+			g_string_append(str, positionCodeNames[POSITION_CODE_DR]);
 		}
 		hasPrevious = true;
 	}
 
-	// Centre back
-	if (positions[PLAYER_OFFSET_POSITION_DC - PLAYER_OFFSET_POSITION_GK] >= MINIMUM_POSITIONAL_PROFICIENCY) {
+	if (positions[POSITION_CODE_DC] >= MINIMUM_POSITIONAL_PROFICIENCY) {
 		if (hasPrevious) {
 			g_string_append(str, ", ");
 		}
-		g_string_append(str, "DC");
+		g_string_append(str, positionCodeNames[POSITION_CODE_DC]);
 		hasPrevious = true;
 	}
 
 
-	// Wingback
-	if (positions[PLAYER_OFFSET_POSITION_WBL - PLAYER_OFFSET_POSITION_GK] >= MINIMUM_POSITIONAL_PROFICIENCY) {
+	if (positions[POSITION_CODE_WBL] >= MINIMUM_POSITIONAL_PROFICIENCY) {
 		if (hasPrevious) {
 			g_string_append(str, ", ");
 		}
 		hasPrevious = true;
 		sameRow = true;
-		g_string_append(str, "WBL");
+		g_string_append(str, positionCodeNames[POSITION_CODE_WBL]);
 	}
 
-	if (positions[PLAYER_OFFSET_POSITION_WBR - PLAYER_OFFSET_POSITION_GK] >= MINIMUM_POSITIONAL_PROFICIENCY) {
+	if (positions[POSITION_CODE_WBR] >= MINIMUM_POSITIONAL_PROFICIENCY) {
 		if (sameRow) {
 			sameRow = false;
 			g_string_append(str, "/R");
@@ -284,33 +272,31 @@ static GString *formatPlayerPositions(const uint8_t *positions) {
 				g_string_append(str, ", ");
 			}
 
-			g_string_append(str, "WBR");
+			g_string_append(str, positionCodeNames[POSITION_CODE_WBR]);
 		}
 		hasPrevious = true;
 	}
 
-	// Defensive midfielder
-	if (positions[PLAYER_OFFSET_POSITION_DM - PLAYER_OFFSET_POSITION_GK] >= MINIMUM_POSITIONAL_PROFICIENCY) {
+	if (positions[POSITION_CODE_DM] >= MINIMUM_POSITIONAL_PROFICIENCY) {
 		if (hasPrevious) {
 			g_string_append(str, ", ");
 		}
 		hasPrevious = true;
-		g_string_append(str, "DM");
+		g_string_append(str, positionCodeNames[POSITION_CODE_DM]);
 	}
 
 	sameRow = false;
 
-	// Winger
-	if (positions[PLAYER_OFFSET_POSITION_ML - PLAYER_OFFSET_POSITION_GK] >= MINIMUM_POSITIONAL_PROFICIENCY) {
+	if (positions[POSITION_CODE_ML] >= MINIMUM_POSITIONAL_PROFICIENCY) {
 		if (hasPrevious) {
 			g_string_append(str, ", ");
 		}
 		hasPrevious = true;
 		sameRow = true;
-		g_string_append(str, "ML");
+		g_string_append(str, positionCodeNames[POSITION_CODE_ML]);
 	}
 
-	if (positions[PLAYER_OFFSET_POSITION_MR - PLAYER_OFFSET_POSITION_GK] >= MINIMUM_POSITIONAL_PROFICIENCY) {
+	if (positions[POSITION_CODE_MR] >= MINIMUM_POSITIONAL_PROFICIENCY) {
 		if (sameRow) {
 			g_string_append(str, "/R");
 		} else {
@@ -318,33 +304,31 @@ static GString *formatPlayerPositions(const uint8_t *positions) {
 				g_string_append(str, ", ");
 			}
 
-			g_string_append(str, "MR");
+			g_string_append(str, positionCodeNames[POSITION_CODE_MR]);
 		}
 		hasPrevious = true;
 	}
 
 	sameRow = false;
 
-	// Central midfielder
-	if (positions[PLAYER_OFFSET_POSITION_MC - PLAYER_OFFSET_POSITION_GK] >= MINIMUM_POSITIONAL_PROFICIENCY) {
+	if (positions[POSITION_CODE_MC] >= MINIMUM_POSITIONAL_PROFICIENCY) {
 		if (hasPrevious) {
 			g_string_append(str, ", ");
 		}
 		hasPrevious = true;
-		g_string_append(str, "MC");
+		g_string_append(str, positionCodeNames[POSITION_CODE_MC]);
 	}
 
-	// Advanced winger
-	if (positions[PLAYER_OFFSET_POSITION_AML - PLAYER_OFFSET_POSITION_GK] >= MINIMUM_POSITIONAL_PROFICIENCY) {
+	if (positions[POSITION_CODE_AML] >= MINIMUM_POSITIONAL_PROFICIENCY) {
 		if (hasPrevious) {
 			g_string_append(str, ", ");
 		}
 		hasPrevious = true;
 		sameRow = true;
-		g_string_append(str, "AML");
+		g_string_append(str, positionCodeNames[POSITION_CODE_AML]);
 	}
 
-	if (positions[PLAYER_OFFSET_POSITION_AMR - PLAYER_OFFSET_POSITION_GK] >= MINIMUM_POSITIONAL_PROFICIENCY) {
+	if (positions[POSITION_CODE_AMR] >= MINIMUM_POSITIONAL_PROFICIENCY) {
 		if (sameRow) {
 			g_string_append(str, "/R");
 		} else {
@@ -352,29 +336,27 @@ static GString *formatPlayerPositions(const uint8_t *positions) {
 				g_string_append(str, ", ");
 			}
 
-			g_string_append(str, "AMR");
+			g_string_append(str, positionCodeNames[POSITION_CODE_AMR]);
 		}
 		hasPrevious = true;
 	}
 
 	sameRow = false;
 
-	// Attacking midfielder
-	if (positions[PLAYER_OFFSET_POSITION_AMC - PLAYER_OFFSET_POSITION_GK] >= MINIMUM_POSITIONAL_PROFICIENCY) {
+	if (positions[POSITION_CODE_AMC] >= MINIMUM_POSITIONAL_PROFICIENCY) {
 		if (hasPrevious) {
 			g_string_append(str, ", ");
 		}
 		hasPrevious = true;
-		g_string_append(str, "AMC");
+		g_string_append(str, positionCodeNames[POSITION_CODE_AMC]);
 	}
 
-	// Striker
-	if (positions[PLAYER_OFFSET_POSITION_ST - PLAYER_OFFSET_POSITION_GK] >= MINIMUM_POSITIONAL_PROFICIENCY) {
+	if (positions[POSITION_CODE_ST] >= MINIMUM_POSITIONAL_PROFICIENCY) {
 		if (hasPrevious) {
 			g_string_append(str, ", ");
 		}
 		hasPrevious = true;
-		g_string_append(str, "ST");
+		g_string_append(str, positionCodeNames[POSITION_CODE_ST]);
 	}
 
 	return str;
@@ -424,14 +406,9 @@ static void bindCellValue(const GtkSignalListItemFactory *factory, GtkListItem *
 			printNumeric(label, player->pa - player->ca);
 			break;
 		case COLUMN_RATING: {
-			const float rating = player->ratings[0].value;
-			const uint8_t value = (uint8_t)((rating < MAX_RATING_VALUE ? rating / MAX_RATING_VALUE : 1.f) * 120);
-
-			char colour[9];
-			hueToHex(value, colour);
-			char *buffer = g_markup_printf_escaped("<span foreground=\"%s\">%.2f%%</span>", colour, rating);
+			char buffer[44];
+			formatter_formatRating(player->ratings[0].value, buffer);
 			gtk_label_set_markup(GTK_LABEL(label), buffer);
-			g_free(buffer);
 			break;
 		}
 		case COLUMN_VALUE:
@@ -509,8 +486,7 @@ static void bindNationalitiesValue(const GtkSignalListItemFactory *factory, GtkL
 			pathToFlag,
 			sizeof(pathToFlag),
 			RESOURCE_BASE "/assets/flags/%s.png",
-			nation.code
-		);
+			nation.code);
 		GtkWidget *flagImage = gtk_image_new_from_resource(pathToFlag);
 		gtk_box_append(GTK_BOX(box), flagImage);
 		gtk_widget_set_tooltip_text(flagImage, nation.name);
@@ -562,8 +538,7 @@ static void onSorterChanged(GtkSorter *sorter, const GtkSorterChange change, gpo
 			adjustment,
 			"value-changed",
 			G_CALLBACK(onScrollGuard),
-			NULL
-		);
+			NULL);
 	}
 }
 
@@ -577,7 +552,7 @@ static GtkColumnViewColumn *createColumn(const char *title, const uint8_t column
 		g_signal_connect(factory, "bind", G_CALLBACK(bindStatusValue), NULL);
 	} else {
 		g_signal_connect(factory, "setup", G_CALLBACK(setupTextLabel), NULL);
-		g_signal_connect(factory, "bind", G_CALLBACK(bindCellValue), (void*)(uint64_t)columnType);
+		g_signal_connect(factory, "bind", G_CALLBACK(bindCellValue), (void *)(uint64_t)columnType);
 	}
 
 	GtkColumnViewColumn *column = gtk_column_view_column_new(title, factory);
@@ -593,29 +568,19 @@ static GtkColumnViewColumn *createColumn(const char *title, const uint8_t column
 void playerTable_init(void) {
 	GtkSorter *ageSorter = GTK_SORTER(
 		gtk_numeric_sorter_new(
-			gtk_property_expression_new(SEARCH_TYPE_PLAYER_ROW, NULL, "age")
-		)
-	);
+			gtk_property_expression_new(SEARCH_TYPE_PLAYER_ROW, NULL, "age")));
 	GtkSorter *caSorter = GTK_SORTER(
 		gtk_numeric_sorter_new(
-			gtk_property_expression_new(SEARCH_TYPE_PLAYER_ROW, NULL, "ca")
-		)
-	);
+			gtk_property_expression_new(SEARCH_TYPE_PLAYER_ROW, NULL, "ca")));
 	GtkSorter *paSorter = GTK_SORTER(
 		gtk_numeric_sorter_new(
-			gtk_property_expression_new(SEARCH_TYPE_PLAYER_ROW, NULL, "pa")
-		)
-	);
+			gtk_property_expression_new(SEARCH_TYPE_PLAYER_ROW, NULL, "pa")));
 	GtkSorter *diffSorter = GTK_SORTER(
 		gtk_numeric_sorter_new(
-			gtk_property_expression_new(SEARCH_TYPE_PLAYER_ROW, NULL, "diff")
-		)
-	);
+			gtk_property_expression_new(SEARCH_TYPE_PLAYER_ROW, NULL, "diff")));
 	GtkSorter *ratingSorter = GTK_SORTER(
 		gtk_numeric_sorter_new(
-			gtk_property_expression_new(SEARCH_TYPE_PLAYER_ROW, NULL, "rating")
-		)
-	);
+			gtk_property_expression_new(SEARCH_TYPE_PLAYER_ROW, NULL, "rating")));
 
 	GtkColumnView *table = GTK_COLUMN_VIEW(GTK_WIDGET(gtk_builder_get_object(gameContext.builder, "table:player-list")));
 	context.table = table;
@@ -650,7 +615,7 @@ void playerTable_init(void) {
 }
 
 static SearchPlayerRow *search_player_row_new(Player *player) {
-	return g_object_new(SEARCH_TYPE_PLAYER_ROW, "player", player,NULL);
+	return g_object_new(SEARCH_TYPE_PLAYER_ROW, "player", player, NULL);
 }
 
 void playerTable_clear(void) {
@@ -676,7 +641,7 @@ void playerTable_populate(void) {
 	GListStore *store = g_list_store_new(SEARCH_TYPE_PLAYER_ROW);
 	for (size_t i = 0; i < playerCount; ++i) {
 		const Player *player = &gameContext.players[playerIds[i]];
-		SearchPlayerRow *row = search_player_row_new((Player*)player);
+		SearchPlayerRow *row = search_player_row_new((Player *)player);
 		g_list_store_append(store, row);
 		g_object_unref(row);
 	}
@@ -684,19 +649,19 @@ void playerTable_populate(void) {
 	GtkSorter *sorter = g_object_ref(gtk_column_view_get_sorter(context.table));
 	GtkSortListModel *sortModel = gtk_sort_list_model_new(G_LIST_MODEL(store), sorter);
 	GtkSingleSelection *newSelection = gtk_single_selection_new(G_LIST_MODEL(sortModel));
-	gtk_single_selection_set_autoselect(newSelection,false);
+	gtk_single_selection_set_autoselect(newSelection, false);
 
 	GtkSingleSelection *oldSelection = context.selection;
 
 	gtk_column_view_set_model(context.table, GTK_SELECTION_MODEL(newSelection));
 
-	if (oldSelection != NULL) g_object_unref(oldSelection);
+	if (oldSelection != NULL)
+		g_object_unref(oldSelection);
 
 	context.selection = newSelection;
 
 	GtkLabel *resultsCountLabel = GTK_LABEL(
-		GTK_WIDGET(gtk_builder_get_object(gameContext.builder, "label:results-count"))
-	);
+		GTK_WIDGET(gtk_builder_get_object(gameContext.builder, "label:results-count")));
 	char resultCountString[32] = {0};
 	char formattedResults[12] = {0};
 	snprintf(formattedResults, 12, "%zu", playerCount);
@@ -705,11 +670,10 @@ void playerTable_populate(void) {
 		resultCountString,
 		sizeof(resultCountString),
 		playerCount == 1 ? "1 result" : "%s results",
-		formattedResults
-	);
+		formattedResults);
 	gtk_label_set_text(resultsCountLabel, resultCountString);
 
 	const int64_t timeEnd = platform_getMicroseconds();
 
-	LOG_INFO("Rendered %zu players in %lld microseconds", playerCount, (long long)(timeEnd - timeStart));
+	LOG_DEBUG("Rendered %zu players in %lld microseconds", playerCount, (long long)(timeEnd - timeStart));
 }
