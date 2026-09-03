@@ -64,10 +64,11 @@ static void search_player_row_set_property(
 	GObject *object,
 	const guint propertyId,
 	const GValue *value,
-	GParamSpec *pspec) {
+	GParamSpec *pspec
+) {
 	SearchPlayerRow *self = SEARCH_PLAYER_ROW(object);
 	if (propertyId == PROP_PLAYER) {
-		self->player = (Player *)g_value_get_pointer(value);
+		self->player = (Player*)g_value_get_pointer(value);
 	} else {
 		G_OBJECT_WARN_INVALID_PROPERTY_ID(object, propertyId, pspec);
 	}
@@ -108,7 +109,8 @@ static void search_player_row_class_init(SearchPlayerRowClass *klass) {
 		"player",
 		"Player",
 		"Player data",
-		G_PARAM_READWRITE | G_PARAM_CONSTRUCT_ONLY);
+		G_PARAM_READWRITE | G_PARAM_CONSTRUCT_ONLY
+	);
 	properties[PROP_AGE] = g_param_spec_uint(
 		"age",
 		"Age",
@@ -116,7 +118,8 @@ static void search_player_row_class_init(SearchPlayerRowClass *klass) {
 		0,
 		100,
 		0,
-		G_PARAM_READABLE);
+		G_PARAM_READABLE
+	);
 	properties[PROP_CA] = g_param_spec_uint(
 		"ca",
 		"CA",
@@ -124,7 +127,8 @@ static void search_player_row_class_init(SearchPlayerRowClass *klass) {
 		0,
 		200,
 		0,
-		G_PARAM_READABLE);
+		G_PARAM_READABLE
+	);
 	properties[PROP_PA] = g_param_spec_uint(
 		"pa",
 		"PA",
@@ -132,7 +136,8 @@ static void search_player_row_class_init(SearchPlayerRowClass *klass) {
 		0,
 		200,
 		0,
-		G_PARAM_READABLE);
+		G_PARAM_READABLE
+	);
 	properties[PROP_DIFF] = g_param_spec_uint(
 		"diff",
 		"Diff",
@@ -140,7 +145,8 @@ static void search_player_row_class_init(SearchPlayerRowClass *klass) {
 		0,
 		200,
 		0,
-		G_PARAM_READABLE);
+		G_PARAM_READABLE
+	);
 	properties[PROP_RATING] = g_param_spec_float(
 		"rating",
 		"Rating",
@@ -148,7 +154,8 @@ static void search_player_row_class_init(SearchPlayerRowClass *klass) {
 		0,
 		200,
 		0,
-		G_PARAM_READABLE);
+		G_PARAM_READABLE
+	);
 
 	g_object_class_install_properties(object_class, N_PROPS, properties);
 }
@@ -158,7 +165,8 @@ static void onRowClicked(
 	const uint8_t clickCount,
 	const double x,
 	const double y,
-	gpointer data) {
+	gpointer data
+) {
 	(void)gesture;
 	(void)x;
 	(void)y;
@@ -486,7 +494,8 @@ static void bindNationalitiesValue(const GtkSignalListItemFactory *factory, GtkL
 			pathToFlag,
 			sizeof(pathToFlag),
 			RESOURCE_BASE "/assets/flags/%s.png",
-			nation.code);
+			nation.code
+		);
 		GtkWidget *flagImage = gtk_image_new_from_resource(pathToFlag);
 		gtk_box_append(GTK_BOX(box), flagImage);
 		gtk_widget_set_tooltip_text(flagImage, nation.name);
@@ -538,7 +547,8 @@ static void onSorterChanged(GtkSorter *sorter, const GtkSorterChange change, gpo
 			adjustment,
 			"value-changed",
 			G_CALLBACK(onScrollGuard),
-			NULL);
+			NULL
+		);
 	}
 }
 
@@ -568,19 +578,29 @@ static GtkColumnViewColumn *createColumn(const char *title, const uint8_t column
 void playerTable_init(void) {
 	GtkSorter *ageSorter = GTK_SORTER(
 		gtk_numeric_sorter_new(
-			gtk_property_expression_new(SEARCH_TYPE_PLAYER_ROW, NULL, "age")));
+			gtk_property_expression_new(SEARCH_TYPE_PLAYER_ROW, NULL, "age")
+		)
+	);
 	GtkSorter *caSorter = GTK_SORTER(
 		gtk_numeric_sorter_new(
-			gtk_property_expression_new(SEARCH_TYPE_PLAYER_ROW, NULL, "ca")));
+			gtk_property_expression_new(SEARCH_TYPE_PLAYER_ROW, NULL, "ca")
+		)
+	);
 	GtkSorter *paSorter = GTK_SORTER(
 		gtk_numeric_sorter_new(
-			gtk_property_expression_new(SEARCH_TYPE_PLAYER_ROW, NULL, "pa")));
+			gtk_property_expression_new(SEARCH_TYPE_PLAYER_ROW, NULL, "pa")
+		)
+	);
 	GtkSorter *diffSorter = GTK_SORTER(
 		gtk_numeric_sorter_new(
-			gtk_property_expression_new(SEARCH_TYPE_PLAYER_ROW, NULL, "diff")));
+			gtk_property_expression_new(SEARCH_TYPE_PLAYER_ROW, NULL, "diff")
+		)
+	);
 	GtkSorter *ratingSorter = GTK_SORTER(
 		gtk_numeric_sorter_new(
-			gtk_property_expression_new(SEARCH_TYPE_PLAYER_ROW, NULL, "rating")));
+			gtk_property_expression_new(SEARCH_TYPE_PLAYER_ROW, NULL, "rating")
+		)
+	);
 
 	GtkColumnView *table = GTK_COLUMN_VIEW(GTK_WIDGET(gtk_builder_get_object(gameContext.builder, "table:player-list")));
 	context.table = table;
@@ -641,7 +661,7 @@ void playerTable_populate(void) {
 	GListStore *store = g_list_store_new(SEARCH_TYPE_PLAYER_ROW);
 	for (size_t i = 0; i < playerCount; ++i) {
 		const Player *player = &gameContext.players[playerIds[i]];
-		SearchPlayerRow *row = search_player_row_new((Player *)player);
+		SearchPlayerRow *row = search_player_row_new((Player*)player);
 		g_list_store_append(store, row);
 		g_object_unref(row);
 	}
@@ -661,7 +681,8 @@ void playerTable_populate(void) {
 	context.selection = newSelection;
 
 	GtkLabel *resultsCountLabel = GTK_LABEL(
-		GTK_WIDGET(gtk_builder_get_object(gameContext.builder, "label:results-count")));
+		GTK_WIDGET(gtk_builder_get_object(gameContext.builder, "label:results-count"))
+	);
 	char resultCountString[32] = {0};
 	char formattedResults[12] = {0};
 	snprintf(formattedResults, 12, "%zu", playerCount);
@@ -670,7 +691,8 @@ void playerTable_populate(void) {
 		resultCountString,
 		sizeof(resultCountString),
 		playerCount == 1 ? "1 result" : "%s results",
-		formattedResults);
+		formattedResults
+	);
 	gtk_label_set_text(resultsCountLabel, resultCountString);
 
 	const int64_t timeEnd = platform_getMicroseconds();

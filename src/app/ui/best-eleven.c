@@ -1,13 +1,20 @@
 // SPDX-FileCopyrightText: © 2026 Phil Armstead <philarmstead@mailbox.org>
 // SPDX-License-Identifier: GPL-3.0-or-later
 
+#include "app/ui.h"
 #include "app/helpers/formatter.h"
 #include "app/helpers/vector-shared-pointer.h"
 #include "app/helpers/vector.h"
-#include "app/ui.h"
 #include "core/logger.h"
 #include "platform/platform.h"
 
+
+typedef struct {
+	uint8_t minAge;
+	uint8_t maxAge;
+	uint16_t minCondition;
+	uint16_t maxCondition;
+} BestElevenFilters;
 
 extern GameContext gameContext;
 
@@ -18,9 +25,12 @@ static void hungarian(float **matrix, uint32_t n, uint32_t *outAssignment);
 static void assignFormation(
 	const uint32_t *playerIds,
 	const PositionCode positions[FORMATION_POSITION_COUNT],
-	BestElevenRow outSlots[FORMATION_POSITION_COUNT]);
+	BestElevenFilters filters,
+	BestElevenRow outSlots[FORMATION_POSITION_COUNT]
+);
 static void renderBestElevenTable(WindowContext context);
-static void onFormationSelected(GObject *dropDown, GParamSpec *pspec, gpointer userData);
+static void onFormationSelected(GObject *object, GParamSpec *pspec, gpointer userData);
+static void onFilterChange(GObject *object, gpointer userData);
 
 WindowContext ui_createBestElevenWindow(void) {
 	const WindowContext context = openWindow("best-xi", "window:best-xi");
@@ -28,7 +38,12 @@ WindowContext ui_createBestElevenWindow(void) {
 
 	SharedPointer *snapshot = gameContext.searchResults;
 	sharedPointer_ref(snapshot);
-	g_object_set_data_full(G_OBJECT(context.window), "best-xi:search-results", snapshot, (GDestroyNotify)sharedPointer_unref);
+	g_object_set_data_full(
+		G_OBJECT(context.window),
+		"best-xi:search-results",
+		snapshot,
+		(GDestroyNotify)sharedPointer_unref
+	);
 
 	GtkDropDown *formationDropDown = GTK_DROP_DOWN(gtk_builder_get_object(context.builder, "dropdown:formation"));
 
@@ -41,7 +56,31 @@ WindowContext ui_createBestElevenWindow(void) {
 		G_CALLBACK(onFormationSelected),
 		cbContext,
 		(GClosureNotify)g_free,
-		0); // g_free(cbContext) on disconnect
+		0
+	);
+
+	GtkSpinButton *spinMinAge = GTK_SPIN_BUTTON(gtk_builder_get_object(context.builder, "spin:min-age"));
+	GtkSpinButton *spinMaxAge = GTK_SPIN_BUTTON(gtk_builder_get_object(context.builder, "spin:max-age"));
+	GtkSpinButton *spinMinCondition = GTK_SPIN_BUTTON(gtk_builder_get_object(context.builder, "spin:min-condition"));
+	GtkSpinButton *spinMaxCondition = GTK_SPIN_BUTTON(gtk_builder_get_object(context.builder, "spin:max-condition"));
+	g_signal_connect_data(spinMinAge, "value-changed",G_CALLBACK(onFilterChange), cbContext, (GClosureNotify)g_free, 0);
+	g_signal_connect_data(spinMaxAge, "value-changed",G_CALLBACK(onFilterChange), cbContext, (GClosureNotify)g_free, 0);
+	g_signal_connect_data(
+		spinMinCondition,
+		"value-changed",
+		G_CALLBACK(onFilterChange),
+		cbContext,
+		(GClosureNotify)g_free,
+		0
+	);
+	g_signal_connect_data(
+		spinMaxCondition,
+		"value-changed",
+		G_CALLBACK(onFilterChange),
+		cbContext,
+		(GClosureNotify)g_free,
+		0
+	);
 
 	return context;
 }
@@ -70,10 +109,22 @@ static void renderBestElevenTable(const WindowContext context) {
 	const uint32_t *playerIds = snapshot ? snapshot->data : NULL;
 	const size_t playerCount = playerIds ? vector_length(playerIds) : 0;
 
+	GtkSpinButton *spinMinAge = GTK_SPIN_BUTTON(gtk_builder_get_object(context.builder, "spin:min-age"));
+	GtkSpinButton *spinMaxAge = GTK_SPIN_BUTTON(gtk_builder_get_object(context.builder, "spin:max-age"));
+	GtkSpinButton *spinMinCondition = GTK_SPIN_BUTTON(gtk_builder_get_object(context.builder, "spin:min-condition"));
+	GtkSpinButton *spinMaxCondition = GTK_SPIN_BUTTON(gtk_builder_get_object(context.builder, "spin:max-condition"));
+
+	const BestElevenFilters filters = {
+		.maxAge = (uint8_t)gtk_spin_button_get_value_as_int(spinMaxAge),
+		.minAge = (uint8_t)gtk_spin_button_get_value_as_int(spinMinAge),
+		// Convert percentages to 0-10000 scale
+		.minCondition = (uint16_t)gtk_spin_button_get_value_as_int(spinMinCondition) * 100,
+		.maxCondition = (uint16_t)gtk_spin_button_get_value_as_int(spinMaxCondition) * 100,
+	};
 
 	BestElevenRow rows[FORMATION_POSITION_COUNT] = {0};
 	const int64_t timeStart = platform_getMicroseconds();
-	assignFormation(playerIds, formation.positions, rows);
+	assignFormation(playerIds, formation.positions, filters, rows);
 	const int64_t timeEnd = platform_getMicroseconds();
 	LOG_DEBUG("Found best XI for %d players in %zu microseconds", playerCount, timeEnd - timeStart);
 
@@ -90,6 +141,7 @@ static void renderBestElevenTable(const WindowContext context) {
 
 
 		GtkWidget *widgetLabelPosition = gtk_label_new(positionCodeNames[formation.positions[i]]);
+		gtk_label_set_yalign(GTK_LABEL(widgetLabelPosition), GTK_ALIGN_CENTER);
 		gtk_widget_add_css_class(widgetLabelPosition, "position");
 
 		GtkWidget *widgetLabelPlayer = gtk_label_new("");
@@ -125,10 +177,15 @@ static void renderBestElevenTable(const WindowContext context) {
 	}
 }
 
-static void onFormationSelected(GObject *dropDown, GParamSpec *pspec, gpointer userData) {
-	(void)dropDown;
+static void onFormationSelected(GObject *object, GParamSpec *pspec, gpointer userData) {
+	(void)object;
 	(void)pspec;
-	renderBestElevenTable(*(const WindowContext *)userData);
+	renderBestElevenTable(*(const WindowContext*)userData);
+}
+
+static void onFilterChange(GObject *object, gpointer userData) {
+	(void)object;
+	renderBestElevenTable(*(const WindowContext*)userData);
 }
 
 /**
@@ -274,7 +331,8 @@ static void insertTopK(
 	uint8_t *count,
 	const uint8_t capacity,
 	const uint32_t searchIndex,
-	const float rating) {
+	const float rating
+) {
 	if (*count < capacity) {
 		uint8_t pos = (*count)++;
 		while (pos > 0 && topValues[pos - 1] < rating) {
@@ -315,7 +373,9 @@ static void insertTopK(
 static void assignFormation(
 	const uint32_t *playerIds,
 	const PositionCode positions[FORMATION_POSITION_COUNT],
-	BestElevenRow outSlots[FORMATION_POSITION_COUNT]) {
+	const BestElevenFilters filters,
+	BestElevenRow outSlots[FORMATION_POSITION_COUNT]
+) {
 	// Default every slot to empty; filled in as the solver assigns players.
 	for (uint8_t i = 0; i < FORMATION_POSITION_COUNT; ++i) {
 		outSlots[i] = (BestElevenRow){.player = NULL, .rating = 0};
@@ -359,7 +419,18 @@ static void assignFormation(
 		const PositionCode position = distinctPositions[d];
 		uint8_t topCount = 0;
 		for (uint32_t j = 0; j < playerCount; ++j) {
-			const float rating = getPlayerPositionalRating(&gameContext.players[playerIds[j]], position);
+			const Player *player = &gameContext.players[playerIds[j]];
+
+			if (
+				player->age < filters.minAge ||
+				player->age > filters.maxAge ||
+				player->condition < filters.minCondition ||
+				player->condition > filters.maxCondition
+			) {
+				continue;
+			}
+
+			const float rating = getPlayerPositionalRating(player, position);
 			if (rating >= INFEASIBLE_COST) {
 				continue;
 			}
@@ -381,7 +452,7 @@ static void assignFormation(
 	// feasible candidate remains.
 	const uint32_t dim = candidateCount > FORMATION_POSITION_COUNT ? candidateCount : FORMATION_POSITION_COUNT;
 
-	float **matrix = malloc(dim * sizeof(float *));
+	float **matrix = malloc(dim * sizeof(float*));
 	for (uint32_t i = 0; i < dim; ++i) {
 		matrix[i] = malloc(dim * sizeof(float));
 		for (uint32_t j = 0; j < dim; ++j) {

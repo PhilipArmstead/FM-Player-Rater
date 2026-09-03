@@ -48,7 +48,7 @@ dropdown row {
 
 
 dropdown > popover listview > row label {
-	color: #cccccc;
+	color: #ccc;
 }
 
 dropdown > popover row:hover, dropdown > popover row:hover * {
@@ -408,7 +408,7 @@ headerbar .title {
 }
 
 .best-eleven-root .position {
-	color: var(--colour-primary-dark);
+	color: var(--colour-primary-darker);
 	font-weight: bold;
 }
 

@@ -19,7 +19,7 @@ static void writeToConsole(const char *message, const LogLevel colour, HANDLE co
 	}
 
 	// Fatal, error, warn, info, debug
-	static uint8_t levels[4] = {64, 4, 6, 2, 8};
+	static uint8_t levels[5] = {64, 4, 6, 2, 8};
 	SetConsoleTextAttribute(consoleHandle, levels[colour]);
 
 	OutputDebugStringA(message);

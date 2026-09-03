@@ -31,14 +31,14 @@ SPDX-License-Identifier: GPL-3.0-or-later -->
 				<property name="step-increment">1</property>
 				<property name="page-increment">5</property>
 			</object>
-			<object class="GtkAdjustment" id="adjustment:min-fitness">
+			<object class="GtkAdjustment" id="adjustment:min-condition">
 				<property name="lower">0</property>
 				<property name="upper">100</property>
 				<property name="value">70</property>
 				<property name="step-increment">1</property>
 				<property name="page-increment">5</property>
 			</object>
-			<object class="GtkAdjustment" id="adjustment:max-fitness">
+			<object class="GtkAdjustment" id="adjustment:max-condition">
 				<property name="lower">0</property>
 				<property name="upper">100</property>
 				<property name="value">100</property>
@@ -173,7 +173,7 @@ SPDX-License-Identifier: GPL-3.0-or-later -->
 												<property name="orientation">vertical</property>
 												<property name="spacing">4</property>
 												<child>
-													<object class="GtkSpinButton" id="min_age_spin">
+													<object class="GtkSpinButton" id="spin:min-age">
 														<property name="adjustment">adjustment:min-age</property>
 														<property name="numeric">true</property>
 													</object>
@@ -191,7 +191,7 @@ SPDX-License-Identifier: GPL-3.0-or-later -->
 												<property name="orientation">vertical</property>
 												<property name="spacing">4</property>
 												<child>
-													<object class="GtkSpinButton" id="max_age_spin">
+													<object class="GtkSpinButton" id="spin:max-age">
 														<property name="adjustment">adjustment:max-age</property>
 														<property name="numeric">true</property>
 													</object>
@@ -207,7 +207,7 @@ SPDX-License-Identifier: GPL-3.0-or-later -->
 
 								<child>
 									<object class="GtkLabel">
-										<property name="label">Match Fitness</property>
+										<property name="label">Condition (%)</property>
 										<property name="halign">start</property>
 										<property name="xalign">0</property>
 										<style>
@@ -224,8 +224,8 @@ SPDX-License-Identifier: GPL-3.0-or-later -->
 												<property name="orientation">vertical</property>
 												<property name="spacing">4</property>
 												<child>
-													<object class="GtkSpinButton" id="min_fitness_spin">
-														<property name="adjustment">adjustment:min-fitness</property>
+													<object class="GtkSpinButton" id="spin:min-condition">
+														<property name="adjustment">adjustment:min-condition</property>
 														<property name="numeric">true</property>
 														<property name="digits">0</property>
 													</object>
@@ -243,8 +243,8 @@ SPDX-License-Identifier: GPL-3.0-or-later -->
 												<property name="orientation">vertical</property>
 												<property name="spacing">4</property>
 												<child>
-													<object class="GtkSpinButton" id="max_fitness_spin">
-														<property name="adjustment">adjustment:max-fitness</property>
+													<object class="GtkSpinButton" id="spin:max-condition">
+														<property name="adjustment">adjustment:max-condition</property>
 														<property name="numeric">true</property>
 														<property name="digits">0</property>
 													</object>
@@ -255,84 +255,6 @@ SPDX-License-Identifier: GPL-3.0-or-later -->
 								</child>
 							</object>
 						</child>
-
-						<!--						<child>-->
-						<!--							<object class="GtkBox" id="excluded_players_panel">-->
-						<!--								<property name="orientation">vertical</property>-->
-						<!--								<property name="spacing">10</property>-->
-						<!--								<style>-->
-						<!--									<class name="card"/>-->
-						<!--								</style>-->
-
-						<!--								<child>-->
-						<!--									<object class="GtkLabel">-->
-						<!--										<property name="label">Excluded Players</property>-->
-						<!--										<property name="halign">start</property>-->
-						<!--										<property name="xalign">0</property>-->
-						<!--										<style>-->
-						<!--											<class name="title-3"/>-->
-						<!--										</style>-->
-						<!--									</object>-->
-						<!--								</child>-->
-
-						<!--								<child>-->
-						<!--									<object class="GtkLabel" id="excluded_players_description">-->
-						<!--										<property name="label">These players will not be considered when selecting the best eleven.-->
-						<!--										</property>-->
-						<!--										<property name="halign">start</property>-->
-						<!--										<property name="xalign">0</property>-->
-						<!--										<property name="wrap">true</property>-->
-						<!--										<style>-->
-						<!--											<class name="dim-label"/>-->
-						<!--										</style>-->
-						<!--									</object>-->
-						<!--								</child>-->
-
-						<!--								<child>-->
-						<!--									<object class="GtkScrolledWindow">-->
-						<!--										<property name="vexpand">true</property>-->
-						<!--										<property name="hscrollbar-policy">never</property>-->
-						<!--										<child>-->
-						<!--											<object class="GtkListBox" id="excluded_players_list">-->
-						<!--												<property name="selection-mode">none</property>-->
-						<!--												<property name="show-separators">true</property>-->
-
-						<!--												&lt;!&ndash; Sample excluded player &ndash;&gt;-->
-						<!--												<child>-->
-						<!--													<object class="GtkListBoxRow" id="excluded_player_row_1">-->
-						<!--														<child>-->
-						<!--															<object class="GtkBox">-->
-						<!--																<property name="spacing">8</property>-->
-						<!--																<property name="margin-top">6</property>-->
-						<!--																<property name="margin-bottom">6</property>-->
-						<!--																<property name="margin-start">8</property>-->
-						<!--																<property name="margin-end">8</property>-->
-						<!--																<child>-->
-						<!--																	<object class="GtkLabel">-->
-						<!--																		<property name="label">Example Player</property>-->
-						<!--																		<property name="xalign">0</property>-->
-						<!--																		<property name="ellipsize">end</property>-->
-						<!--																	</object>-->
-						<!--																</child>-->
-						<!--																<child>-->
-						<!--																	<object class="GtkButton" id="restore_excluded_player_1_button">-->
-						<!--																		<child>-->
-						<!--																			<object class="GtkImage">-->
-						<!--																				<property name="icon-name">list-add-symbolic</property>-->
-						<!--																			</object>-->
-						<!--																		</child>-->
-						<!--																	</object>-->
-						<!--																</child>-->
-						<!--															</object>-->
-						<!--														</child>-->
-						<!--													</object>-->
-						<!--												</child>-->
-						<!--											</object>-->
-						<!--										</child>-->
-						<!--									</object>-->
-						<!--								</child>-->
-						<!--							</object>-->
-						<!--						</child>-->
 					</object>
 				</child>
 			</object>
