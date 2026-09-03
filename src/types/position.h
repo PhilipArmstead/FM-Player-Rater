@@ -23,6 +23,19 @@ typedef enum PositionCode {
 } PositionCode;
 
 static const char *positionCodeNames[POSITION_CODE_COUNT] = {
-  "GK", "SW", "DL", "DC", "DR", "DM", "ML", "MC", "MR",
-  "AML", "AMC", "AMR", "ST", "WBL", "WBR",
+	"GK",
+	"SW",
+	"DL",
+	"DC",
+	"DR",
+	"DM",
+	"ML",
+	"MC",
+	"MR",
+	"AML",
+	"AMC",
+	"AMR",
+	"ST",
+	"WBL",
+	"WBR",
 };

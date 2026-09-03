@@ -429,5 +429,15 @@
 // (+0x04 from here)
 #define CITY_OFFSET_NAME 0x18
 
+/** Injury */
+// This is 0x60 bytes long
+#define INJURY_OFFSET_ROW_ID 0x08
+#define INJURY_OFFSET_UNIQUE_ID 0x0C
+#define INJURY_OFFSET_RANDOM_ID 0x10
+// (+0x04 from here)
+#define INJURY_OFFSET_SHORT_NAME_ADDRESS 0x18
+// (+0x04 from here)
+#define INJURY_OFFSET_LONG_NAME_ADDRESS 0x20
+
 #define STRING_OFFSET_LENGTH 0x0
 #define STRING_OFFSET_VALUE 0x04

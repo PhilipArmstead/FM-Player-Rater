@@ -44,6 +44,14 @@ static void showPlayerById(uint32_t uniqueId) {
 		return;
 	}
 
+	LOG_DEBUG(
+		"Found %s %s at address 0x%08x, 0x%08x",
+		player.forename,
+		player.surname,
+		player.personAddress,
+		player.playerAddress
+	);
+
 	const WindowContext context = ui_createPlayerInfoWindow();
 	ui_renderPlayerInfoWindow(context, &player);
 }

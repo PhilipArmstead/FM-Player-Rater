@@ -240,49 +240,127 @@ static void setDefaults(void) {
 	memset(options, 0, sizeof(*options));
 	options->darkMode = true;
 
+	// TODO: use a vector for this, lose the formationCount property and the limit of 32
 	static const struct {
 		const char *name;
 		PositionCode positions[FORMATION_POSITION_COUNT];
-	} defaults[] = {
+	} formations[] = {
 		{
 			"4-4-2",
 			{
-				POSITION_CODE_GK, POSITION_CODE_DL, POSITION_CODE_DC, POSITION_CODE_DC,
-				POSITION_CODE_DR, POSITION_CODE_ML, POSITION_CODE_MC, POSITION_CODE_MC,
-				POSITION_CODE_MR, POSITION_CODE_ST, POSITION_CODE_ST,
+				POSITION_CODE_GK,
+				POSITION_CODE_DL,
+				POSITION_CODE_DC,
+				POSITION_CODE_DC,
+				POSITION_CODE_DR,
+				POSITION_CODE_ML,
+				POSITION_CODE_MC,
+				POSITION_CODE_MC,
+				POSITION_CODE_MR,
+				POSITION_CODE_ST,
+				POSITION_CODE_ST,
 			},
 		},
 		{
 			"4-3-3",
 			{
-				POSITION_CODE_GK, POSITION_CODE_DL, POSITION_CODE_DC, POSITION_CODE_DC,
-				POSITION_CODE_DR, POSITION_CODE_MC, POSITION_CODE_MC, POSITION_CODE_MC,
-				POSITION_CODE_AML, POSITION_CODE_AMR, POSITION_CODE_ST,
+				POSITION_CODE_GK,
+				POSITION_CODE_DL,
+				POSITION_CODE_DC,
+				POSITION_CODE_DC,
+				POSITION_CODE_DR,
+				POSITION_CODE_MC,
+				POSITION_CODE_MC,
+				POSITION_CODE_MC,
+				POSITION_CODE_AML,
+				POSITION_CODE_AMR,
+				POSITION_CODE_ST,
 			},
 		},
 		{
 			"4-2-3-1",
 			{
-				POSITION_CODE_GK, POSITION_CODE_DL, POSITION_CODE_DC, POSITION_CODE_DC,
-				POSITION_CODE_DR, POSITION_CODE_DM, POSITION_CODE_DM, POSITION_CODE_AML,
-				POSITION_CODE_AMC, POSITION_CODE_AMR, POSITION_CODE_ST,
+				POSITION_CODE_GK,
+				POSITION_CODE_DL,
+				POSITION_CODE_DC,
+				POSITION_CODE_DC,
+				POSITION_CODE_DR,
+				POSITION_CODE_DM,
+				POSITION_CODE_DM,
+				POSITION_CODE_AML,
+				POSITION_CODE_AMC,
+				POSITION_CODE_AMR,
+				POSITION_CODE_ST,
 			},
 		},
 		{
 			"4-2-4 IF",
 			{
-				POSITION_CODE_GK, POSITION_CODE_DL, POSITION_CODE_DC, POSITION_CODE_DC,
-				POSITION_CODE_DR, POSITION_CODE_DM, POSITION_CODE_DM, POSITION_CODE_AML,
-				POSITION_CODE_AMR, POSITION_CODE_ST, POSITION_CODE_ST,
+				POSITION_CODE_GK,
+				POSITION_CODE_DL,
+				POSITION_CODE_DC,
+				POSITION_CODE_DC,
+				POSITION_CODE_DR,
+				POSITION_CODE_DM,
+				POSITION_CODE_DM,
+				POSITION_CODE_AML,
+				POSITION_CODE_AMR,
+				POSITION_CODE_ST,
+				POSITION_CODE_ST,
 			},
 		},
 	};
 
-	options->formationCount = (uint8_t)(sizeof(defaults) / sizeof(defaults[0]));
+	options->formationCount = (uint8_t)(sizeof(formations) / sizeof(formations[0]));
 	for (uint8_t i = 0; i < options->formationCount; ++i) {
-		snprintf(options->formations[i].name, FORMATION_NAME_LENGTH, "%s", defaults[i].name);
-		memcpy(options->formations[i].positions, defaults[i].positions, sizeof(defaults[i].positions));
+		snprintf(options->formations[i].name, FORMATION_NAME_LENGTH, "%s", formations[i].name);
+		memcpy(options->formations[i].positions, formations[i].positions, sizeof(formations[i].positions));
 	}
+
+	// TODO: use a vector for this
+	static PositionWeights weights[] = {
+		{.role = POSITION_GROUPED_GK, .weights = {0}},
+		{.role = POSITION_GROUPED_COUNT, .weights = {0}},
+	};
+	// Ref: https://fm-arena.com/find-comment/53835/
+	weights[0].weights[ATTR_DET] = 20;
+	weights[0].weights[ATTR_CON] = 18.53f;
+	weights[0].weights[ATTR_REF] = 19.35f;
+	weights[0].weights[ATTR_AER] = 6.45f;
+	weights[0].weights[ATTR_AGI] = 7.35f;
+	weights[0].weights[ATTR_PAC] = 6.37f;
+	weights[0].weights[ATTR_ACC] = 3.38f;
+	weights[0].weights[ATTR_INJ] = -11.03f;
+	weights[0].weights[ATTR_DIR] = -3.68f;
+	weights[0].weights[ATTR_FIR] = 3.83f;
+	weights[0].weights[ATTR_WOR] = 8.7f;
+	weights[0].weights[ATTR_JUM] = 3.22f;
+	weights[0].weights[ATTR_STA] = 7.35f;
+	weights[0].weights[ATTR_TEC] = 3.53f;
+	weights[0].weights[ATTR_FLA] = 11.03f;
+	weights[0].weights[ATTR_COM] = 3.53f;
+	weights[0].weights[ATTR_PRE] = 3.38f;
+	weights[0].weights[ATTR_PRO] = 2.2f;
+	weights[0].weights[ATTR_NAT] = 2.35f;
+	weights[0].scale = 1;
+
+	weights[1].weights[ATTR_PAC] = 20;
+	weights[1].weights[ATTR_ACC] = 19.26f;
+	weights[1].weights[ATTR_JUM] = 9.15f;
+	weights[1].weights[ATTR_DRI] = 3.04f;
+	weights[1].weights[ATTR_BAL] = 3.03f;
+	weights[1].weights[ATTR_CON] = 9.57f;
+	weights[1].weights[ATTR_ANT] = 8.51f;
+	weights[1].weights[ATTR_DET] = 9.25f;
+	weights[1].weights[ATTR_AGI] = 3.40f;
+	weights[1].weights[ATTR_STA] = 10.64f;
+	weights[1].weights[ATTR_DIR] = 6.8f;
+	weights[1].weights[ATTR_CMP] = 5.53f;
+	weights[1].weights[ATTR_WOR] = 14.15f;
+	weights[1].weights[ATTR_PRE] = 3.62f;
+	weights[1].weights[ATTR_INJ] = -4.8f;
+	weights[1].scale = 1.05f;
+	memcpy(options->weights, weights, sizeof(weights));
 }
 
 // Writes the current in-memory defaults to a new options file so the user has one to edit.

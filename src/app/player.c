@@ -9,8 +9,6 @@
 #include "core/logger.h"
 #include "platform/platform.h"
 
-#include <stdio.h>
-
 
 extern GameContext gameContext;
 
@@ -51,7 +49,7 @@ uint32_t getCurrentPersonUniqueId(const ProcessContext *processContext) {
 }
 
 // Assumes valid ProcessContext
-Player getPlayerById(const ProcessContext *processContext, uint32_t uniqueId) {
+Player getPlayerById(const ProcessContext *processContext, const uint32_t uniqueId) {
 	const uint32_t personAddress = getPersonAddressFromUid(processContext, uniqueId);
 	if (personAddress && isPlayerValid(processContext->handle, personAddress)) {
 		return getPlayer(processContext->handle, false, personAddress, 0);
@@ -62,7 +60,7 @@ Player getPlayerById(const ProcessContext *processContext, uint32_t uniqueId) {
 	return (Player){0};
 }
 
-static uint32_t getPlayerAddressFromPersonAddress(void *handle, uint32_t personAddress) {
+static uint32_t getPlayerAddressFromPersonAddress(void *handle, const uint32_t personAddress) {
 	const int32_t offset = isPersonAlsoStaff(handle, personAddress)
 		? STAFF_OFFSET_FROM_PERSON
 		: PLAYER_OFFSET_FROM_PERSON;
@@ -70,7 +68,7 @@ static uint32_t getPlayerAddressFromPersonAddress(void *handle, uint32_t personA
 	return personAddress + (uint32_t)offset;
 }
 
-uint32_t getPersonAddressFromPlayerAddress(void *handle, uint32_t playerAddress) {
+uint32_t getPersonAddressFromPlayerAddress(void *handle, const uint32_t playerAddress) {
 	const int32_t offset = isPlayerAlsoStaff(handle, playerAddress)
 		? STAFF_OFFSET_FROM_PERSON
 		: PLAYER_OFFSET_FROM_PERSON;
@@ -78,7 +76,7 @@ uint32_t getPersonAddressFromPlayerAddress(void *handle, uint32_t playerAddress)
 	return playerAddress - (uint32_t)offset;
 }
 
-Player getPlayer(void *handle, bool skipIsValidCheck, uint32_t personAddress, uint32_t playerAddress) {
+Player getPlayer(void *handle, const bool skipIsValidCheck, const uint32_t personAddress, uint32_t playerAddress) {
 	#ifndef PLAYER_BY_ID
 	if (!skipIsValidCheck && !isPlayerValid(handle, personAddress)) {
 		return (Player){0};
@@ -197,20 +195,20 @@ Player getPlayer(void *handle, bool skipIsValidCheck, uint32_t personAddress, ui
 	return player;
 }
 
-static bool isPlayerAlsoStaff(void *handle, uint32_t playerAddress) {
+static bool isPlayerAlsoStaff(void *handle, const uint32_t playerAddress) {
 	uint8_t bytes[8];
 	readFromMemory(handle, playerAddress - (uint32_t)PLAYER_OFFSET_FROM_PERSON + 0x0C, 8, bytes);
 	const uint64_t ids = hexBytesToInt(bytes, 8);
 	return ids >> 32 != (ids & 0xFFFFFFFF);
 }
 
-static bool isPersonAlsoStaff(void *handle, uint32_t personAddress) {
+static bool isPersonAlsoStaff(void *handle, const uint32_t personAddress) {
 	uint8_t bytes[4];
 	readFromMemory(handle, personAddress + (uint32_t)PLAYER_OFFSET_FROM_PERSON + 0x08, 4, bytes);
 	return hexBytesToInt(bytes, 4) == 0;
 }
 
-static bool isPlayerValid(void *handle, uint32_t personAddress) {
+static bool isPlayerValid(void *handle, const uint32_t personAddress) {
 	#ifndef MOCKS_MODE
 	const uint32_t playerAddress = personAddress + (uint32_t)PLAYER_OFFSET_FROM_PERSON;
 	for (uint8_t i = 0; i < 5; ++i) {
@@ -226,7 +224,7 @@ static bool isPlayerValid(void *handle, uint32_t personAddress) {
 	#endif
 }
 
-static bool isPersonValid(void *handle, uint32_t personAddress) {
+static bool isPersonValid(void *handle, const uint32_t personAddress) {
 	#ifndef MOCKS_MODE
 	for (uint8_t i = 0; i < 8; ++i) {
 		const uint8_t attribute = readByte(handle, personAddress + PERSON_OFFSET_PERSONALITY + i);
@@ -250,25 +248,29 @@ static inline void getPersonName(void *handle, uint8_t pointer[4], char str[PERS
 	readFromMemory(handle, a + 4, PERSON_COMMON_NAME_LENGTH, (uint8_t*)str);
 }
 
-static inline void getPersonForename(void *handle, uint32_t attributeBase, char str[PERSON_COMMON_NAME_LENGTH]) {
+static inline void getPersonForename(void *handle, const uint32_t attributeBase, char str[PERSON_COMMON_NAME_LENGTH]) {
 	uint8_t pointer[4];
 	readFromMemory(handle, attributeBase + PERSON_OFFSET_FORENAME, 4, pointer);
 	getPersonName(handle, pointer, str);
 }
 
-static inline void getPersonSurname(void *handle, uint32_t attributeBase, char str[PERSON_COMMON_NAME_LENGTH]) {
+static inline void getPersonSurname(void *handle, const uint32_t attributeBase, char str[PERSON_COMMON_NAME_LENGTH]) {
 	uint8_t pointer[4];
 	readFromMemory(handle, attributeBase + PERSON_OFFSET_SURNAME, 4, pointer);
 	getPersonName(handle, pointer, str);
 }
 
-static inline void getPersonCommonName(void *handle, uint32_t attributeBase, char str[PERSON_COMMON_NAME_LENGTH]) {
+static inline void getPersonCommonName(
+	void *handle,
+	const uint32_t attributeBase,
+	char str[PERSON_COMMON_NAME_LENGTH]
+) {
 	uint8_t pointer[4];
 	readFromMemory(handle, attributeBase + PERSON_OFFSET_COMMON_NAME, 4, pointer);
 	getPersonName(handle, pointer, str);
 }
 
-static uint8_t getAge(void *handle, uint32_t address) {
+static uint8_t getAge(void *handle, const uint32_t address) {
 	uint8_t bytes[4];
 	readFromMemory(handle, address + PERSON_OFFSET_DOB, 4, bytes);
 	const uint8_t yearBytes[2] = {bytes[2], bytes[3]};
@@ -283,7 +285,7 @@ static uint8_t getAge(void *handle, uint32_t address) {
 	return age;
 }
 
-static int32_t getClubIndexFromPerson(void *handle, uint32_t personAddress) {
+static int32_t getClubIndexFromPerson(void *handle, const uint32_t personAddress) {
 	uint8_t pointer[4];
 	readFromMemory(handle, personAddress + PERSON_OFFSET_CONTRACTS, 4, pointer);
 	const uint32_t contractAddress = (uint32_t)hexBytesToInt(pointer, 4);
@@ -308,402 +310,69 @@ typedef struct {
 /* Personality weights are fixed length 8 */
 
 static void fillWeightsForPosition(
-	PositionGrouped p,
+	const PositionGrouped p,
 	float outAttr[ATTRIBUTE_COUNT],
-	float outPersonality[8],
-	float *outWeight
+	float *outScale
 ) {
-	/* zero defaults */
-	for (int i = 0; i < ATTRIBUTE_COUNT; ++i) outAttr[i] = 0.0f;
-	for (int i = 0; i < 8; ++i) outPersonality[i] = 0.0f;
-	*outWeight = 1.0f;
-
-	/* Define sparse attribute lists and personality for each position */
-	switch (p) {
-		case POSITION_GROUPED_GK: {
-			static const AttrPair attrs[] = {
-				{ATTR_PAS, 14},
-				{ATTR_VIS, 5},
-				{ATTR_HAN, 6},
-				{ATTR_AER, 27},
-				{ATTR_CMD, 36},
-				{ATTR_COM, 13},
-				{ATTR_KIC, -6},
-				{ATTR_THR, 10},
-				{ATTR_ANT, 4},
-				{ATTR_POS, 5},
-				{ATTR_REF, 100},
-				{ATTR_FIR, 11},
-				{ATTR_FLA, -2},
-				{ATTR_TEA, 6},
-				{ATTR_WOR, 9},
-				{ATTR_ECC, 6},
-				{ATTR_TRO, 5},
-				{ATTR_TTP, 2},
-				{ATTR_ACC, 37},
-				{ATTR_STR, 7},
-				{ATTR_STA, 9},
-				{ATTR_PAC, 27},
-				{ATTR_JUM, 8},
-				{ATTR_BRA, 7},
-				{ATTR_CON, 20},
-				{ATTR_AGG, -6},
-				{ATTR_AGI, 63},
-				{ATTR_IMP, 17},
-				{ATTR_CMP, 1},
-				{ATTR_CNT, 14}
-			};
-			const float pers[8] = {0, 0, 0, 32, 0, 0, 0, 0};
-			const float weight = 4.4638f;
-			for (size_t i = 0; i < sizeof(attrs) / sizeof(attrs[0]); ++i) outAttr[attrs[i].idx] = attrs[i].weight;
-			for (int i = 0; i < 8; ++i) outPersonality[i] = pers[i];
-			*outWeight = weight;
+	PositionGrouped generalIndex = 0;
+	PositionGrouped matchingIndex = 0xFF;
+	for (PositionGrouped i = 0; i < POSITION_GROUPED_COUNT; ++i) {
+		if (gameContext.options.weights[i].scale == 0) {
 			break;
 		}
-		case POSITION_GROUPED_CB: {
-			static const AttrPair attrs[] = {
-				{ATTR_DRI, 49},
-				{ATTR_FIN, 14},
-				{ATTR_HEA, 7},
-				{ATTR_LON, 16},
-				{ATTR_OTB, 9},
-				{ATTR_PAS, 10},
-				{ATTR_ANT, 24},
-				{ATTR_POS, 2},
-				{ATTR_FIR, 13},
-				{ATTR_WOR, 31},
-				{ATTR_ACC, 98},
-				{ATTR_STR, 29},
-				{ATTR_STA, 20},
-				{ATTR_PAC, 100},
-				{ATTR_JUM, 50},
-				{ATTR_DIR, -15},
-				{ATTR_BAL, 31},
-				{ATTR_CON, 20},
-				{ATTR_AGG, 15},
-				{ATTR_AGI, 9},
-				{ATTR_IMP, 16},
-				{ATTR_INJ, -27},
-				{ATTR_VER, 3},
-				{ATTR_NAT, 21},
-				{ATTR_DET, 18},
-				{ATTR_CMP, 12},
-				{ATTR_CNT, 28}
-			};
-			const float pers[8] = {4, 10, 9, 34, 21, 0, 10, -1};
-			const float weight = 5.84f;
-			for (size_t i = 0; i < sizeof(attrs) / sizeof(attrs[0]); ++i) outAttr[attrs[i].idx] = attrs[i].weight;
-			for (int i = 0; i < 8; ++i) outPersonality[i] = pers[i];
-			*outWeight = weight;
+		if (gameContext.options.weights[i].role == p) {
+			matchingIndex = i;
 			break;
 		}
-		case POSITION_GROUPED_FB: {
-			static const AttrPair attrs[] = {
-				{ATTR_DRI, 44},
-				{ATTR_FIN, 15},
-				{ATTR_HEA, 7},
-				{ATTR_LON, 13},
-				{ATTR_OTB, 5},
-				{ATTR_PAS, 6},
-				{ATTR_ANT, 23},
-				{ATTR_POS, 1},
-				{ATTR_FIR, 9},
-				{ATTR_WOR, 31},
-				{ATTR_ACC, 98},
-				{ATTR_STR, 26},
-				{ATTR_STA, 17},
-				{ATTR_PAC, 100},
-				{ATTR_JUM, 31},
-				{ATTR_DIR, -11},
-				{ATTR_BAL, 30},
-				{ATTR_CON, 17},
-				{ATTR_AGG, 11},
-				{ATTR_AGI, 8},
-				{ATTR_IMP, 12},
-				{ATTR_INJ, -28},
-				{ATTR_VER, 4},
-				{ATTR_NAT, 17},
-				{ATTR_DET, 16},
-				{ATTR_CMP, 9},
-				{ATTR_CNT, 25}
-			};
-			const float pers[8] = {3, 6, 5, 24, 17, 0, 6, -1};
-			const float weight = 5.17f;
-			for (size_t i = 0; i < sizeof(attrs) / sizeof(attrs[0]); ++i) outAttr[attrs[i].idx] = attrs[i].weight;
-			for (int i = 0; i < 8; ++i) outPersonality[i] = pers[i];
-			*outWeight = weight;
-			break;
-		}
-		case POSITION_GROUPED_WB: {
-			static const AttrPair attrs[] = {
-				{ATTR_DRI, 44},
-				{ATTR_FIN, 15},
-				{ATTR_HEA, 7},
-				{ATTR_LON, 13},
-				{ATTR_OTB, 5},
-				{ATTR_PAS, 6},
-				{ATTR_ANT, 23},
-				{ATTR_POS, 1},
-				{ATTR_FIR, 9},
-				{ATTR_WOR, 31},
-				{ATTR_ACC, 98},
-				{ATTR_STR, 26},
-				{ATTR_STA, 16},
-				{ATTR_PAC, 100},
-				{ATTR_JUM, 31},
-				{ATTR_DIR, -11},
-				{ATTR_BAL, 30},
-				{ATTR_CON, 17},
-				{ATTR_AGG, 11},
-				{ATTR_AGI, 8},
-				{ATTR_IMP, 12},
-				{ATTR_INJ, -28},
-				{ATTR_NAT, 17},
-				{ATTR_DET, 16},
-				{ATTR_CMP, 9},
-				{ATTR_CNT, 25}
-			};
-			const float pers[8] = {3, 6, 5, 24, 17, 0, 6, -1};
-			const float weight = 5.17f;
-			for (size_t i = 0; i < sizeof(attrs) / sizeof(attrs[0]); ++i) outAttr[attrs[i].idx] = attrs[i].weight;
-			for (int i = 0; i < 8; ++i) outPersonality[i] = pers[i];
-			*outWeight = weight;
-			break;
-		}
-		case POSITION_GROUPED_DM: {
-			static const AttrPair attrs[] = {
-				{ATTR_DRI, 25},
-				{ATTR_FIN, 13},
-				{ATTR_HEA, 4},
-				{ATTR_LON, 10},
-				{ATTR_OTB, 4},
-				{ATTR_PAS, 5},
-				{ATTR_ANT, 21},
-				{ATTR_POS, 6},
-				{ATTR_FIR, 7},
-				{ATTR_WOR, 32},
-				{ATTR_ACC, 100},
-				{ATTR_STR, 20},
-				{ATTR_STA, 17},
-				{ATTR_PAC, 100},
-				{ATTR_JUM, 32},
-				{ATTR_DIR, -9},
-				{ATTR_BAL, 29},
-				{ATTR_CON, 14},
-				{ATTR_AGG, 9},
-				{ATTR_AGI, 7},
-				{ATTR_IMP, 10},
-				{ATTR_INJ, -26},
-				{ATTR_VER, 3},
-				{ATTR_NAT, 15},
-				{ATTR_DET, 16},
-				{ATTR_CMP, 7},
-				{ATTR_CNT, 14}
-			};
-			const float pers[8] = {2, 3, 3, 22, 15, 0, 5, -1};
-			const float weight = 5.17f;
-			for (size_t i = 0; i < sizeof(attrs) / sizeof(attrs[0]); ++i) outAttr[attrs[i].idx] = attrs[i].weight;
-			for (int i = 0; i < 8; ++i) outPersonality[i] = pers[i];
-			*outWeight = weight;
-			break;
-		}
-		case POSITION_GROUPED_MC: {
-			static const AttrPair attrs[] = {
-				{ATTR_DRI, 33},
-				{ATTR_FIN, 13},
-				{ATTR_HEA, 4},
-				{ATTR_LON, 10},
-				{ATTR_OTB, 3},
-				{ATTR_PAS, 4},
-				{ATTR_ANT, 22},
-				{ATTR_POS, 6},
-				{ATTR_FIR, 7},
-				{ATTR_WOR, 33},
-				{ATTR_ACC, 100},
-				{ATTR_STR, 26},
-				{ATTR_STA, 16},
-				{ATTR_PAC, 100},
-				{ATTR_JUM, 32},
-				{ATTR_DIR, -9},
-				{ATTR_BAL, 28},
-				{ATTR_CON, 14},
-				{ATTR_AGG, 9},
-				{ATTR_AGI, 6},
-				{ATTR_IMP, 10},
-				{ATTR_INJ, -26},
-				{ATTR_VER, 3},
-				{ATTR_NAT, 15},
-				{ATTR_DET, 16},
-				{ATTR_CMP, 7},
-				{ATTR_CNT, 14}
-			};
-			const float pers[8] = {2, 4, 3, 22, 15, 0, 4, -1};
-			const float weight = 5.17f;
-			for (size_t i = 0; i < sizeof(attrs) / sizeof(attrs[0]); ++i) outAttr[attrs[i].idx] = attrs[i].weight;
-			for (int i = 0; i < 8; ++i) outPersonality[i] = pers[i];
-			*outWeight = weight;
-			break;
-		}
-		case POSITION_GROUPED_AM: {
-			static const AttrPair attrs[] = {
-				{ATTR_DRI, 32},
-				{ATTR_FIN, 12},
-				{ATTR_HEA, 4},
-				{ATTR_LON, 10},
-				{ATTR_OTB, 4},
-				{ATTR_PAS, 6},
-				{ATTR_ANT, 22},
-				{ATTR_POS, 8},
-				{ATTR_FIR, 8},
-				{ATTR_WOR, 33},
-				{ATTR_ACC, 100},
-				{ATTR_STR, 27},
-				{ATTR_STA, 16},
-				{ATTR_PAC, 100},
-				{ATTR_JUM, 32},
-				{ATTR_DIR, -8},
-				{ATTR_BAL, 29},
-				{ATTR_CON, 14},
-				{ATTR_AGG, 8},
-				{ATTR_AGI, 7},
-				{ATTR_IMP, 10},
-				{ATTR_INJ, -26},
-				{ATTR_VER, 3},
-				{ATTR_NAT, 15},
-				{ATTR_DET, 16},
-				{ATTR_CMP, 7},
-				{ATTR_CNT, 13}
-			};
-			const float pers[8] = {2, 4, 3, 22, 15, 0, 5, -1};
-			const float weight = 5.17f;
-			for (size_t i = 0; i < sizeof(attrs) / sizeof(attrs[0]); ++i) outAttr[attrs[i].idx] = attrs[i].weight;
-			for (int i = 0; i < 8; ++i) outPersonality[i] = pers[i];
-			*outWeight = weight;
-			break;
-		}
-		case POSITION_GROUPED_W: {
-			static const AttrPair attrs[] = {
-				{ATTR_DRI, 36},
-				{ATTR_FIN, 20},
-				{ATTR_HEA, 13},
-				{ATTR_LON, 17},
-				{ATTR_OTB, 10},
-				{ATTR_PAS, 11},
-				{ATTR_ANT, 28},
-				{ATTR_POS, 5},
-				{ATTR_FIR, 11},
-				{ATTR_WOR, 30},
-				{ATTR_ACC, 100},
-				{ATTR_STR, 32},
-				{ATTR_STA, 18},
-				{ATTR_PAC, 99},
-				{ATTR_JUM, 38},
-				{ATTR_DIR, -17},
-				{ATTR_BAL, 33},
-				{ATTR_CON, 22},
-				{ATTR_AGG, 17},
-				{ATTR_AGI, 9},
-				{ATTR_IMP, 18},
-				{ATTR_INJ, -28},
-				{ATTR_VER, 4},
-				{ATTR_NAT, 23},
-				{ATTR_DET, 15},
-				{ATTR_CMP, 12},
-				{ATTR_CNT, 19}
-			};
-			const float pers[8] = {5, 12, 11, 30, 23, 0, 13, -1};
-			const float weight = 6.6f;
-			for (size_t i = 0; i < sizeof(attrs) / sizeof(attrs[0]); ++i) outAttr[attrs[i].idx] = attrs[i].weight;
-			for (int i = 0; i < 8; ++i) outPersonality[i] = pers[i];
-			*outWeight = weight;
-			break;
-		}
-		default: {
-			static const AttrPair attrs[] = {
-				{ATTR_DRI, 26},
-				{ATTR_FIN, 9},
-				{ATTR_HEA, 6},
-				{ATTR_LON, 13},
-				{ATTR_OTB, 3},
-				{ATTR_PAS, 8},
-				{ATTR_ANT, 23},
-				{ATTR_POS, 3},
-				{ATTR_FIR, 8},
-				{ATTR_WOR, 23},
-				{ATTR_ACC, 97},
-				{ATTR_STR, 20},
-				{ATTR_STA, 14},
-				{ATTR_PAC, 100},
-				{ATTR_JUM, 27},
-				{ATTR_DIR, -13},
-				{ATTR_BAL, 31},
-				{ATTR_CON, 18},
-				{ATTR_AGG, 13},
-				{ATTR_AGI, 6},
-				{ATTR_IMP, 14},
-				{ATTR_INJ, -27},
-				{ATTR_VER, 3},
-				{ATTR_NAT, 19},
-				{ATTR_DET, 15},
-				{ATTR_CMP, 8},
-				{ATTR_CNT, 17}
-			};
-			const float pers[8] = {3, 8, 7, 26, 19, 0, 9, -1};
-			const float weight = 5.79f;
-			for (size_t i = 0; i < sizeof(attrs) / sizeof(attrs[0]); ++i) outAttr[attrs[i].idx] = attrs[i].weight;
-			for (int i = 0; i < 8; ++i) outPersonality[i] = pers[i];
-			*outWeight = weight;
-			break;
+		if (gameContext.options.weights[i].role == POSITION_GROUPED_COUNT) {
+			generalIndex = i;
 		}
 	}
+
+	if (matchingIndex == 0xFF) {
+		matchingIndex = generalIndex;
+	}
+
+	memcpy(outAttr, gameContext.options.weights[matchingIndex].weights, ATTRIBUTE_COUNT * sizeof outAttr[0]);
+	*outScale = gameContext.options.weights[matchingIndex].scale;
 }
 
-static inline int positionGroupToIndices(PositionGrouped p, int outIndices[5]) {
+static inline int positionGroupToIndices(const PositionGrouped p, int outIndices[5]) {
 	/* returns number of indices filled in outIndices (max 5) */
 	int n = 0;
 	switch (p) {
-		case POSITION_GROUPED_GK: outIndices[n++] = 0;
+		case POSITION_GROUPED_GK: outIndices[n++] = POSITION_CODE_GK;
 			break;
-		case POSITION_GROUPED_FB: outIndices[n++] = 2;
-			outIndices[n++] = 4;
+		case POSITION_GROUPED_FB: outIndices[n++] = POSITION_CODE_DL;
+			outIndices[n++] = POSITION_CODE_DR;
 			break;
-		case POSITION_GROUPED_CB: outIndices[n++] = 3;
+		case POSITION_GROUPED_CB: outIndices[n++] = POSITION_CODE_DC;
 			break;
-		case POSITION_GROUPED_WB: outIndices[n++] = 13;
-			outIndices[n++] = 14;
+		case POSITION_GROUPED_WB: outIndices[n++] = POSITION_CODE_WBL;
+			outIndices[n++] = POSITION_CODE_WBR;
 			break;
-		case POSITION_GROUPED_DM: outIndices[n++] = 5;
+		case POSITION_GROUPED_DM: outIndices[n++] = POSITION_CODE_DM;
 			break;
-		case POSITION_GROUPED_MC: outIndices[n++] = 7;
+		case POSITION_GROUPED_MC: outIndices[n++] = POSITION_CODE_MC;
 			break;
-		case POSITION_GROUPED_W: outIndices[n++] = 6;
-			outIndices[n++] = 8;
-			outIndices[n++] = 9;
-			outIndices[n++] = 11;
+		case POSITION_GROUPED_W: outIndices[n++] = POSITION_CODE_ML;
+			outIndices[n++] = POSITION_CODE_MR;
+			outIndices[n++] = POSITION_CODE_AML;
+			outIndices[n++] = POSITION_CODE_AMR;
 			break;
-		case POSITION_GROUPED_AM: outIndices[n++] = 10;
+		case POSITION_GROUPED_AM: outIndices[n++] = POSITION_CODE_AMC;
 			break;
-		default: outIndices[n++] = 12;
+		default: outIndices[n++] = POSITION_CODE_ST;
 			break;
 	}
 	return n;
 }
 
-void getWeightsForPosition(
-	PositionGrouped position,
-	float outAttr[ATTRIBUTE_COUNT],
-	float outPersonality[8],
-	float *outWeight
-) {
-	fillWeightsForPosition(position, outAttr, outPersonality, outWeight);
+void getWeightsForPosition(const PositionGrouped position, float outAttributes[ATTRIBUTE_COUNT], float *outScale) {
+	fillWeightsForPosition(position, outAttributes, outScale);
 }
 
-static float getRatingPerPosition(const Player *player, PositionGrouped position) {
-	float attrWeights[ATTRIBUTE_COUNT];
-	float persWeights[8];
-	float totalWeight = 1.0f;
-	fillWeightsForPosition(position, attrWeights, persWeights, &totalWeight);
-
+static float getRatingPerPosition(const Player *player, const PositionGrouped position) {
 	/* Check positional proficiency */
 	int indices[5];
 	const int count = positionGroupToIndices(position, indices);
@@ -719,17 +388,21 @@ static float getRatingPerPosition(const Player *player, PositionGrouped position
 		return 0.0f;
 	}
 	// LOG_INFO("%s can play	%d", player->forename, position);
+
+	float attributeWeights[ATTRIBUTE_COUNT] = {0};
+	float totalScale = 1.0f;
+	fillWeightsForPosition(position, attributeWeights, &totalScale);
 	float rating = 0.0f;
 	for (int i = 0; i < ATTRIBUTE_COUNT; ++i) {
-		if (attrWeights[i] != 0.f) {
+		if (attributeWeights[i] > 0.1f) {
 			const float value = (float)player->attributes[i] / 100.f;
-			rating += attrWeights[i] * value;
+			rating += attributeWeights[i] * value;
 			// LOG_INFO("Attr %d: %f * %f = %f (new rating: %f)", i, value, attrWeights[i], attrWeights[i] * value, rating);
 		}
 	}
 
-	if (totalWeight != 0.f) {
-		rating /= totalWeight;
+	if (totalScale != 0.f) {
+		rating /= totalScale;
 	}
 	// LOG_INFO("Final rating after dividing by %f: %f", totalWeight, rating);
 
@@ -737,11 +410,11 @@ static float getRatingPerPosition(const Player *player, PositionGrouped position
 }
 
 static void getSortedPositionRatings(Player *player) {
-	uint8_t i = 0;
-	uint8_t j = 0;
+	PositionGrouped i = 0;
+	PositionGrouped j = 0;
 	while (i < POSITION_GROUPED_COUNT) {
-		const float value = getRatingPerPosition(player, (PositionGrouped)i);
-		if (value >= 0.f) {
+		const float value = getRatingPerPosition(player, i);
+		if (value > 0.f) {
 			player->ratings[j].value = value;
 			player->ratings[j].position = i;
 			++j;
@@ -751,7 +424,7 @@ static void getSortedPositionRatings(Player *player) {
 
 	/* simple selection sort descending */
 	for (i = 0; i < POSITION_GROUPED_COUNT; ++i) {
-		uint8_t best = i;
+		PositionGrouped best = i;
 		for (j = i + 1; j < POSITION_GROUPED_COUNT; ++j) {
 			if (player->ratings[j].value > player->ratings[best].value) {
 				best = j;

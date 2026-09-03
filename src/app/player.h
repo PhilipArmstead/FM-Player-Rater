@@ -10,9 +10,4 @@ Player getPlayer(void *handle, bool skipIsValidCheck, uint32_t personAddress, ui
 uint32_t getPersonAddressFromPlayerAddress(void *handle, uint32_t playerAddress);
 uint32_t getCurrentPersonUniqueId(const ProcessContext *processContext);
 Player getPlayerById(const ProcessContext *processContext, uint32_t uniqueId);
-void getWeightsForPosition(
-	PositionGrouped position,
-	float outAttr[ATTRIBUTE_COUNT],
-	float outPersonality[8],
-	float *outWeight
-);
+void getWeightsForPosition(PositionGrouped position, float outAttributes[ATTRIBUTE_COUNT], float *outScale);

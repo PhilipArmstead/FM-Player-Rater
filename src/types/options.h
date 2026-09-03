@@ -14,7 +14,14 @@ typedef struct {
 } Formation;
 
 typedef struct {
-	bool darkMode;
+	float weights[ATTRIBUTE_COUNT];
+	PositionGrouped role; // POSITION_GROUPED_COUNT means all roles unless otherwise explicitly defined
+	float scale;
+} PositionWeights;
+
+typedef struct {
 	Formation formations[OPTIONS_MAX_FORMATIONS];
+	PositionWeights weights[POSITION_GROUPED_COUNT];
 	uint8_t formationCount;
+	bool darkMode;
 } Options;

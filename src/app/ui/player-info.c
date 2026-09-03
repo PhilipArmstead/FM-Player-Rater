@@ -68,14 +68,13 @@ void ui_renderPlayerInfoWindow(WindowContext context, const Player *player) {
 		gtk_label_set_text(clubNameLabel, club.name);
 	}
 
-	float attrWeights[ATTRIBUTE_COUNT];
-	float persWeights[8];
-	float totalWeight = 1.0f;
-	getWeightsForPosition(player->ratings[0].position, attrWeights, persWeights, &totalWeight);
+	float weights[ATTRIBUTE_COUNT];
+	float scale = 1.0f;
+	getWeightsForPosition(player->ratings[0].position, weights, &scale);
 	float max = 0;
 	for (int i = 0; i < ATTRIBUTE_COUNT; ++i) {
-		if (attrWeights[i] > max) {
-			max = attrWeights[i];
+		if (weights[i] > max) {
+			max = weights[i];
 		}
 	}
 
@@ -90,9 +89,9 @@ void ui_renderPlayerInfoWindow(WindowContext context, const Player *player) {
 		gtk_label_set_text(label, buffer);																									\
 		snprintf(widgetId, 64, "row:%s", id);																								\
 		widget = GTK_WIDGET(gtk_builder_get_object(context.builder, widgetId));							\
-		if (attrWeights[attributeIndex] > max * 0.5f) {																		\
+		if (weights[attributeIndex] > max * 0.5f) {																					\
 			gtk_widget_add_css_class(widget, "attribute-row--high");													\
-		} else if (attrWeights[attributeIndex] > max * 0.15f) {														\
+		} else if (weights[attributeIndex] > max * 0.15f) {																	\
 			gtk_widget_add_css_class(widget, "attribute-row--mid");														\
 		}																																										\
 	}
