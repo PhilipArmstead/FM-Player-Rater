@@ -365,6 +365,28 @@ static void writeDefaultOptions(const char *path) {
 		fputc('\n', file);
 	}
 
+	const uint8_t weightCount = sizeof(options->weights) / sizeof(options->weights[0]);
+	fputs("ratings:\n", file);
+	for (uint8_t i = 0; i < weightCount; ++i) {
+		if (options->weights[i].scale == 0) {
+			break;
+		}
+
+		fprintf(file, "  - position: %s\n", positionGroupedCodes[options->weights[i].role]);
+		fputs("    weights:\n", file);
+		bool isFirstAttribute = true;
+		for (uint8_t j = 0; j < ATTRIBUTE_COUNT; ++j) {
+			if (options->weights[i].weights[j] > 0) {
+				if (isFirstAttribute) {
+					fprintf(file, "      - %s: %.2f\n", attributeNames[j], options->weights[i].weights[j]);
+					isFirstAttribute = false;
+				} else {
+					fprintf(file, "        %s: %.2f\n", attributeNames[j], options->weights[i].weights[j]);
+				}
+			}
+		}
+	}
+
 	fclose(file);
 
 	LOG_INFO("Created default options file '%s'", path);
