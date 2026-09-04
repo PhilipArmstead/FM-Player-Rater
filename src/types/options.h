@@ -19,7 +19,7 @@ typedef struct {
 
 typedef struct {
 	RatingWeight *weights;
-	PositionGrouped role; // POSITION_GROUPED_COUNT means all roles unless otherwise explicitly defined
+	PositionGrouped position; // POSITION_GROUPED_COUNT means all roles unless otherwise explicitly defined
 	float scale;
 } PositionWeights;
 

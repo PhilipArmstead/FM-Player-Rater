@@ -17,7 +17,6 @@
 
 extern GameContext gameContext;
 
-// Accumulates a single formation while parsing its block of lines.
 typedef struct {
 	Formation current;
 	bool haveCurrent;
@@ -25,6 +24,12 @@ typedef struct {
 	bool positionsValid;
 	uint8_t positionCount;
 } FormationParser;
+
+typedef struct {
+	PositionWeights current;
+	bool haveCurrent;
+	bool inWeights;
+} RatingsParser;
 
 
 static char *trimLeading(char *text) {
@@ -108,7 +113,7 @@ static void copyFormationName(char *destination, const char *value) {
 }
 
 // Validates the accumulated formation and, if valid, appends it to the options.
-static void formationParser_finalize(FormationParser *parser) {
+static void formationParser_finalise(FormationParser *parser) {
 	if (!parser->haveCurrent) {
 		return;
 	}
@@ -130,10 +135,25 @@ static void formationParser_finalize(FormationParser *parser) {
 	*parser = (FormationParser){0};
 }
 
-// Begins a new formation list item, finalising any previous one.
+static void ratingsParser_finalise(RatingsParser *parser) {
+	if (!parser->haveCurrent) {
+		return;
+	}
+
+	Options *options = &gameContext.options;
+	vector_push(options->weights, parser->current);
+	*parser = (RatingsParser){0};
+}
+
 static void formationParser_begin(FormationParser *parser) {
-	formationParser_finalize(parser);
+	formationParser_finalise(parser);
 	*parser = (FormationParser){0};
+	parser->haveCurrent = true;
+}
+
+static void ratingsParser_begin(RatingsParser *parser) {
+	ratingsParser_finalise(parser);
+	*parser = (RatingsParser){0};
 	parser->haveCurrent = true;
 }
 
@@ -159,6 +179,24 @@ static void formationParser_positions(FormationParser *parser, char *value) {
 	}
 }
 
+static void formationParser_weight(RatingsParser *parser, const char *key, const char *value) {
+	for (uint8_t i = 0; i < ATTRIBUTE_COUNT; ++i) {
+		if (!strcasecmp(key, attributeNames[i])) {
+			vector_push(parser->current.weights, ((RatingWeight){.attribute = i, .weight = strtof(value, NULL)}));
+			return;
+		}
+	}
+}
+
+static inline PositionGrouped readRatingsPosition(const char *value) {
+	for (PositionGrouped i = 0; i < POSITION_GROUPED_COUNT; ++i) {
+		if (!strcasecmp(value, positionGroupedCodes[i])) {
+			return i;
+		}
+	}
+	return POSITION_GROUPED_COUNT;
+}
+
 static void formationParser_keyValue(FormationParser *parser, const char *key, char *value) {
 	if (!parser->haveCurrent) {
 		LOG_WARN("Ignoring formation field '%s' outside a list item", key);
@@ -178,33 +216,44 @@ static void formationParser_keyValue(FormationParser *parser, const char *key, c
 	LOG_WARN("Unrecognised formation field '%s'", key);
 }
 
+static void ratingsParser_keyValue(RatingsParser *parser, const char *key, char *value) {
+	if (!parser->haveCurrent) {
+		LOG_WARN("Ignoring ratings field '%s' outside a list item", key);
+		return;
+	}
+
+	if (!strcmp(key, "position")) {
+		parser->current.position = readRatingsPosition(value);
+		parser->inWeights = false;
+		return;
+	}
+
+	if (parser->inWeights) {
+		formationParser_weight(parser, key, value);
+		return;
+	}
+
+	if (!strcmp(key, "weights")) {
+		parser->inWeights = true;
+		return;
+	}
+
+	LOG_WARN("Unrecognised ratings field '%s'", key);
+}
+
 // Handles one indented line inside a `formations:` block.
 static void formationParser_line(FormationParser *parser, char *cursor) {
 	if (cursor[0] == '-') {
 		formationParser_begin(parser);
-		char *rest = trimLeading(cursor + 1);
-		if (*rest == '\0') {
+		cursor = trimLeading(cursor + 1);
+		if (*cursor == '\0') {
 			return;
 		}
-
-		char *separator = strchr(rest, ':');
-		if (!separator) {
-			LOG_WARN("Ignoring malformed formation entry '%s'", rest);
-			return;
-		}
-
-		*separator = '\0';
-		char *key = rest;
-		char *value = trimLeading(separator + 1);
-		trimTrailing(key);
-		trimTrailing(value);
-		formationParser_keyValue(parser, key, value);
-		return;
 	}
 
 	char *separator = strchr(cursor, ':');
 	if (!separator) {
-		LOG_WARN("Ignoring malformed formation line '%s'", cursor);
+		LOG_WARN("Ignoring malformed formation entry '%s'", cursor);
 		return;
 	}
 
@@ -214,6 +263,33 @@ static void formationParser_line(FormationParser *parser, char *cursor) {
 	trimTrailing(key);
 	trimTrailing(value);
 	formationParser_keyValue(parser, key, value);
+}
+
+
+// Handles one indented line inside a `ratings:` block.
+static void ratingsParser_line(RatingsParser *parser, char *cursor) {
+	if (cursor[0] == '-') {
+		if (!parser->inWeights) {
+			ratingsParser_begin(parser);
+		}
+		cursor = trimLeading(cursor + 1);
+		if (*cursor == '\0') {
+			return;
+		}
+	}
+
+	char *separator = strchr(cursor, ':');
+	if (!separator) {
+		LOG_WARN("Ignoring malformed ratings entry '%s'", cursor);
+		return;
+	}
+
+	*separator = '\0';
+	char *key = cursor;
+	char *value = trimLeading(separator + 1);
+	trimTrailing(key);
+	trimTrailing(value);
+	ratingsParser_keyValue(parser, key, value);
 }
 
 static void applyOption(const char *key, const char *value) {
@@ -300,8 +376,8 @@ static void setDefaults(void) {
 			},
 	}));
 
-	vector_push(options->weights, ((PositionWeights){.role = POSITION_GROUPED_GK, .scale = 1, .weights = NULL}));
-	vector_push(options->weights, ((PositionWeights){.role = POSITION_GROUPED_COUNT, .scale = 1.05f, .weights = NULL}));
+	vector_push(options->weights, ((PositionWeights){.position = POSITION_GROUPED_GK, .scale = 1, .weights = NULL}));
+	vector_push(options->weights, ((PositionWeights){.position = POSITION_GROUPED_COUNT, .scale = 1.05f, .weights = NULL}));
 
 	// Ref: https://fm-arena.com/find-comment/53835/
 	vector_push(options->weights[0].weights, ((RatingWeight){.attribute = ATTR_DET, .weight = 20}));
@@ -367,7 +443,7 @@ static void writeDefaultOptions(const char *path) {
 
 	fputs("ratings:\n", file);
 	for (uint64_t i = 0; i <  vector_length(options->weights); ++i) {
-		fprintf(file, "  - position: %s\n", positionGroupedCodes[options->weights[i].role]);
+		fprintf(file, "  - position: %s\n", positionGroupedCodes[options->weights[i].position]);
 		fputs("    weights:\n", file);
 		bool isFirstAttribute = true;
 		for (uint64_t j = 0; j < vector_length(options->weights[i].weights); ++j) {
@@ -409,8 +485,10 @@ void options_init(void) {
 		return;
 	}
 
-	FormationParser parser = {0};
+	FormationParser formationParser = {0};
+	RatingsParser ratingsParser = {0};
 	bool inFormations = false;
+	bool inRatings = false;
 
 	char line[OPTIONS_LINE_BUFFER_SIZE];
 	while (fgets(line, sizeof(line), file)) {
@@ -423,15 +501,27 @@ void options_init(void) {
 			continue;
 		}
 
+		// TODO: Change format from space-separated string to YAML array
 		if (inFormations) {
 			if (indented) {
-				formationParser_line(&parser, cursor);
+				formationParser_line(&formationParser, cursor);
 				continue;
 			}
 
 			// A non-indented line ends the block; fall through to handle it as a top-level key.
-			formationParser_finalize(&parser);
+			formationParser_finalise(&formationParser);
 			inFormations = false;
+		}
+
+		if (inRatings) {
+			if (indented) {
+				ratingsParser_line(&ratingsParser, cursor);
+				continue;
+			}
+
+			// A non-indented line ends the block; fall through to handle it as a top-level key.
+			ratingsParser_finalise(&ratingsParser);
+			inRatings = false;
 		}
 
 		char *separator = strchr(cursor, ':');
@@ -452,7 +542,7 @@ void options_init(void) {
 
 		if (!strcmp(key, "formations")) {
 			vector_free(gameContext.options.formations);
-			parser = (FormationParser){0};
+			formationParser = (FormationParser){0};
 			inFormations = true;
 			if (*value != '\0') {
 				LOG_WARN("Ignoring inline value for 'formations'");
@@ -460,11 +550,20 @@ void options_init(void) {
 			continue;
 		}
 
+		if (!strcmp(key, "ratings")) {
+			vector_free(gameContext.options.weights);
+			inRatings = true;
+			if (*value != '\0') {
+				LOG_WARN("Ignoring inline value for 'ratings'");
+			}
+			continue;
+		}
+
 		applyOption(key, value);
 	}
 
-	// Finalise a formation still open at end of file.
-	formationParser_finalize(&parser);
+	formationParser_finalise(&formationParser);
+	ratingsParser_finalise(&ratingsParser);
 
 	fclose(file);
 
