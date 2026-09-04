@@ -4,7 +4,6 @@
 #pragma once
 
 #define FORMATION_NAME_LENGTH 32
-#define OPTIONS_MAX_FORMATIONS 32
 
 #define FORMATION_POSITION_COUNT 11
 
@@ -20,8 +19,7 @@ typedef struct {
 } PositionWeights;
 
 typedef struct {
-	Formation formations[OPTIONS_MAX_FORMATIONS];
+	Formation *formations;
 	PositionWeights weights[POSITION_GROUPED_COUNT];
-	uint8_t formationCount;
 	bool darkMode;
 } Options;

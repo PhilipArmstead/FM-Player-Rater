@@ -3,6 +3,7 @@
 
 #include "options.h"
 #include "app/types.h"
+#include "app/helpers/vector.h"
 #include "core/logger.h"
 #include "platform/platform.h"
 
@@ -122,14 +123,8 @@ static void formationParser_finalize(FormationParser *parser) {
 			parser->current.name,
 			FORMATION_POSITION_COUNT
 		);
-	} else if (options->formationCount >= OPTIONS_MAX_FORMATIONS) {
-		LOG_WARN(
-			"Ignoring formation '%s': exceeded maximum of %d",
-			parser->current.name,
-			OPTIONS_MAX_FORMATIONS
-		);
 	} else {
-		options->formations[options->formationCount++] = parser->current;
+		vector_push(options->formations, parser->current);
 	}
 
 	*parser = (FormationParser){0};
@@ -240,30 +235,25 @@ static void setDefaults(void) {
 	memset(options, 0, sizeof(*options));
 	options->darkMode = true;
 
-	// TODO: use a vector for this, lose the formationCount property and the limit of 32
-	static const struct {
-		const char *name;
-		PositionCode positions[FORMATION_POSITION_COUNT];
-	} formations[] = {
-		{
-			"4-4-2",
-			{
-				POSITION_CODE_GK,
-				POSITION_CODE_DL,
-				POSITION_CODE_DC,
-				POSITION_CODE_DC,
-				POSITION_CODE_DR,
-				POSITION_CODE_ML,
-				POSITION_CODE_MC,
-				POSITION_CODE_MC,
-				POSITION_CODE_MR,
-				POSITION_CODE_ST,
-				POSITION_CODE_ST,
-			},
+	vector_push(options->formations, ((Formation){
+		.name = "4-4-2",
+		.positions = {
+			POSITION_CODE_GK,
+			POSITION_CODE_DL,
+			POSITION_CODE_DC,
+			POSITION_CODE_DC,
+			POSITION_CODE_DR,
+			POSITION_CODE_ML,
+			POSITION_CODE_MC,
+			POSITION_CODE_MC,
+			POSITION_CODE_MR,
+			POSITION_CODE_ST,
+			POSITION_CODE_ST,
 		},
-		{
-			"4-3-3",
-			{
+	}));
+	vector_push(options->formations, ((Formation){
+		.name = "4-3-3",
+		.positions = {
 				POSITION_CODE_GK,
 				POSITION_CODE_DL,
 				POSITION_CODE_DC,
@@ -275,11 +265,11 @@ static void setDefaults(void) {
 				POSITION_CODE_AML,
 				POSITION_CODE_AMR,
 				POSITION_CODE_ST,
-			},
 		},
-		{
-			"4-2-3-1",
-			{
+	}));
+	vector_push(options->formations, ((Formation){
+		.name = "4-2-3-1",
+		.positions = {
 				POSITION_CODE_GK,
 				POSITION_CODE_DL,
 				POSITION_CODE_DC,
@@ -291,11 +281,11 @@ static void setDefaults(void) {
 				POSITION_CODE_AMC,
 				POSITION_CODE_AMR,
 				POSITION_CODE_ST,
-			},
 		},
-		{
-			"4-2-4 IF",
-			{
+	}));
+	vector_push(options->formations, ((Formation){
+			.name = "4-2-4 IF",
+			.positions = {
 				POSITION_CODE_GK,
 				POSITION_CODE_DL,
 				POSITION_CODE_DC,
@@ -308,14 +298,7 @@ static void setDefaults(void) {
 				POSITION_CODE_ST,
 				POSITION_CODE_ST,
 			},
-		},
-	};
-
-	options->formationCount = (uint8_t)(sizeof(formations) / sizeof(formations[0]));
-	for (uint8_t i = 0; i < options->formationCount; ++i) {
-		snprintf(options->formations[i].name, FORMATION_NAME_LENGTH, "%s", formations[i].name);
-		memcpy(options->formations[i].positions, formations[i].positions, sizeof(formations[i].positions));
-	}
+	}));
 
 	// TODO: use a vector for this
 	static PositionWeights weights[] = {
@@ -378,7 +361,7 @@ static void writeDefaultOptions(const char *path) {
 	fprintf(file, "dark-mode: %s\n", options->darkMode ? "true" : "false");
 
 	fputs("formations:\n", file);
-	for (uint8_t i = 0; i < options->formationCount; ++i) {
+	for (uint64_t i = 0; i < vector_length(options->formations); ++i) {
 		fprintf(file, "  - name: \"%s\"\n", options->formations[i].name);
 		fputs("    positions:", file);
 		for (uint8_t j = 0; j < FORMATION_POSITION_COUNT; ++j) {
@@ -417,7 +400,7 @@ void options_init(void) {
 
 	char line[OPTIONS_LINE_BUFFER_SIZE];
 	while (fgets(line, sizeof(line), file)) {
-		const bool indented = (line[0] == ' ' || line[0] == '\t');
+		const bool indented = line[0] == ' ' || line[0] == '\t';
 		char *cursor = trimLeading(line);
 		trimTrailing(cursor);
 
@@ -454,8 +437,7 @@ void options_init(void) {
 		}
 
 		if (!strcmp(key, "formations")) {
-			// The file is authoritative for formations when the key is present.
-			gameContext.options.formationCount = 0;
+			vector_free(gameContext.options.formations);
 			parser = (FormationParser){0};
 			inFormations = true;
 			if (*value != '\0') {
