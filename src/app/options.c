@@ -300,50 +300,45 @@ static void setDefaults(void) {
 			},
 	}));
 
-	// TODO: use a vector for this
-	static PositionWeights weights[] = {
-		{.role = POSITION_GROUPED_GK, .weights = {0}},
-		{.role = POSITION_GROUPED_COUNT, .weights = {0}},
-	};
-	// Ref: https://fm-arena.com/find-comment/53835/
-	weights[0].weights[ATTR_DET] = 20;
-	weights[0].weights[ATTR_CON] = 18.53f;
-	weights[0].weights[ATTR_REF] = 19.35f;
-	weights[0].weights[ATTR_AER] = 6.45f;
-	weights[0].weights[ATTR_AGI] = 7.35f;
-	weights[0].weights[ATTR_PAC] = 6.37f;
-	weights[0].weights[ATTR_ACC] = 3.38f;
-	weights[0].weights[ATTR_INJ] = -11.03f;
-	weights[0].weights[ATTR_DIR] = -3.68f;
-	weights[0].weights[ATTR_FIR] = 3.83f;
-	weights[0].weights[ATTR_WOR] = 8.7f;
-	weights[0].weights[ATTR_JUM] = 3.22f;
-	weights[0].weights[ATTR_STA] = 7.35f;
-	weights[0].weights[ATTR_TEC] = 3.53f;
-	weights[0].weights[ATTR_FLA] = 11.03f;
-	weights[0].weights[ATTR_COM] = 3.53f;
-	weights[0].weights[ATTR_PRE] = 3.38f;
-	weights[0].weights[ATTR_PRO] = 2.2f;
-	weights[0].weights[ATTR_NAT] = 2.35f;
-	weights[0].scale = 1;
+	vector_push(options->weights, ((PositionWeights){.role = POSITION_GROUPED_GK, .scale = 1, .weights = NULL}));
+	vector_push(options->weights, ((PositionWeights){.role = POSITION_GROUPED_COUNT, .scale = 1.05f, .weights = NULL}));
 
-	weights[1].weights[ATTR_PAC] = 20;
-	weights[1].weights[ATTR_ACC] = 19.26f;
-	weights[1].weights[ATTR_JUM] = 9.15f;
-	weights[1].weights[ATTR_DRI] = 3.04f;
-	weights[1].weights[ATTR_BAL] = 3.03f;
-	weights[1].weights[ATTR_CON] = 9.57f;
-	weights[1].weights[ATTR_ANT] = 8.51f;
-	weights[1].weights[ATTR_DET] = 9.25f;
-	weights[1].weights[ATTR_AGI] = 3.40f;
-	weights[1].weights[ATTR_STA] = 10.64f;
-	weights[1].weights[ATTR_DIR] = 6.8f;
-	weights[1].weights[ATTR_CMP] = 5.53f;
-	weights[1].weights[ATTR_WOR] = 14.15f;
-	weights[1].weights[ATTR_PRE] = 3.62f;
-	weights[1].weights[ATTR_INJ] = -4.8f;
-	weights[1].scale = 1.05f;
-	memcpy(options->weights, weights, sizeof(weights));
+	// Ref: https://fm-arena.com/find-comment/53835/
+	vector_push(options->weights[0].weights, ((RatingWeight){.attribute = ATTR_DET, .weight = 20}));
+	vector_push(options->weights[0].weights, ((RatingWeight){.attribute = ATTR_CON, .weight = 18.53f}));
+	vector_push(options->weights[0].weights, ((RatingWeight){.attribute = ATTR_REF, .weight = 19.35f}));
+	vector_push(options->weights[0].weights, ((RatingWeight){.attribute = ATTR_AER, .weight = 6.45f}));
+	vector_push(options->weights[0].weights, ((RatingWeight){.attribute = ATTR_AGI, .weight = 7.35f}));
+	vector_push(options->weights[0].weights, ((RatingWeight){.attribute = ATTR_PAC, .weight = 6.37f}));
+	vector_push(options->weights[0].weights, ((RatingWeight){.attribute = ATTR_ACC, .weight = 3.38f}));
+	vector_push(options->weights[0].weights, ((RatingWeight){.attribute = ATTR_INJ, .weight = -11.03f}));
+	vector_push(options->weights[0].weights, ((RatingWeight){.attribute = ATTR_DIR, .weight = -3.68f}));
+	vector_push(options->weights[0].weights, ((RatingWeight){.attribute = ATTR_FIR, .weight = 3.83f}));
+	vector_push(options->weights[0].weights, ((RatingWeight){.attribute = ATTR_WOR, .weight = 8.7f}));
+	vector_push(options->weights[0].weights, ((RatingWeight){.attribute = ATTR_JUM, .weight = 3.22f}));
+	vector_push(options->weights[0].weights, ((RatingWeight){.attribute = ATTR_STA, .weight = 7.35f}));
+	vector_push(options->weights[0].weights, ((RatingWeight){.attribute = ATTR_TEC, .weight = 3.53f}));
+	vector_push(options->weights[0].weights, ((RatingWeight){.attribute = ATTR_FLA, .weight = 11.03f}));
+	vector_push(options->weights[0].weights, ((RatingWeight){.attribute = ATTR_COM, .weight = 3.53f}));
+	vector_push(options->weights[0].weights, ((RatingWeight){.attribute = ATTR_PRE, .weight = 3.38f}));
+	vector_push(options->weights[0].weights, ((RatingWeight){.attribute = ATTR_PRO, .weight = 2.2f}));
+	vector_push(options->weights[0].weights, ((RatingWeight){.attribute = ATTR_NAT, .weight = 2.35f}));
+
+	vector_push(options->weights[1].weights, ((RatingWeight){.attribute = ATTR_PAC, .weight = 20}));
+	vector_push(options->weights[1].weights, ((RatingWeight){.attribute = ATTR_ACC, .weight = 19.26f}));
+	vector_push(options->weights[1].weights, ((RatingWeight){.attribute = ATTR_JUM, .weight = 9.15f}));
+	vector_push(options->weights[1].weights, ((RatingWeight){.attribute = ATTR_DRI, .weight = 3.04f}));
+	vector_push(options->weights[1].weights, ((RatingWeight){.attribute = ATTR_BAL, .weight = 3.03f}));
+	vector_push(options->weights[1].weights, ((RatingWeight){.attribute = ATTR_CON, .weight = 9.57f}));
+	vector_push(options->weights[1].weights, ((RatingWeight){.attribute = ATTR_ANT, .weight = 8.51f}));
+	vector_push(options->weights[1].weights, ((RatingWeight){.attribute = ATTR_DET, .weight = 9.25f}));
+	vector_push(options->weights[1].weights, ((RatingWeight){.attribute = ATTR_AGI, .weight = 3.40f}));
+	vector_push(options->weights[1].weights, ((RatingWeight){.attribute = ATTR_STA, .weight = 10.64f}));
+	vector_push(options->weights[1].weights, ((RatingWeight){.attribute = ATTR_DIR, .weight = 6.8f}));
+	vector_push(options->weights[1].weights, ((RatingWeight){.attribute = ATTR_CMP, .weight = 5.53f}));
+	vector_push(options->weights[1].weights, ((RatingWeight){.attribute = ATTR_WOR, .weight = 14.15f}));
+	vector_push(options->weights[1].weights, ((RatingWeight){.attribute = ATTR_PRE, .weight = 3.62f}));
+	vector_push(options->weights[1].weights, ((RatingWeight){.attribute = ATTR_INJ, .weight = -4.8f}));
 }
 
 // Writes the current in-memory defaults to a new options file so the user has one to edit.

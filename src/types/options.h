@@ -13,13 +13,18 @@ typedef struct {
 } Formation;
 
 typedef struct {
-	float weights[ATTRIBUTE_COUNT];
+	float weight;
+	uint8_t attribute;
+} RatingWeight;
+
+typedef struct {
+	RatingWeight *weights;
 	PositionGrouped role; // POSITION_GROUPED_COUNT means all roles unless otherwise explicitly defined
 	float scale;
 } PositionWeights;
 
 typedef struct {
 	Formation *formations;
-	PositionWeights weights[POSITION_GROUPED_COUNT];
+	PositionWeights *weights;
 	bool darkMode;
 } Options;
