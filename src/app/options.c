@@ -365,23 +365,20 @@ static void writeDefaultOptions(const char *path) {
 		fputc('\n', file);
 	}
 
-	const uint8_t weightCount = sizeof(options->weights) / sizeof(options->weights[0]);
 	fputs("ratings:\n", file);
-	for (uint8_t i = 0; i < weightCount; ++i) {
-		if (options->weights[i].scale == 0) {
-			break;
-		}
-
+	for (uint64_t i = 0; i <  vector_length(options->weights); ++i) {
 		fprintf(file, "  - position: %s\n", positionGroupedCodes[options->weights[i].role]);
 		fputs("    weights:\n", file);
 		bool isFirstAttribute = true;
-		for (uint8_t j = 0; j < ATTRIBUTE_COUNT; ++j) {
-			if (options->weights[i].weights[j] > 0) {
+		for (uint64_t j = 0; j < vector_length(options->weights[i].weights); ++j) {
+			const float weight = options->weights[i].weights[j].weight;
+			const uint8_t attribute = options->weights[i].weights[j].attribute;
+			if (weight > 0) {
 				if (isFirstAttribute) {
-					fprintf(file, "      - %s: %.2f\n", attributeNames[j], options->weights[i].weights[j]);
+					fprintf(file, "      - %s: %.2f\n", attributeNames[attribute], weight);
 					isFirstAttribute = false;
 				} else {
-					fprintf(file, "        %s: %.2f\n", attributeNames[j], options->weights[i].weights[j]);
+					fprintf(file, "        %s: %.2f\n", attributeNames[attribute], weight);
 				}
 			}
 		}
